@@ -8,30 +8,11 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
-union md_mode_ // MDのモード
-{
-    struct
-    {
-        uint8_t device_code;                   // デバイスコード
-        unsigned char limit_switch : 1;        // リミットスイッチ
-        unsigned char incremental_encoder : 1; // インクリメンタルエンコーダ
-        unsigned char absolute_encoder : 1;    // アブソリュートエンコーダ
-        unsigned char pid : 1;                 // PID制御
-        unsigned char brake : 1;               // ブレーキ
-        unsigned char reverse_encoder : 1;     // エンコーダの反転
-        unsigned char none2 : 1;               // 予約
-        unsigned char none3 : 1;               // 予約
-        uint8_t max_acceleration;              // 最大加速度
-        uint8_t reporting_cycle;               // 周期
-        uint16_t max_output;                   // 最大出力
-        uint16_t motor_transfer_cofficient;    // モーターの伝達関数(100倍)
-    };
-    uint8_t code[6];
-} md_mode;
+#include "htmd_mode.hpp"
 
 CANDataManager myCAN;
 MotorController motor;
+md_mode_t md_mode;
 
 void App::getMDIdFromDispSW(uint8_t *md_id_)
 {
@@ -51,22 +32,9 @@ void App::init()
 {
     getMDIdFromDispSW(&md_id); // ディップスイッチの値をMDのIDに設定
     serial_printf("md_id: %d\n", md_id);
-    serial_printf("default\n");
-    serial_printf("Kp: %f\n", Kp);
-    serial_printf("Ki: %f\n", Ki);
-    serial_printf("Kd: %f\n", Kd);
-    serial_printf("report: %d\n", reporting_cycle);
-    serial_printf("acces: %d\n", max_acceleration);
-    serial_printf("abs_enc: %d\n", enable_absolute_encoder);
-    serial_printf("brake: %d\n", enable_brake);
-    serial_printf("inc_enc: %d\n", enable_incremental_encoder);
-    serial_printf("limSw: %d\n", enable_limit_switch);
-    serial_printf("pid: %d\n", enable_pid);
-    serial_printf("max_out: %d\n", max_output);
-    serial_printf("motor_transfer_cofficient: %f\n", motor_transfer_cofficient);
     // peripheral init
-    myCAN.init(md_id);                     // CAN通信の初期化
-    motor.init(max_output, control_cycle); // モーターの初期化
+    myCAN.init(md_id);                                    // CAN通信の初期化
+    motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
     indicateStanby(true);
     // main timer start
     HAL_TIM_Base_Start_IT(&htim6);
@@ -89,48 +57,44 @@ void App::mainLoop()
     {
         myCAN.sendReInitMode(md_mode.code); // レスポンス
         // モードを更新
-        reporting_cycle = md_mode.reporting_cycle;
-        max_acceleration = md_mode.max_acceleration;
-        enable_absolute_encoder = md_mode.absolute_encoder;
-        enable_brake = md_mode.brake;
-        enable_incremental_encoder = md_mode.incremental_encoder;
-        enable_limit_switch = md_mode.limit_switch;
-        enable_pid = md_mode.pid;
-        max_output = md_mode.max_output;
-        motor_transfer_cofficient = float(md_mode.motor_transfer_cofficient) / 100.0f; // 100倍されているので100で割る
-        if (max_output > 3199)                                                         // 最大出力が3199を超えていたら
+        motor_transfer_cofficient = float(md_mode.values.motor_transfer_coefficient) / 100.0f; // 100倍されているので100で割る
+        if (md_mode.values.max_output > 3199)                                                  // 最大出力が3199を超えていたら
         {
-            max_output = 3199;
+            md_mode.values.max_output = 3199;
         }
         // print
         serial_printf("updated md mode\n");
-        serial_printf("report: %d\n", reporting_cycle);
-        serial_printf("acces: %d\n", max_acceleration);
-        serial_printf("abs_enc: %d\n", enable_absolute_encoder);
-        serial_printf("brake: %d\n", enable_brake);
-        serial_printf("inc_enc: %d\n", enable_incremental_encoder);
-        serial_printf("limSw: %d\n", enable_limit_switch);
-        serial_printf("pid: %d\n", enable_pid);
-        serial_printf("max_out: %d\n", max_output);
+        serial_printf("incremental_encoder: %d\n", md_mode.flags.incremental_encoder);
+        serial_printf("absolute_encoder: %d\n", md_mode.flags.absolute_encoder);
+        serial_printf("reverse_encoder: %d\n", md_mode.flags.reverse_encoder);
+        serial_printf("limit_switch: %d\n", md_mode.flags.limit_switch);
+        serial_printf("brake: %d\n", md_mode.flags.brake);
+        serial_printf("pid: %d\n", md_mode.flags.pid);
+        serial_printf("torque_control: %d\n", md_mode.flags.torque_control);
+        serial_printf("state_temp: %d\n", md_mode.flags.state_temp);
+        serial_printf("max_acceleration: %d\n", md_mode.values.max_acceleration);
+        serial_printf("max_current: %d\n", md_mode.values.max_current);
+        serial_printf("report_rate: %d\n", md_mode.values.report_rate);
+        serial_printf("max_output: %d\n", md_mode.values.max_output);
+        serial_printf("motor_transfer_coefficient: %f\n", motor_transfer_cofficient);
         resetControlVal(); // 制御値をリセット
     }
     // 初期化されていればMDの状態を送信する
     if (initialized)
     {
-        if (enable_incremental_encoder || enable_limit_switch) // インクリメンタルエンコーダかリミットスイッチが有効なら
+        if (md_mode.flags.incremental_encoder || enable_limit_switch) // インクリメンタルエンコーダかリミットスイッチが有効なら
         {
             myCAN.sendMDStatus(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false, encoder_value); // エンコーダの値を送信
             serial_printf("encoder: %d\n", encoder_value);                                        // エンコーダの値を表示
         }
 
-        HAL_Delay(reporting_cycle); // 周期的に送信
+        HAL_Delay(report_rate); // 周期的に送信
     }
     else
     {
         if (myCAN.getMDInit()) // 初期化コマンドが送られてきたら
         {
-            myCAN.sendReInitCommand(); // レスポンス
-            initialized = true;        // 初期化されたら
+            initialized = true; // 初期化されたら
             indicateReady(true);
             indicateStanby(false);
             serial_printf("initialized\n");

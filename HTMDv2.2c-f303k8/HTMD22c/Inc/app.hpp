@@ -9,9 +9,6 @@ class App
 private:
     uint8_t md_id = 0;                      // MDのID
     uint8_t control_cycle = 5;              // 制御周期
-    uint8_t reporting_cycle = 10;           // MDの状態をCANで送信する周期
-    uint16_t max_output = 3199;             // 最大出力
-    uint16_t max_acceleration = 1;          // 最大加速
     float Kp = 0.0f;                        // PID制御の比例ゲイン
     float Ki = 0.0f;                        // PID制御の積分ゲイン
     float Kd = 0.0f;                        // PID制御の微分ゲイン
@@ -64,16 +61,11 @@ public:
     void resetControlVal();
 
 private:
-    int16_t output;                          // 出力
-    int16_t encoder_value = 0;               // エンコーダーの値
-    bool limit_switch_state = false;         // リミットスイッチの状態
-    int16_t target = 0;                      // 目標値
-    uint64_t no_update_count = 0;            // 目標値が更新されないで何回制御したか
-    uint8_t control_count = 0;               // タイマーの回数をカウントして、制御周期に合わせる
-    bool initialized = false;                // 初期化されたかどうか
-    bool enable_limit_switch = false;        // リミットスイッチを使うかどうか
-    bool enable_incremental_encoder = false; // インクリメンタルエンコーダを使うかどうか
-    bool enable_absolute_encoder = false;    // アブソリュートエンコーダを使うかどうか
-    bool enable_brake = true;                // ブレーキを使うかどうか
-    bool enable_pid = false;                 // PID制御を使うかどうか
+    int16_t output;                  // 出力
+    int16_t encoder_value = 0;       // エンコーダーの値
+    bool limit_switch_state = false; // リミットスイッチの状態
+    int16_t target = 0;              // 目標値
+    uint64_t no_update_count = 0;    // 目標値が更新されないで何回制御したか
+    uint8_t control_count = 0;       // タイマーの回数をカウントして、制御周期に合わせる
+    bool initialized = false;        // 初期化されたかどうか
 };

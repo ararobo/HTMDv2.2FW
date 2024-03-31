@@ -11,10 +11,10 @@ private:
     uint8_t md_id;
     static constexpr float PID_GAIN_QUALITY = 10000.0f;
     // buffer
-    uint8_t buff_init_pid[data_length::INIT_PID];
-    uint8_t buff_init_mode[data_length::INIT_MODE];
-    uint8_t buff_init_command[data_length::INIT_COMMAND];
-    uint8_t buff_targets[data_length::TARGETS];
+    uint8_t buff_init_pid[can_configure::manage::dlc::pid];
+    uint8_t buff_init_mode[can_configure::manage::dlc::mode];
+    uint8_t buff_init_command[can_configure::manage::dlc::init];
+    uint8_t buff_targets[can_configure::control::dlc::md_targets];
     // flag
     bool flag_init_pid;
     bool flag_init_mode;
@@ -67,21 +67,6 @@ public:
     bool getPIDGain(float *p_gain, float *i_gain, float *d_gain);
 
     /**
-     * @brief MDの状態をCAN通信で送信する
-     *
-     * @param lim_sw1 リミットスイッチ１の値
-     * @param lim_sw2 リミットスイッチ２の値（あれば）
-     * @param encoder エンコーダーの値
-     */
-    void sendMDStatus(bool lim_sw1, bool lim_sw2, int16_t encoder);
-
-    /**
-     * @brief 初期化が完了したことを送信
-     *
-     */
-    void sendReInitCommand();
-
-    /**
      * @brief PIDゲインが更新されたことを送信
      *
      * @param p_gain 比例ゲイン
@@ -103,6 +88,24 @@ public:
      * @param hcan_ よくわかんない
      */
     void onReceiveTask(CAN_HandleTypeDef *hcan_);
+
+    void sendSensorLimit(bool limit_switch1, bool limit_switch2);
+
+    void sendSensorEncoder(int16_t encoder_value);
+
+    void sendSensorCurrent(int16_t current);
+
+    void sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value);
+
+    void sendSensorEncoderAndCurrent(int16_t encoder_value, int16_t current);
+
+    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current);
+
+    void sendStateMD(uint8_t state_code);
+
+    void sendStateTemp(uint8_t state_temp);
+
+    void sendStateAll(uint8_t state_code, uint8_t state_temp);
 
 private:
     /**
