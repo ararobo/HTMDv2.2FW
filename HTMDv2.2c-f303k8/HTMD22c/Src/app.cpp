@@ -67,11 +67,11 @@ void App::mainLoop()
         serial_printf("incremental_encoder: %d\n", md_mode.flags.incremental_encoder);
         serial_printf("absolute_encoder: %d\n", md_mode.flags.absolute_encoder);
         serial_printf("reverse_encoder: %d\n", md_mode.flags.reverse_encoder);
-        serial_printf("limit_switch: %d\n", md_mode.flags.limit_switch);
         serial_printf("brake: %d\n", md_mode.flags.brake);
         serial_printf("pid: %d\n", md_mode.flags.pid);
+        serial_printf("current: %d\n", md_mode.flags.current);
         serial_printf("torque_control: %d\n", md_mode.flags.torque_control);
-        serial_printf("state_temp: %d\n", md_mode.flags.state_temp);
+        serial_printf("state: %d\n", md_mode.flags.state);
         serial_printf("max_acceleration: %d\n", md_mode.values.max_acceleration);
         serial_printf("max_current: %d\n", md_mode.values.max_current);
         serial_printf("report_rate: %d\n", md_mode.values.report_rate);
@@ -82,9 +82,35 @@ void App::mainLoop()
     // 初期化されていればMDの状態を送信する
     if (initialized)
     {
-        if (md_mode.flags.incremental_encoder && md_mode.flags.limit_switch && md_mode.flags.)
+        if (md_mode.values.report_rate != 0) // レポートレートが0でなければ
+        {
+            if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
+            {
+                myCAN.sendSensorLimitAndEncoder(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false, encoder_value); // エンコーダの値とリミットスイッチの状態を送信
+            }
+            else
+            {
+                myCAN.sendSensorLimit(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false); // リミットスイッチの状態を送信
+            }
+        }
+        else if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
+        {
+            myCAN.sendSensorEncoder(encoder_value); // エンコーダの値を送信
+        }
 
-            HAL_Delay(report_rate); // 周期的に送信
+        if (md_mode.flags.state)
+        {
+            if (target != 0)
+            {
+                indicateBusy(true);
+                myCAN.sendStateMD(can_configure::state::state::busy); // busy
+            }
+            else
+            {
+                indicateBusy(false);
+                myCAN.sendStateMD(can_configure::state::state::ready); // ready
+            }
+        }
     }
     else
     {
@@ -96,7 +122,8 @@ void App::mainLoop()
             serial_printf("initialized\n");
             resetControlVal(); // 制御値をリセット
         }
-        // serial_printf("waiting for init\n");
+        myCAN.sendStateMD(can_configure::state::state::init); // init
+        HAL_Delay(10);
     }
 }
 
@@ -114,9 +141,9 @@ void App::timerTask()
         no_update_count++; // 更新されていない回数をカウント
     }
     // エンコーダーを読む
-    if (enable_pid || enable_incremental_encoder) // PID制御が有効 or インクリメンタルエンコーダが有効なら
+    if (md_mode.flags.pid || md_mode.flags.incremental_encoder) // PID制御が有効 or インクリメンタルエンコーダが有効なら
     {
-        if (md_mode.reverse_encoder) // reverse_encoderが有効なら
+        if (md_mode.flags.reverse_encoder) // reverse_encoderが有効なら
         {
             encoder_value = -motor.getCount(); // エンコーダのカウントを取得 (反転)
         }
@@ -126,7 +153,7 @@ void App::timerTask()
         }
     }
     // PID制御をする
-    if (enable_pid)
+    if (md_mode.flags.pid)
     {
         output += motor.calculatePID(target, encoder_value);          // PID制御
         if ((target < 0 && output > 0) || (target > 0 && output < 0)) // 目標値の符号と出力の符号が異なる場合
@@ -145,8 +172,8 @@ void App::timerTask()
         output = target;
     }
     // 安全装置
-    output = motor.trapezoidalControl(output, max_acceleration);             // 台形制御
-    output = motor.saturate(int(output), -int(max_output), int(max_output)); // 出力を最大出力に制限
+    output = motor.trapezoidalControl(output, md_mode.values.max_acceleration);                            // 台形制御
+    output = motor.saturate(int(output), -int(md_mode.values.max_output), int(md_mode.values.max_output)); // 出力を最大出力に制限
 
     if (no_update_count > no_update_max || !initialized) // 値が長い間更新されていなければ or 初期化されていなければ
     {
@@ -154,15 +181,11 @@ void App::timerTask()
     }
     else
     {
-        if (target != 0) // 目標値が0でなければ
-        {
-            indicateBusy(true);
-        }
-        else
+        if (target == 0) // 目標値が0なら
         {
             resetControlVal(); // 制御値をリセット
         }
-        motor.run(output, max_output); // モーターを制御
+        motor.run(output, md_mode.values.max_output); // モーターを制御
     }
 }
 void App::CANCallbackProcess(CAN_HandleTypeDef *hcan_)
@@ -187,6 +210,5 @@ void App::resetControlVal()
     target = 0;
     output = 0;
     motor.resetPID();
-    motor.run(0, max_output);
-    indicateBusy(false);
+    motor.run(0, md_mode.values.max_output);
 }
