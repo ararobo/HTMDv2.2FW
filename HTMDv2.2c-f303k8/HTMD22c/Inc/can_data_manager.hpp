@@ -97,13 +97,11 @@ public:
 
     void sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value);
 
-    void sendSensorEncoderAndCurrent(int16_t encoder_value, int16_t current);
+    void sendSensorLimitAndCurrent(int16_t encoder_value, int16_t current);
 
     void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current);
 
     void sendStateMD(uint8_t state_code);
-
-    void sendStateTemp(uint8_t state_temp);
 
     void sendStateAll(uint8_t state_code, uint8_t state_temp);
 

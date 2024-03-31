@@ -190,6 +190,26 @@ void CANDataManager::sendSensorCurrent(int16_t current)
     sendPacket(can_configure::sensor::id::current + md_id, tx_data, can_configure::sensor::dlc::current);                                                                            // 送信
 }
 
+void CANDataManager::sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value)
+{
+    uint8_t tx_data[can_configure::sensor::dlc::limit_and_encoder] = {0};
+    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                       // リミットスイッチ
+    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                           // エンコーダーの下位8ビット
+    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                             // エンコーダーの上位8ビット
+    sendPacket(can_configure::sensor::id::limit_and_encoder + md_id, tx_data, can_configure::sensor::dlc::limit_and_encoder); // 送信
+}
+
+void CANDataManager::sendSensorLimitAndCurrent(int16_t encoder_value, int16_t current)
+{
+    uint8_t tx_data[can_configure::sensor::dlc::limit_and_current] = {0};
+    tx_data[0] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                           // エンコーダーの下位8ビット
+    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                             // エンコーダーの上位8ビット
+    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(current) & 0xFF);                                                 // 電流の下位8ビット
+    tx_data[3] = static_cast<uint8_t>(static_cast<uint16_t>(current) >> 8);                                                   // 電流の上位8ビット
+    sendPacket(can_configure::sensor::id::limit_and_current + md_id, tx_data, can_configure::sensor::dlc::limit_and_current); // 送信
+}
+
 void CANDataManager::sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current)
 {
     uint8_t tx_data[can_configure::sensor::dlc::all] = {0};
@@ -206,12 +226,6 @@ void CANDataManager::sendStateMD(uint8_t state_code)
 {
     uint8_t tx_data[can_configure::state::dlc::md] = {state_code};                            // 送信データ
     sendPacket(can_configure::state::id::md + md_id, tx_data, can_configure::state::dlc::md); // 送信
-}
-
-void CANDataManager::sendStateTemp(uint8_t state_temp)
-{
-    uint8_t tx_data[can_configure::state::dlc::temp] = {state_temp};                              // 送信データ
-    sendPacket(can_configure::state::id::temp + md_id, tx_data, can_configure::state::dlc::temp); // 送信
 }
 
 void CANDataManager::sendStateAll(uint8_t state_code, uint8_t state_temp)
