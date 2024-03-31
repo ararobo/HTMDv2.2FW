@@ -17,11 +17,11 @@ struct md_mode_flags
     unsigned char incremental_encoder : 1;
     unsigned char absolute_encoder : 1;
     unsigned char reverse_encoder : 1;
-    unsigned char limit_switch : 1;
     unsigned char brake : 1;
     unsigned char pid : 1;
+    unsigned char current : 1;
     unsigned char torque_control : 1;
-    unsigned char state_temp : 1;
+    unsigned char state : 1;
 };
 
 union md_mode_t

@@ -82,13 +82,9 @@ void App::mainLoop()
     // 初期化されていればMDの状態を送信する
     if (initialized)
     {
-        if (md_mode.flags.incremental_encoder || enable_limit_switch) // インクリメンタルエンコーダかリミットスイッチが有効なら
-        {
-            myCAN.sendMDStatus(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false, encoder_value); // エンコーダの値を送信
-            serial_printf("encoder: %d\n", encoder_value);                                        // エンコーダの値を表示
-        }
+        if (md_mode.flags.incremental_encoder && md_mode.flags.limit_switch && md_mode.flags.)
 
-        HAL_Delay(report_rate); // 周期的に送信
+            HAL_Delay(report_rate); // 周期的に送信
     }
     else
     {

@@ -46,7 +46,7 @@ namespace can_configure
             static constexpr int encoder = 2;
             static constexpr int current = 4;
             static constexpr int limit_and_encoder = 3;
-            static constexpr int encoder_and_current = 6;
+            static constexpr int limit_and_current = 5;
             static constexpr int all = 7;
         }
         namespace id
@@ -55,7 +55,7 @@ namespace can_configure
             static constexpr int encoder = 0x310;
             static constexpr int current = 0x320;
             static constexpr int limit_and_encoder = 0x350;
-            static constexpr int encoder_and_current = 0x360;
+            static constexpr int limit_and_current = 0x360;
             static constexpr int all = 0x370;
         }
     }
@@ -64,13 +64,11 @@ namespace can_configure
         namespace dlc
         {
             static constexpr int md = 1;
-            static constexpr int temp = 1;
             static constexpr int all = 2;
         }
         namespace id
         {
             static constexpr int md = 0x400;
-            static constexpr int temp = 0x410;
             static constexpr int all = 0x470;
         }
         namespace state
