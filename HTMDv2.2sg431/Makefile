@@ -71,6 +71,7 @@ Core/Src/system_stm32g4xx.c
 
 CXX_SOURCES = \
 Core/Src/main.cpp \
+$(wildcard HTMDv2.2s/Src/*.cpp) \
 
 # ASM sources
 ASM_SOURCES =  \
@@ -130,6 +131,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-IHTMDv2.2s/Inc \
 -IDrivers/STM32G4xx_HAL_Driver/Inc \
 -IDrivers/STM32G4xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32G4xx/Include \
