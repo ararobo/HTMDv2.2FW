@@ -33,7 +33,7 @@ public:
      *
      * @param hcan_ CANのハンドラ
      */
-    void CANCallbackProcess(CAN_HandleTypeDef *hcan_);
+    void CANCallbackProcess(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 
     /**
      * @brief タイマー処理のコールバック関数

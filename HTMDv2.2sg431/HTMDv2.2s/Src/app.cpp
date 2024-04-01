@@ -17,9 +17,9 @@ md_mode_t md_mode;
 void App::getMDIdFromDispSW(uint8_t *md_id_)
 {
     uint8_t id = 0;
-    if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+    if (HAL_GPIO_ReadPin(DPI4_GPIO_Port, DPI4_Pin))
         id = 1;
-    if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+    if (HAL_GPIO_ReadPin(DPI3_GPIO_Port, DPI3_Pin))
         id |= 0b10;
     if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
         id |= 0b100;
@@ -37,7 +37,7 @@ void App::init()
     motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
     indicateStanby(true);
     // main timer start
-    HAL_TIM_Base_Start_IT(&htim6);
+    HAL_TIM_Base_Start_IT();
 }
 
 void App::mainLoop()
@@ -188,9 +188,9 @@ void App::timerTask()
         motor.run(output, md_mode.values.max_output); // モーターを制御
     }
 }
-void App::CANCallbackProcess(CAN_HandleTypeDef *hcan_)
+void App::CANCallbackProcess(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
-    myCAN.onReceiveTask(hcan_); // CAN通信のコールバック処理
+    myCAN.onReceiveTask(hfdcan, RxFifo0ITs);
 }
 
 template <typename... Args>

@@ -6,20 +6,30 @@ void CANDataManager::init(uint8_t md_id_)
 {
     md_id = md_id_;
     // CANのフィルタ設定
-    RxFilter.FilterIdHigh = 0;                    // フィルタのIDの上位16ビット
-    RxFilter.FilterIdLow = 0;                     // フィルタのIDの下位16ビット
-    RxFilter.FilterMaskIdHigh = 0;                // フィルタのマスクのIDの上位16ビット
-    RxFilter.FilterMaskIdLow = 0;                 // フィルタのマスクのIDの下位16ビット
-    RxFilter.FilterScale = CAN_FILTERSCALE_32BIT; // フィルタのスケール
-    RxFilter.FilterBank = 0;                      // フィルタのバンク
-    RxFilter.FilterMode = CAN_FILTERMODE_IDMASK;  // フィルタのモード
-    RxFilter.SlaveStartFilterBank = 14;           // スレーブの開始フィルタバンク
-    RxFilter.FilterActivation = ENABLE;           // フィルタの有効化
+    RxFilter.IdType = FDCAN_STANDARD_ID;             // 標準ID
+    RxFilter.FilterIndex = 0;                        // フィルタインデックス
+    RxFilter.FilterType = FDCAN_FILTER_MASK;         // マスク
+    RxFilter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // FIFO0にフィルタ
+    RxFilter.FilterID1 = 0x000;
+    RxFilter.FilterID2 = 0x000;
+    if (HAL_FDCAN_ConfigFilter(&hfdcan1, &RxFilter) != HAL_OK)
+    {
+        Error_Handler();
+        indicateError(true);
+    }
+    if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
+    {
+        Error_Handler();
+        indicateError(true);
+    }
     // CAN通信のスタート
-    HAL_CAN_Start(&hcan);                   // CANのスタート
-    HAL_CAN_ConfigFilter(&hcan, &RxFilter); // CANのフィルタの設定
+    HAL_FDCAN_Start(&hfdcan1); // CAN通信のスタート
     // 割り込み有効
-    HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // FIFO0のメッセージペンディング割り込みを有効
+    if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
+    {
+        Error_Handler();
+        indicateError(true);
+    }
 }
 
 bool CANDataManager::getMDInit()
@@ -98,72 +108,83 @@ void CANDataManager::sendReInitMode(uint8_t *mode_code)
     sendPacket(can_configure::manage::id::re_mode + md_id, mode_code, can_configure::manage::dlc::re_mode); // 送信
 }
 
-void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
+void CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
-    if (HAL_CAN_GetRxMessage(hcan_, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) // 正常に受信できた場合
+    if (hfdcan->Instance == hfdcan1.Instance)
     {
-        uint16_t rx_id = RxHeader.StdId & 0x7F0;                                              // CANのIDをマスクして全MD共通で種類分けする
-        uint8_t rx_md_id = RxHeader.StdId & 0x00F;                                            // CANのIDをマスクしてMDのIDを取得
-        if (uint16_t(RxHeader.StdId) == (can_configure::control::id::md_targets + md_id / 4)) // MDのIDに対応したモーターの目標値データであった場合
+        if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
         {
-            if (RxHeader.DLC == can_configure::control::dlc::md_targets) // 受信したデータの長さが正しい場合
+            if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
             {
-                for (uint8_t i = 0; i < can_configure::control::dlc::md_targets; i++) // データ長に合わせて繰り返す
-                {
-                    buff_targets[i] = RxData[i]; // 受信データを目標値バッファに格納
-                }
-                flag_targets = true; // 目標値のフラグを立てる
+                Error_Handler();
+                indicateError(true);
             }
             else
             {
-                indicateError(true); // エラー処理
-            }
-        }
-        else if (rx_md_id == md_id) // 対応するMDのIDである場合
-        {
-            if (rx_id == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
-            {
-                if (RxHeader.DLC == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
+                uint16_t rx_id = RxHeader.Identifier & 0x7F0;                                              // CANのIDをマスクして全MD共通で種類分けする
+                uint8_t rx_md_id = RxHeader.Identifier & 0x00F;                                            // CANのIDをマスクしてMDのIDを取得
+                if (uint16_t(RxHeader.Identifier) == (can_configure::control::id::md_targets + md_id / 4)) // MDのIDに対応したモーターの目標値データであった場合
                 {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
+                    if (RxHeader.DataLength == can_configure::control::dlc::md_targets) // 受信したデータの長さが正しい場合
                     {
-                        buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
+                        for (uint8_t i = 0; i < can_configure::control::dlc::md_targets; i++) // データ長に合わせて繰り返す
+                        {
+                            buff_targets[i] = RxData[i]; // 受信データを目標値バッファに格納
+                        }
+                        flag_targets = true; // 目標値のフラグを立てる
                     }
-                    flag_init_command = true; // 初期化コマンドのフラグを立てる
-                }
-                else
-                {
-                    indicateError(true); // エラー処理
-                }
-            }
-            else if (rx_id == can_configure::manage::id::mode) // モード指定のCANのIDである場合
-            {
-                if (RxHeader.DLC == can_configure::manage::dlc::mode) // 受信したデータの長さが正しい場合
-                {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::mode; i++) // データ長に合わせて繰り返す
+                    else
                     {
-                        buff_init_mode[i] = RxData[i]; // 受信データをモード指定バッファに格納
+                        indicateError(true); // エラー処理
                     }
-                    flag_init_mode = true; // モード指定のフラグを立てる
                 }
-                else
+                else if (rx_md_id == md_id) // 対応するMDのIDである場合
                 {
-                    indicateError(true); // エラー処理
-                }
-            }
-            else if (rx_id == can_configure::manage::id::pid) // PIDゲイン指定のCANのIDである場合
-            {
-                if (RxHeader.DLC == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
-                {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
+                    if (rx_id == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
                     {
-                        buff_init_pid[i] = RxData[i]; // 受信データをPIDゲイン指定バッファに格納
+                        if (RxHeader.DataLength == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
+                        {
+                            for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
+                            {
+                                buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
+                            }
+                            flag_init_command = true; // 初期化コマンドのフラグを立てる
+                        }
+                        else
+                        {
+                            indicateError(true); // エラー処理
+                        }
                     }
-                    flag_init_pid = true; // PIDゲイン指定のフラグを立てる
-                }
-                else
-                {
-                    indicateError(true); // エラー処理
+                    else if (rx_id == can_configure::manage::id::mode) // モード指定のCANのIDである場合
+                    {
+                        if (RxHeader.DataLength == can_configure::manage::dlc::mode) // 受信したデータの長さが正しい場合
+                        {
+                            for (uint8_t i = 0; i < can_configure::manage::dlc::mode; i++) // データ長に合わせて繰り返す
+                            {
+                                buff_init_mode[i] = RxData[i]; // 受信データをモード指定バッファに格納
+                            }
+                            flag_init_mode = true; // モード指定のフラグを立てる
+                        }
+                        else
+                        {
+                            indicateError(true); // エラー処理
+                        }
+                    }
+                    else if (rx_id == can_configure::manage::id::pid) // PIDゲイン指定のCANのIDである場合
+                    {
+                        if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
+                        {
+                            for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
+                            {
+                                buff_init_pid[i] = RxData[i]; // 受信データをPIDゲイン指定バッファに格納
+                            }
+                            flag_init_pid = true; // PIDゲイン指定のフラグを立てる
+                        }
+                        else
+                        {
+                            indicateError(true); // エラー処理
+                        }
+                    }
                 }
             }
         }
@@ -236,20 +257,28 @@ void CANDataManager::sendStateAll(uint8_t state_code, uint8_t state_temp)
 
 void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length)
 {
-    if (data_length > 8) // データ長が8より大きい場合
+    if (data_length > 8)
     {
         indicateError(true); // エラー処理
-        return;
     }
-    if (0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan))
-    {
-        TxHeader.StdId = can_id;               // CANのID
-        TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
-        TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
-        TxHeader.DLC = data_length;            // データ長
-        TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
 
-        HAL_CAN_AddTxMessage(&hcan, &TxHeader, tx_buffer, &TxMailbox); // 送信
+    TxHeader.Identifier = can_id;
+    TxHeader.IdType = FDCAN_STANDARD_ID;
+    TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+    TxHeader.DataLength = FDCAN_DLC_BYTES_8;
+    TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    TxHeader.MessageMarker = 0;
+
+    if (0 < HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan1))
+    {
+        if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, tx_buffer) != HAL_OK)
+        {
+            Error_Handler();
+            indicateError(true); // エラー処理
+        }
     }
     else
     {

@@ -10,7 +10,7 @@ void MotorController::init(uint16_t max_output_, uint8_t control_cycle_)
     control_cycle = control_cycle_;
     // モータードライバの初期化
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+    HAL_GPIO_WritePin(PWM_L_GPIO_Port, PWM_L_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_RESET);
     // エンコーダーの初期化
@@ -34,7 +34,6 @@ void MotorController::run(int16_t output, uint16_t max_output)
     }
     // 出力を設定
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, output);
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 3200);
 }
 
 int16_t MotorController::getCount()

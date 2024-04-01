@@ -87,7 +87,7 @@ public:
      *
      * @param hcan_ よくわかんない
      */
-    void onReceiveTask(CAN_HandleTypeDef *hcan_);
+    void onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 
     void sendSensorLimit(bool limit_switch1, bool limit_switch2);
 
@@ -117,9 +117,9 @@ private:
 
 private:
     // 内部使用データ
-    CAN_RxHeaderTypeDef RxHeader;
-    CAN_FilterTypeDef RxFilter;
-    CAN_TxHeaderTypeDef TxHeader;
+    FDCAN_RxHeaderTypeDef RxHeader;
+    FDCAN_FilterTypeDef RxFilter;
+    FDCAN_TxHeaderTypeDef TxHeader;
     uint32_t TxMailbox;
     uint8_t RxData[8];
 };
