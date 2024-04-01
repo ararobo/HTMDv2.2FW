@@ -28,6 +28,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "app.hpp"
 
 /* USER CODE END Includes */
 
@@ -60,6 +61,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+App app;
 
 /* USER CODE END 0 */
 
@@ -102,6 +104,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  app.init();
 
   /* USER CODE END 2 */
 
@@ -110,6 +113,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+    app.mainLoop();
 
     /* USER CODE BEGIN 3 */
   }
@@ -162,6 +166,17 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM3)
+  {
+    app.timerTask();
+  }
+}
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+  app.CANCallbackProcess(hfdcan, RxFifo0ITs);
+}
 
 /* USER CODE END 4 */
 

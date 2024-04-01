@@ -37,7 +37,7 @@ void App::init()
     motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
     indicateStanby(true);
     // main timer start
-    HAL_TIM_Base_Start_IT();
+    HAL_TIM_Base_Start_IT(&htim3);
 }
 
 void App::mainLoop()
@@ -202,7 +202,7 @@ void App::serial_printf(const std::string &fmt, Args... args)
     std::vector<char> buf(len + 1);
     std::snprintf(&buf[0], len + 1, fmt.c_str(), args...);
     // ヌル終端された文字列をUARTに送信
-    HAL_UART_Transmit(&huart1, (uint8_t *)&buf[0], len, 0xFF);
+    HAL_UART_Transmit(&huart3, (uint8_t *)&buf[0], len, 0xFF);
 }
 
 void App::resetControlVal()
