@@ -89,20 +89,69 @@ public:
      */
     void onReceiveTask(CAN_HandleTypeDef *hcan_);
 
+    /**
+     * @brief リミットスイッチの状態を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     */
     void sendSensorLimit(bool limit_switch1, bool limit_switch2);
 
+    /**
+     * @brief エンコーダの値を送信
+     *
+     * @param encoder_value エンコーダの値
+     */
     void sendSensorEncoder(int16_t encoder_value);
 
+    /**
+     * @brief 電流センサの値を送信
+     *
+     * @param current 電流センサの値
+     */
     void sendSensorCurrent(int16_t current);
 
+    /**
+     * @brief リミットスイッチの状態とエンコーダの値を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     * @param encoder_value エンコーダの値
+     */
     void sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value);
 
+    /**
+     * @brief リミットスイッチの状態と電流センサの値を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     * @param current 電流センサの値
+     */
     void sendSensorLimitAndCurrent(int16_t encoder_value, int16_t current);
 
+    /**
+     * @brief リミットスイッチの状態、エンコーダの値、電流センサの値を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     * @param encoder_value エンコーダの値
+     * @param current 電流センサの値
+     */
     void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current);
 
+    /**
+     * @brief MDの状態を送信
+     *
+     * @param state_code 状態コード
+     */
     void sendStateMD(uint8_t state_code);
 
+    /**
+     * @brief 全てのMDの状態を送信
+     *
+     * @param state_code 状態コード
+     * @param state_temp 状態温度
+     */
     void sendStateAll(uint8_t state_code, uint8_t state_temp);
 
 private:
