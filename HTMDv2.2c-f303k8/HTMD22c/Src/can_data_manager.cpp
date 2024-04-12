@@ -66,12 +66,22 @@ bool CANDataManager::getMDMode(uint8_t *mode_code)
 
 bool CANDataManager::getPIDGain(float *p_gain, float *i_gain, float *d_gain)
 {
-    if (flag_init_pid) // PIDゲイン指定のフラグが立っている場合
+    if (flag_init_pid[0] && flag_init_pid[1] && flag_init_pid[2]) // PIDゲイン指定のフラグが立っている場合
     {
-        flag_init_pid = false;                                                                            // フラグを下ろす
-        *p_gain = float(uint16_t(buff_init_pid[1]) | uint16_t(buff_init_pid[2] << 8)) / PID_GAIN_QUALITY; // 比例ゲイン
-        *i_gain = float(uint16_t(buff_init_pid[3]) | uint16_t(buff_init_pid[4] << 8)) / PID_GAIN_QUALITY; // 積分ゲイン
-        *d_gain = float(uint16_t(buff_init_pid[5]) | uint16_t(buff_init_pid[6] << 8)) / PID_GAIN_QUALITY; // 微分ゲイン
+        uint32_t raw_pid_gain[3]; // PIDゲインの生データ
+        // フラグを下ろす
+        flag_init_pid[0] = false;
+        flag_init_pid[1] = false;
+        flag_init_pid[2] = false;
+        // データを結合
+        raw_pid_gain[0] = buff_init_p_gain[0] | (buff_init_p_gain[1] << 8) | (buff_init_p_gain[2] << 16) | (buff_init_p_gain[3] << 24); // 比例ゲイン
+        raw_pid_gain[1] = buff_init_i_gain[0] | (buff_init_i_gain[1] << 8) | (buff_init_i_gain[2] << 16) | (buff_init_i_gain[3] << 24); // 積分ゲイン
+        raw_pid_gain[2] = buff_init_d_gain[0] | (buff_init_d_gain[1] << 8) | (buff_init_d_gain[2] << 16) | (buff_init_d_gain[3] << 24); // 微分ゲイン
+        // ゲインを格納
+        *p_gain = static_cast<float>(raw_pid_gain[0]); // 比例ゲイン
+        *i_gain = static_cast<float>(raw_pid_gain[1]); // 積分ゲイン
+        *d_gain = static_cast<float>(raw_pid_gain[2]); // 微分ゲイン
+
         return true;
     }
     return false;
@@ -79,18 +89,19 @@ bool CANDataManager::getPIDGain(float *p_gain, float *i_gain, float *d_gain)
 
 void CANDataManager::sendReInitPID(float p_gain, float i_gain, float d_gain)
 {
-    uint8_t tx_data[7];         // 送信データ
-    p_gain *= PID_GAIN_QUALITY; // PIDゲインを10000倍
-    i_gain *= PID_GAIN_QUALITY;
-    d_gain *= PID_GAIN_QUALITY;
-    tx_data[0] = md_id;                                                                                 // MDのID
-    tx_data[1] = uint16_t(p_gain);                                                                      // 比例ゲインの下位8ビット
-    tx_data[2] = uint16_t(p_gain) >> 8;                                                                 // 比例ゲインの上位8ビット
-    tx_data[3] = uint16_t(i_gain);                                                                      // 積分ゲインの下位8ビット
-    tx_data[4] = uint16_t(i_gain) >> 8;                                                                 // 積分ゲインの上位8ビット
-    tx_data[5] = uint16_t(d_gain);                                                                      // 微分ゲインの下位8ビット
-    tx_data[6] = uint16_t(d_gain) >> 8;                                                                 // 微分ゲインの上位8ビット
-    sendPacket(can_configure::manage::id::re_pid + md_id, tx_data, can_configure::manage::dlc::re_pid); // 送信
+    uint8_t tx_data[3][can_configure::manage::dlc::pid];
+    uint32_t raw_pid_gain[3] = {static_cast<uint32_t>(p_gain), static_cast<uint32_t>(i_gain), static_cast<uint32_t>(d_gain)}; // ゲインの生データ
+    // 生データを分割
+    for (uint8_t i = 0; i < 3; i++) // ゲインの数だけ繰り返す
+    {
+        tx_data[i][0] = static_cast<uint8_t>(raw_pid_gain[i] & 0xFF);         // 下位8ビット
+        tx_data[i][1] = static_cast<uint8_t>((raw_pid_gain[i] >> 8) & 0xFF);  // 8ビット右シフトして下位8ビット
+        tx_data[i][2] = static_cast<uint8_t>((raw_pid_gain[i] >> 16) & 0xFF); // 16ビット右シフトして下位8ビット
+        tx_data[i][3] = static_cast<uint8_t>((raw_pid_gain[i] >> 24) & 0xFF); // 24ビット右シフトして下位8ビット
+    }
+    sendPacket(can_configure::manage::id::re_p_gain, tx_data[0], can_configure::manage::dlc::pid); // 送信
+    sendPacket(can_configure::manage::id::re_i_gain, tx_data[1], can_configure::manage::dlc::pid); // 送信
+    sendPacket(can_configure::manage::id::re_d_gain, tx_data[2], can_configure::manage::dlc::pid); // 送信
 }
 
 void CANDataManager::sendReInitMode(uint8_t *mode_code)
@@ -151,15 +162,45 @@ void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
                     indicateError(true); // エラー処理
                 }
             }
-            else if (rx_id == can_configure::manage::id::pid) // PIDゲイン指定のCANのIDである場合
+            else if (rx_id == can_configure::manage::id::p_gain) // 比例ゲイン指定のCANのIDである場合
             {
                 if (RxHeader.DLC == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
                 {
                     for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
                     {
-                        buff_init_pid[i] = RxData[i]; // 受信データをPIDゲイン指定バッファに格納
+                        buff_init_p_gain[i] = RxData[i]; // 受信データを比例ゲイン指定バッファに格納
                     }
-                    flag_init_pid = true; // PIDゲイン指定のフラグを立てる
+                    flag_init_pid[0] = true; // 比例ゲイン指定のフラグを立てる
+                }
+                else
+                {
+                    indicateError(true); // エラー処理
+                }
+            }
+            else if (rx_id == can_configure::manage::id::i_gain) // 積分ゲイン指定のCANのIDである場合
+            {
+                if (RxHeader.DLC == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
+                {
+                    for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
+                    {
+                        buff_init_i_gain[i] = RxData[i]; // 受信データを積分ゲイン指定バッファに格納
+                    }
+                    flag_init_pid[1] = true; // 積分ゲイン指定のフラグを立てる
+                }
+                else
+                {
+                    indicateError(true); // エラー処理
+                }
+            }
+            else if (rx_id == can_configure::manage::id::d_gain) // 微分ゲイン指定のCANのIDである場合
+            {
+                if (RxHeader.DLC == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
+                {
+                    for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
+                    {
+                        buff_init_d_gain[i] = RxData[i]; // 受信データを微分ゲイン指定バッファに格納
+                    }
+                    flag_init_pid[2] = true; // 微分ゲイン指定のフラグを立てる
                 }
                 else
                 {
