@@ -97,7 +97,6 @@ void App::mainLoop()
         {
             myCAN.sendSensorEncoder(encoder_value); // エンコーダの値を送信
         }
-
         if (md_mode.flags.state)
         {
             if (target != 0)
@@ -111,6 +110,7 @@ void App::mainLoop()
                 myCAN.sendStateMD(can_configure::state::state::ready); // ready
             }
         }
+        HAL_Delay(md_mode.values.report_rate); // レポートレート分待つ
     }
     else
     {
