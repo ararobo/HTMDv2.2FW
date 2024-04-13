@@ -92,10 +92,6 @@ void App::mainLoop()
             {
                 myCAN.sendSensorLimit(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false); // リミットスイッチの状態を送信
             }
-            if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
-            {
-                myCAN.sendSensorEncoder(encoder_value); // エンコーダの値を送信
-            }
             if (md_mode.flags.state)
             {
                 if (target != 0)
@@ -109,10 +105,6 @@ void App::mainLoop()
                     myCAN.sendStateMD(can_configure::state::state::ready); // ready
                 }
             }
-        }
-        else
-        {
-            HAL_Delay(50);
         }
         HAL_Delay(md_mode.values.report_rate); // レポートレート分待つ
     }
