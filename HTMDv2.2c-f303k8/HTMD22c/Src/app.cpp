@@ -92,23 +92,27 @@ void App::mainLoop()
             {
                 myCAN.sendSensorLimit(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false); // リミットスイッチの状態を送信
             }
-        }
-        else if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
-        {
-            myCAN.sendSensorEncoder(encoder_value); // エンコーダの値を送信
-        }
-        if (md_mode.flags.state)
-        {
-            if (target != 0)
+            if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
             {
-                indicateBusy(true);
-                myCAN.sendStateMD(can_configure::state::state::busy); // busy
+                myCAN.sendSensorEncoder(encoder_value); // エンコーダの値を送信
             }
-            else
+            if (md_mode.flags.state)
             {
-                indicateBusy(false);
-                myCAN.sendStateMD(can_configure::state::state::ready); // ready
+                if (target != 0)
+                {
+                    indicateBusy(true);
+                    myCAN.sendStateMD(can_configure::state::state::busy); // busy
+                }
+                else
+                {
+                    indicateBusy(false);
+                    myCAN.sendStateMD(can_configure::state::state::ready); // ready
+                }
             }
+        }
+        else
+        {
+            HAL_Delay(50);
         }
         HAL_Delay(md_mode.values.report_rate); // レポートレート分待つ
     }
@@ -177,13 +181,19 @@ void App::timerTask()
 
     if (no_update_count > no_update_max || !initialized) // 値が長い間更新されていなければ or 初期化されていなければ
     {
-        resetControlVal(); // 制御値をリセット
+        resetControlVal();                            // 制御値をリセット
+        motor.run(output, md_mode.values.max_output); // モーターを制御
     }
     else
     {
         if (target == 0) // 目標値が0なら
         {
             resetControlVal(); // 制御値をリセット
+            indicateBusy(false);
+        }
+        else
+        {
+            indicateBusy(true);
         }
         motor.run(output, md_mode.values.max_output); // モーターを制御
     }
@@ -210,5 +220,4 @@ void App::resetControlVal()
     target = 0;
     output = 0;
     motor.resetPID();
-    motor.run(0, md_mode.values.max_output);
 }
