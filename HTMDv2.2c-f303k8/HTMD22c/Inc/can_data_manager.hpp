@@ -138,7 +138,7 @@ public:
      * @param encoder_value エンコーダの値
      * @param current 電流センサの値
      */
-    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current);
+    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current);
 
     /**
      * @brief MDの状態を送信

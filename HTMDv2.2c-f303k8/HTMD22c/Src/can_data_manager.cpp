@@ -251,15 +251,15 @@ void CANDataManager::sendSensorLimitAndCurrent(int16_t encoder_value, int16_t cu
     sendPacket(can_configure::sensor::id::limit_and_current + md_id, tx_data, can_configure::sensor::dlc::limit_and_current); // 送信
 }
 
-void CANDataManager::sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current)
+void CANDataManager::sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current)
 {
     uint8_t tx_data[can_configure::sensor::dlc::all] = {0};
     tx_data[0] |= uint8_t(limit_switch1) & 0b1;
     tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                           // リミットスイッチ
     tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);               // エンコーダーの下位8ビット
     tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                 // エンコーダーの上位8ビット
-    tx_data[3] = static_cast<uint8_t>(static_cast<uint16_t>(current) & 0xFF);                     // 電流の下位8ビット
-    tx_data[4] = static_cast<uint8_t>(static_cast<uint16_t>(current) >> 8);                       // 電流の上位8ビット
+    tx_data[3] = static_cast<uint8_t>(current & 0xFF);                                            // 電流の下位8ビット
+    tx_data[4] = static_cast<uint8_t>(current >> 8);                                              // 電流の上位8ビット
     sendPacket(can_configure::sensor::id::all + md_id, tx_data, can_configure::sensor::dlc::all); // 送信
 }
 
