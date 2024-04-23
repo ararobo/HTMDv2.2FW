@@ -29,8 +29,8 @@ bool CANDataManager::getMDInit()
         flag_init_command = false;                                           // フラグを下ろす
         if (buff_init_command[0] == can_configure::manage::command::do_init) // 初期化コマンドが実行された場合
         {
-            uint8_t tx_data[can_configure::manage::dlc::init] = {can_configure::manage::command::success}; // 送信データの設定
-            sendPacket(can_configure::manage::id::re_init, tx_data, can_configure::manage::dlc::re_init);  // 送信
+            uint8_t tx_data[can_configure::manage::dlc::md_init] = {can_configure::manage::command::success}; // 送信データの設定
+            sendPacket(can_configure::manage::id::re_md_init, tx_data, can_configure::manage::dlc::re_init);  // 送信
             return true;
         }
     }
@@ -54,8 +54,8 @@ bool CANDataManager::getMDMode(uint8_t *mode_code)
 {
     if (flag_init_mode) // モード指定のフラグが立っている場合
     {
-        flag_init_mode = false;                                        // フラグを下ろす
-        for (uint8_t i = 0; i < can_configure::manage::dlc::mode; i++) // モード指定のデータ長に合わせて繰り返す
+        flag_init_mode = false;                                           // フラグを下ろす
+        for (uint8_t i = 0; i < can_configure::manage::dlc::md_mode; i++) // モード指定のデータ長に合わせて繰り返す
         {
             mode_code[i] = buff_init_mode[i]; // モード指定のデータをモードコードに格納
         }
@@ -106,7 +106,7 @@ void CANDataManager::sendReInitPID(float p_gain, float i_gain, float d_gain)
 
 void CANDataManager::sendReInitMode(uint8_t *mode_code)
 {
-    sendPacket(can_configure::manage::id::re_mode + md_id, mode_code, can_configure::manage::dlc::re_mode); // 送信
+    sendPacket(can_configure::manage::id::re_md_mode + md_id, mode_code, can_configure::manage::dlc::re_mode); // 送信
 }
 
 void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
@@ -132,11 +132,11 @@ void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
         }
         else if (rx_md_id == md_id) // 対応するMDのIDである場合
         {
-            if (rx_id == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
+            if (rx_id == can_configure::manage::id::md_init) // 初期化コマンドのCANのIDである場合
             {
-                if (RxHeader.DLC == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
+                if (RxHeader.DLC == can_configure::manage::dlc::md_init) // 受信したデータの長さが正しい場合
                 {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
+                    for (uint8_t i = 0; i < can_configure::manage::dlc::md_init; i++) // データ長に合わせて繰り返す
                     {
                         buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
                     }
@@ -147,11 +147,11 @@ void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
                     indicateError(true); // エラー処理
                 }
             }
-            else if (rx_id == can_configure::manage::id::mode) // モード指定のCANのIDである場合
+            else if (rx_id == can_configure::manage::id::md_mode) // モード指定のCANのIDである場合
             {
-                if (RxHeader.DLC == can_configure::manage::dlc::mode) // 受信したデータの長さが正しい場合
+                if (RxHeader.DLC == can_configure::manage::dlc::md_mode) // 受信したデータの長さが正しい場合
                 {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::mode; i++) // データ長に合わせて繰り返す
+                    for (uint8_t i = 0; i < can_configure::manage::dlc::md_mode; i++) // データ長に合わせて繰り返す
                     {
                         buff_init_mode[i] = RxData[i]; // 受信データをモード指定バッファに格納
                     }
