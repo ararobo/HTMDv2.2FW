@@ -294,6 +294,6 @@ void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t dat
     }
     else
     {
-        indicateError(true); // エラー処理
+        return;
     }
 }

@@ -36,6 +36,7 @@ void App::init()
     myCAN.init(md_id);                                    // CAN通信の初期化
     motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
     indicateStanby(true);
+    indicateError(false);
     // main timer start
     HAL_TIM_Base_Start_IT(&htim6);
 }

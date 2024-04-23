@@ -18,10 +18,15 @@ namespace can_configure
         namespace dlc
         {
             static constexpr int md_targets = 8;
+            static constexpr int servo_angle = 2;
+            static constexpr int solenoid_8 = 1;
+            static constexpr int solenoid_4 = 4;
         }
         namespace id
         {
             static constexpr int md_targets = 0x100;
+            static constexpr int servo_angle = 0x110;
+            static constexpr int solenoid = 0x120;
         }
     }
     namespace manage
