@@ -101,11 +101,10 @@ int main(void)
   MX_TIM2_Init();
   MX_USART3_UART_Init();
   MX_SPI2_Init();
-  MX_TIM3_Init();
   MX_TIM4_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   app.init();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,9 +112,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    app.mainLoop();
 
     /* USER CODE BEGIN 3 */
+    app.mainLoop();
   }
   /* USER CODE END 3 */
 }
@@ -166,18 +165,18 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim->Instance == TIM3)
-  {
-    app.timerTask();
-  }
-}
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
   app.CANCallbackProcess(hfdcan, RxFifo0ITs);
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM4)
+  {
+    app.timerTask();
+  }
+}
 /* USER CODE END 4 */
 
 /**

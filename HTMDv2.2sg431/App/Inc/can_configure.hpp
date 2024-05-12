@@ -1,3 +1,16 @@
+/**
+ * @file can_configure.hpp
+ * @author Gento Aiba
+ * @brief CAN通信の設定
+ * @version 0.1
+ * @date 2024-04-01
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+#pragma once
+#include <stdint.h>
+
 namespace can_configure
 {
     namespace control
@@ -19,8 +32,8 @@ namespace can_configure
             static constexpr int re_init = 1;
             static constexpr int mode = 8;
             static constexpr int re_mode = 8;
-            static constexpr int pid = 6;
-            static constexpr int re_pid = 6;
+            static constexpr int pid = 4;
+            static constexpr int re_pid = 4;
         }
         namespace id
         {
@@ -28,8 +41,12 @@ namespace can_configure
             static constexpr int re_init = 0x210;
             static constexpr int mode = 0x220;
             static constexpr int re_mode = 0x230;
-            static constexpr int pid = 0x240;
-            static constexpr int re_pid = 0x250;
+            static constexpr int p_gain = 0x240;
+            static constexpr int i_gain = 0x250;
+            static constexpr int d_gain = 0x260;
+            static constexpr int re_p_gain = 0x270;
+            static constexpr int re_i_gain = 0x280;
+            static constexpr int re_d_gain = 0x290;
         }
         namespace command
         {
@@ -64,7 +81,7 @@ namespace can_configure
         namespace dlc
         {
             static constexpr int md = 1;
-            static constexpr int all = 2;
+            static constexpr int all = 3;
         }
         namespace id
         {

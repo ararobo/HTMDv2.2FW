@@ -18,6 +18,7 @@ void MyI2C::init()
 {
     flag_temp = false;
     flag_current = false;
+    HAL_I2C_Master_Transmit(&hi2c1, mcp3421_address << 1, &mcp3421_config, 1, 100);
 }
 
 /**
@@ -27,15 +28,12 @@ void MyI2C::init()
  * @return true 新しい値に更新した
  * @return false 新しい値が無い
  */
-bool MyI2C::getTemp(float *temp)
+bool MyI2C::getTemp(uint16_t *temp)
 {
-    if (flag_temp)
-    {
-        *temp = (float)((buff[0] << 8) | buff[1]) / 100.0f;
-        flag_temp = false;
-        return true;
-    }
-    return false;
+    HAL_I2C_Master_Receive(&hi2c1, tmp275_address << 1, tmp275_buff, 2, 100);
+    *temp = (tmp275_buff[0] << 8) | tmp275_buff[1];
+    flag_temp = false;
+    return true;
 }
 
 /**
@@ -45,13 +43,11 @@ bool MyI2C::getTemp(float *temp)
  * @return true 新しい値に更新した
  * @return false 新しい値が無い
  */
-bool MyI2C::getCurrent(float *current)
+bool MyI2C::getCurrent(uint16_t *current)
 {
-    if (flag_current)
-    {
-        *current = (float)((buff[2] << 8) | buff[3]) / 100.0f;
-        flag_current = false;
-        return true;
-    }
-    return false;
+    // Decode data
+    HAL_I2C_Master_Receive(&hi2c1, (mcp3421_address << 1), mcp3421_buff, 2, 100);
+    *current = (mcp3421_buff[0] << 8) | mcp3421_buff[1];
+    flag_current = false;
+    return true;
 }

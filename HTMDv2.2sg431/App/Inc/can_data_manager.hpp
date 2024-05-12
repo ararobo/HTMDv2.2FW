@@ -11,12 +11,14 @@ private:
     uint8_t md_id;
     static constexpr float PID_GAIN_QUALITY = 10000.0f;
     // buffer
-    uint8_t buff_init_pid[can_configure::manage::dlc::pid];
+    uint8_t buff_init_p_gain[can_configure::manage::dlc::pid];
+    uint8_t buff_init_i_gain[can_configure::manage::dlc::pid];
+    uint8_t buff_init_d_gain[can_configure::manage::dlc::pid];
     uint8_t buff_init_mode[can_configure::manage::dlc::mode];
     uint8_t buff_init_command[can_configure::manage::dlc::init];
     uint8_t buff_targets[can_configure::control::dlc::md_targets];
     // flag
-    bool flag_init_pid;
+    bool flag_init_pid[3];
     bool flag_init_mode;
     bool flag_init_command;
     bool flag_targets;
@@ -87,23 +89,21 @@ public:
      *
      * @param hcan_ よくわかんない
      */
-    void onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
+    bool onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 
     void sendSensorLimit(bool limit_switch1, bool limit_switch2);
 
     void sendSensorEncoder(int16_t encoder_value);
 
-    void sendSensorCurrent(int16_t current);
+    void sendSensorCurrent(uint16_t current);
 
     void sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value);
 
-    void sendSensorLimitAndCurrent(int16_t encoder_value, int16_t current);
-
-    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, int16_t current);
+    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current);
 
     void sendStateMD(uint8_t state_code);
 
-    void sendStateAll(uint8_t state_code, uint8_t state_temp);
+    void sendStateAll(uint8_t state_code, uint16_t state_temp);
 
 private:
     /**

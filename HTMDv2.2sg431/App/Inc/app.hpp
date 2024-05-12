@@ -14,6 +14,8 @@ private:
     float Kd = 0.0f;                        // PID制御の微分ゲイン
     uint64_t no_update_max = 100;           // CANで目標値が更新されない回数の最大（CANが死んで何回制御周期が回ったら出力をゼロにするか）
     float motor_transfer_cofficient = 1.0f; // モーターの伝達関数
+    uint16_t current = 0;                   // 電流センサーの値
+    int16_t temp = 0;                       // 温度センサーの値
 
 public:
     /**

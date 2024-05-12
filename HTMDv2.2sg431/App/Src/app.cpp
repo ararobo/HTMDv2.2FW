@@ -2,28 +2,29 @@
 #include <cstring>
 #include "app.hpp"
 #include "motor_controller.hpp"
-#include "indicator.hpp"
 #include "main.h"
 #include "fdcan.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 #include "htmd_mode.hpp"
+#include "my_i2c.hpp"
 
 CANDataManager myCAN;
 MotorController motor;
 md_mode_t md_mode;
+MyI2C myI2C;
 
 void App::getMDIdFromDispSW(uint8_t *md_id_)
 {
     uint8_t id = 0;
-    if (HAL_GPIO_ReadPin(DPI4_GPIO_Port, DPI4_Pin))
-        id = 1;
-    if (HAL_GPIO_ReadPin(DPI3_GPIO_Port, DPI3_Pin))
-        id |= 0b10;
-    if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
-        id |= 0b100;
     if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
+        id = 1;
+    if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
+        id |= 0b10;
+    if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+        id |= 0b100;
+    if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
         id |= 0b1000;
     *md_id_ = id; // ディップスイッチの値をMDのIDに設定
 }
@@ -35,9 +36,9 @@ void App::init()
     // peripheral init
     myCAN.init(md_id);                                    // CAN通信の初期化
     motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
-    indicateStanby(true);
     // main timer start
-    HAL_TIM_Base_Start_IT(&htim3);
+    HAL_TIM_Base_Start_IT(&htim4);
+    myI2C.init(); // I2C通信の初期化
 }
 
 void App::mainLoop()
@@ -58,10 +59,11 @@ void App::mainLoop()
         myCAN.sendReInitMode(md_mode.code); // レスポンス
         // モードを更新
         motor_transfer_cofficient = float(md_mode.values.motor_transfer_coefficient) / 100.0f; // 100倍されているので100で割る
-        if (md_mode.values.max_output > 3199)                                                  // 最大出力が3199を超えていたら
+        if (md_mode.values.max_output > 5999)                                                  // 最大出力が5999を超えていたら
         {
-            md_mode.values.max_output = 3199;
+            md_mode.values.max_output = 5999;
         }
+        motor.setBrake(md_mode.flags.brake); // ブレーキの設定
         // print
         serial_printf("updated md mode\n");
         serial_printf("incremental_encoder: %d\n", md_mode.flags.incremental_encoder);
@@ -84,46 +86,58 @@ void App::mainLoop()
     {
         if (md_mode.values.report_rate != 0) // レポートレートが0でなければ
         {
+            bool limit_status[2];
+            limit_status[0] = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
+            limit_status[1] = HAL_GPIO_ReadPin(LIM2_GPIO_Port, LIM2_Pin);
             if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
             {
-                myCAN.sendSensorLimitAndEncoder(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false, encoder_value); // エンコーダの値とリミットスイッチの状態を送信
+                if (md_mode.flags.current)
+                {
+                    myI2C.getCurrent(&current);                                                    // 電流センサーの値を取得
+                    serial_printf("current: %d\n", current);                                       // debug
+                    myCAN.sendSensorAll(limit_status[0], limit_status[1], encoder_value, current); // エンコーダの値とリミットスイッチの状態と電流を送信
+                }
+                else
+                {
+                    myCAN.sendSensorLimitAndEncoder(limit_status[0], limit_status[1], encoder_value); // エンコーダの値とリミットスイッチの状態を送信
+                }
             }
             else
             {
-                myCAN.sendSensorLimit(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false); // リミットスイッチの状態を送信
+                myCAN.sendSensorLimit(limit_status[0], limit_status[1]); // リミットスイッチの状態を送信
             }
-        }
-        else if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
-        {
-            myCAN.sendSensorEncoder(encoder_value); // エンコーダの値を送信
-        }
 
-        if (md_mode.flags.state)
-        {
-            if (target != 0)
+            if (md_mode.flags.state)
             {
-                indicateBusy(true);
-                myCAN.sendStateMD(can_configure::state::state::busy); // busy
+                uint16_t temp_;
+                myI2C.getTemp(&temp_);              // 温度センサーの値を取得
+                serial_printf("temp: %d\n", temp_); // debug
+                temp = static_cast<int16_t>(temp_); // uint16_t -> int16_t
+                if (target != 0)
+                {
+                    myCAN.sendStateAll(can_configure::state::state::busy, temp); // busy
+                }
+                else
+                {
+                    myCAN.sendStateAll(can_configure::state::state::ready, temp); // ready
+                }
             }
-            else
-            {
-                indicateBusy(false);
-                myCAN.sendStateMD(can_configure::state::state::ready); // ready
-            }
+            HAL_Delay(md_mode.values.report_rate); // レポートレートに応じて待つ
         }
+        myCAN.sendStateMD(can_configure::state::state::ready); // ready
+        // serial_printf("ready\n");
     }
     else
     {
         if (myCAN.getMDInit()) // 初期化コマンドが送られてきたら
         {
             initialized = true; // 初期化されたら
-            indicateReady(true);
-            indicateStanby(false);
+            HAL_GPIO_WritePin(LED_DEBUG_GPIO_Port, LED_DEBUG_Pin, GPIO_PIN_SET);
             serial_printf("initialized\n");
             resetControlVal(); // 制御値をリセット
         }
         myCAN.sendStateMD(can_configure::state::state::init); // init
-        HAL_Delay(10);
+        HAL_Delay(100);
     }
 }
 
@@ -134,7 +148,8 @@ void App::timerTask()
     if (myCAN.getMotorTarget(&target))
     {
         no_update_count = 0; // 更新されたらカウントをリセット
-        serial_printf("target: %d\n", target);
+        // serial_printf("target: %d\n", target);
+        HAL_GPIO_WritePin(LED_CAN_GPIO_Port, LED_CAN_Pin, GPIO_PIN_SET);
     }
     else
     {
@@ -177,6 +192,7 @@ void App::timerTask()
 
     if (no_update_count > no_update_max || !initialized) // 値が長い間更新されていなければ or 初期化されていなければ
     {
+        HAL_GPIO_WritePin(LED_CAN_GPIO_Port, LED_CAN_Pin, GPIO_PIN_RESET);
         resetControlVal(); // 制御値をリセット
     }
     else
@@ -190,7 +206,14 @@ void App::timerTask()
 }
 void App::CANCallbackProcess(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
-    myCAN.onReceiveTask(hfdcan, RxFifo0ITs);
+    if (myCAN.onReceiveTask(hfdcan, RxFifo0ITs))
+    {
+        // serial_printf("CAN receive\n");
+    }
+    else
+    {
+        serial_printf("CAN receive error\n");
+    }
 }
 
 template <typename... Args>

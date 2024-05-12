@@ -22,10 +22,15 @@ class MyI2C
 {
 private:
     // buffer
-    uint8_t buff[4];
+    uint8_t mcp3421_buff[2];
+    uint8_t tmp275_buff[2];
     // flag
     bool flag_temp;
     bool flag_current;
+    // param
+    uint8_t mcp3421_address = 0x68;
+    uint8_t tmp275_address = 0x48;
+    uint8_t mcp3421_config = 0b10011000;
 
 public:
     /**
@@ -41,7 +46,7 @@ public:
      * @return true 新しい値に更新した
      * @return false 新しい値が無い
      */
-    bool getTemp(float *temp);
+    bool getTemp(uint16_t *temp);
 
     /**
      * @brief 電流センサーの値を取得
@@ -50,5 +55,7 @@ public:
      * @return true 新しい値に更新した
      * @return false 新しい値が無い
      */
-    bool getCurrent(float *current);
+    bool getCurrent(uint16_t *current);
+
+    void onReceiveTask(I2C_HandleTypeDef *hi2c);
 };
