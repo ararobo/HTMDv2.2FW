@@ -21,7 +21,7 @@ public:
      * @param max_output 最大出力
      * @param control_cycle 制御周期
      */
-    void init(uint16_t max_output, uint8_t control_cycle);
+    void init(uint8_t control_cycle);
 
     /**
      * @brief モーターを制御する
@@ -80,6 +80,8 @@ public:
      * @param max_value 最大値
      * @return T 制限された値
      */
-    template<typename T>
+    template <typename T>
     T saturate(T value, T min_value, T max_value);
+
+    void setBrake(bool brake);
 };

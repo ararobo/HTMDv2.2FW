@@ -34,8 +34,8 @@ void App::init()
     getMDIdFromDispSW(&md_id); // ディップスイッチの値をMDのIDに設定
     serial_printf("md_id: %d\n", md_id);
     // peripheral init
-    myCAN.init(md_id);                                    // CAN通信の初期化
-    motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
+    myCAN.init(md_id);         // CAN通信の初期化
+    motor.init(control_cycle); // モーターの初期化
     // main timer start
     HAL_TIM_Base_Start_IT(&htim4);
     myI2C.init(); // I2C通信の初期化

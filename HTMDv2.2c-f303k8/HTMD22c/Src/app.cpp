@@ -33,8 +33,8 @@ void App::init()
     getMDIdFromDispSW(&md_id); // ディップスイッチの値をMDのIDに設定
     serial_printf("md_id: %d\n", md_id);
     // peripheral init
-    myCAN.init(md_id);                                    // CAN通信の初期化
-    motor.init(md_mode.values.max_output, control_cycle); // モーターの初期化
+    myCAN.init(md_id);         // CAN通信の初期化
+    motor.init(control_cycle); // モーターの初期化
     indicateStanby(true);
     indicateError(false);
     // main timer start
@@ -63,6 +63,7 @@ void App::mainLoop()
         {
             md_mode.values.max_output = 3199;
         }
+        motor.setBrake(md_mode.flags.brake); // ブレーキを設定
         // print
         serial_printf("updated md mode\n");
         serial_printf("incremental_encoder: %d\n", md_mode.flags.incremental_encoder);

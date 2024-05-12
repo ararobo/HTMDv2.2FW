@@ -3,7 +3,7 @@
 #include "usart.h"
 #include "gpio.h"
 
-void MotorController::init(uint16_t max_output_, uint8_t control_cycle_)
+void MotorController::init(uint8_t control_cycle_)
 {
     // 変数の初期化
     control_cycle = control_cycle_;

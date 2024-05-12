@@ -3,19 +3,17 @@
 #include "usart.h"
 #include "gpio.h"
 
-void MotorController::init(uint16_t max_output_, uint8_t control_cycle_)
+void MotorController::init(uint8_t control_cycle_)
 {
     // 変数の初期化
-    max_output = max_output_;
     control_cycle = control_cycle_;
     // モータードライバの初期化
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
     HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET);
     // エンコーダーの初期化
     HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
-    // run(0, 3200, -3200);
 }
 
 void MotorController::run(int16_t output, uint16_t max_output)
@@ -47,18 +45,26 @@ int16_t MotorController::getCount()
 
 int16_t MotorController::trapezoidalControl(int16_t output, uint8_t max_acceleration)
 {
-    int16_t acceleration = output - prev_out; // 加速度を計算
-    // 加速度が最大加速度を超えた場合は最大加速度に制限
-    if (acceleration < -max_acceleration)
+    if (output == 0)
     {
-        output = prev_out - max_acceleration;
+        prev_out = 0;
+        return 0;
     }
-    else if (acceleration > max_acceleration)
+    else
     {
-        output = prev_out + max_acceleration;
+        int16_t acceleration = output - prev_out; // 加速度を計算
+        // 加速度が最大加速度を超えた場合は最大加速度に制限
+        if (acceleration < -max_acceleration)
+        {
+            output = prev_out - max_acceleration;
+        }
+        else if (acceleration > max_acceleration)
+        {
+            output = prev_out + max_acceleration;
+        }
+        prev_out = output; // 前回の出力を保存
+        return output;
     }
-    prev_out = output; // 前回の出力を保存
-    return output;
 }
 
 float MotorController::calculatePID(float target, float now_value)
@@ -106,5 +112,17 @@ T MotorController::saturate(T value, T min_value, T max_value)
     else
     {
         return value;
+    }
+}
+
+void MotorController::setBrake(bool brake)
+{
+    if (brake)
+    {
+        HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_RESET);
     }
 }
