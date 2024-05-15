@@ -14,7 +14,7 @@ private:
     uint8_t buff_init_i_gain[can_configure::manage::dlc::pid];
     uint8_t buff_init_d_gain[can_configure::manage::dlc::pid];
     uint8_t buff_init_mode[can_configure::manage::dlc::md_mode];
-    uint8_t buff_init_command[can_configure::manage::dlc::md_init];
+    uint8_t buff_init_command[can_configure::manage::dlc::init];
     uint8_t buff_targets[can_configure::control::dlc::md_targets];
     // flag
     bool flag_init_pid[3];

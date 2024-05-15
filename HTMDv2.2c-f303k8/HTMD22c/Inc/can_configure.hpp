@@ -20,7 +20,6 @@ namespace can_configure
             static constexpr int md_targets = 8;
             static constexpr int servo_angle = 2;
             static constexpr int solenoid_8 = 1;
-            static constexpr int solenoid_4 = 4;
         }
         namespace id
         {
@@ -33,8 +32,7 @@ namespace can_configure
     {
         namespace dlc
         {
-            static constexpr int md_init = 1;
-            static constexpr int re_init = 1;
+            static constexpr int init = 2;
             static constexpr int md_mode = 8;
             static constexpr int re_mode = 8;
             static constexpr int pid = 4;
@@ -42,8 +40,7 @@ namespace can_configure
         }
         namespace id
         {
-            static constexpr int md_init = 0x200;
-            static constexpr int re_md_init = 0x210;
+            static constexpr int init = 0x200;
             static constexpr int md_mode = 0x220;
             static constexpr int re_md_mode = 0x230;
             static constexpr int p_gain = 0x240;

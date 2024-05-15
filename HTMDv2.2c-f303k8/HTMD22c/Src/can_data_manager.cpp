@@ -27,10 +27,10 @@ bool CANDataManager::getMDInit()
     if (flag_init_command) // 初期化コマンドのフラグが立っている場合
     {
         flag_init_command = false;                                           // フラグを下ろす
-        if (buff_init_command[0] == can_configure::manage::command::do_init) // 初期化コマンドが実行された場合
+        if (buff_init_command[1] == can_configure::manage::command::do_init) // 初期化コマンドが実行された場合
         {
-            uint8_t tx_data[can_configure::manage::dlc::md_init] = {can_configure::manage::command::success}; // 送信データの設定
-            sendPacket(can_configure::manage::id::re_md_init, tx_data, can_configure::manage::dlc::re_init);  // 送信
+            uint8_t tx_data[can_configure::manage::dlc::init] = {md_id, can_configure::manage::command::success}; // 送信データの設定
+            sendPacket(can_configure::manage::id::init, tx_data, can_configure::manage::dlc::init);               // 送信
             return true;
         }
     }
@@ -132,15 +132,18 @@ void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
         }
         else if (rx_md_id == md_id) // 対応するMDのIDである場合
         {
-            if (rx_id == can_configure::manage::id::md_init) // 初期化コマンドのCANのIDである場合
+            if (rx_id == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
             {
-                if (RxHeader.DLC == can_configure::manage::dlc::md_init) // 受信したデータの長さが正しい場合
+                if (RxHeader.DLC == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
                 {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::md_init; i++) // データ長に合わせて繰り返す
+                    for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
                     {
                         buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
                     }
-                    flag_init_command = true; // 初期化コマンドのフラグを立てる
+                    if (buff_init_command[0] == md_id) // 該当するデバイスの場合
+                    {
+                        flag_init_command = true; // 初期化コマンドのフラグを立てる
+                    }
                 }
                 else
                 {

@@ -18,19 +18,22 @@ namespace can_configure
         namespace dlc
         {
             static constexpr int md_targets = 8;
+            static constexpr int servo_angle = 2;
+            static constexpr int solenoid_8 = 1;
         }
         namespace id
         {
             static constexpr int md_targets = 0x100;
+            static constexpr int servo_angle = 0x110;
+            static constexpr int solenoid = 0x120;
         }
     }
     namespace manage
     {
         namespace dlc
         {
-            static constexpr int init = 1;
-            static constexpr int re_init = 1;
-            static constexpr int mode = 8;
+            static constexpr int init = 2;
+            static constexpr int md_mode = 8;
             static constexpr int re_mode = 8;
             static constexpr int pid = 4;
             static constexpr int re_pid = 4;
@@ -38,9 +41,8 @@ namespace can_configure
         namespace id
         {
             static constexpr int init = 0x200;
-            static constexpr int re_init = 0x210;
-            static constexpr int mode = 0x220;
-            static constexpr int re_mode = 0x230;
+            static constexpr int md_mode = 0x220;
+            static constexpr int re_md_mode = 0x230;
             static constexpr int p_gain = 0x240;
             static constexpr int i_gain = 0x250;
             static constexpr int d_gain = 0x260;
