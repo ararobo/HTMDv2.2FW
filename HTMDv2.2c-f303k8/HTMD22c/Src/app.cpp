@@ -121,7 +121,7 @@ void App::mainLoop()
             resetControlVal(); // 制御値をリセット
         }
         myCAN.sendStateMD(can_configure::state::state::init); // init
-        HAL_Delay(10);
+        HAL_Delay(200);
     }
 }
 

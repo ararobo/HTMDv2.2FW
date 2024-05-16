@@ -1,9 +1,9 @@
 /**
  * @file htmd_mode.hpp
  * @author Gento Aiba
- * @brief
- * @version 0.1
- * @date 2024-03-30
+ * @brief MDのモードの共用体(通信時変換用)
+ * @version 1.0
+ * @date 2024-04-01
  *
  * @copyright Copyright (c) 2024
  *
@@ -26,14 +26,17 @@ struct md_mode_flags
 
 union md_mode_t
 {
-    struct md_mode_flags flags;
     struct
     {
-        uint8_t max_acceleration;
-        uint8_t max_current;
-        uint8_t report_rate;
-        uint16_t max_output;
-        uint16_t motor_transfer_coefficient;
-    } values;
+        struct md_mode_flags flags;
+        struct
+        {
+            uint8_t max_acceleration;
+            uint8_t max_current;
+            uint8_t report_rate;
+            uint16_t max_output;
+            uint16_t motor_transfer_coefficient;
+        } values;
+    };
     uint8_t code[8];
 };
