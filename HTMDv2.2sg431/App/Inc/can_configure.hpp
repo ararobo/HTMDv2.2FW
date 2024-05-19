@@ -2,7 +2,7 @@
  * @file can_configure.hpp
  * @author Gento Aiba
  * @brief CAN通信の設定
- * @version 2.0
+ * @version 2.1
  * @date 2024-05-19
  *
  * @copyright Copyright (c) 2024
@@ -35,7 +35,7 @@ namespace can_configure
             static constexpr int init = 2;
             static constexpr int re_init = 2;
             static constexpr int md_mode = 8;
-            static constexpr int re_mode = 8;
+            static constexpr int re_md_mode = 8;
             static constexpr int pid = 4;
             static constexpr int re_pid = 4;
         }
