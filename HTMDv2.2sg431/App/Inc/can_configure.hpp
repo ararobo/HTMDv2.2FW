@@ -2,8 +2,8 @@
  * @file can_configure.hpp
  * @author Gento Aiba
  * @brief CAN通信の設定
- * @version 0.1
- * @date 2024-04-01
+ * @version 2.0
+ * @date 2024-05-19
  *
  * @copyright Copyright (c) 2024
  *
@@ -33,6 +33,7 @@ namespace can_configure
         namespace dlc
         {
             static constexpr int init = 2;
+            static constexpr int re_init = 2;
             static constexpr int md_mode = 8;
             static constexpr int re_mode = 8;
             static constexpr int pid = 4;
@@ -41,6 +42,7 @@ namespace can_configure
         namespace id
         {
             static constexpr int init = 0x200;
+            static constexpr int re_init = 0x210;
             static constexpr int md_mode = 0x220;
             static constexpr int re_md_mode = 0x230;
             static constexpr int p_gain = 0x240;

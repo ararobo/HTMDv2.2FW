@@ -108,6 +108,7 @@ void App::mainLoop()
                 }
             }
         }
+        serial_printf("target: %d\n", target);
         HAL_Delay(md_mode.values.report_rate); // レポートレート分待つ
     }
     else
@@ -120,8 +121,8 @@ void App::mainLoop()
             serial_printf("initialized\n");
             resetControlVal(); // 制御値をリセット
         }
-        myCAN.sendStateMD(can_configure::state::state::init); // init
-        HAL_Delay(200);
+        // myCAN.sendStateMD(can_configure::state::state::init); // init
+        HAL_Delay(1);
     }
 }
 
@@ -132,7 +133,6 @@ void App::timerTask()
     if (myCAN.getMotorTarget(&target))
     {
         no_update_count = 0; // 更新されたらカウントをリセット
-        serial_printf("target: %d\n", target);
     }
     else
     {
