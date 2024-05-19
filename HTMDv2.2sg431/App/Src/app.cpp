@@ -124,7 +124,6 @@ void App::mainLoop()
             }
             HAL_Delay(md_mode.values.report_rate); // レポートレートに応じて待つ
         }
-        myCAN.sendStateMD(can_configure::state::state::ready); // ready
         // serial_printf("ready\n");
     }
     else
@@ -136,8 +135,8 @@ void App::mainLoop()
             serial_printf("initialized\n");
             resetControlVal(); // 制御値をリセット
         }
-        myCAN.sendStateMD(can_configure::state::state::init); // init
-        HAL_Delay(100);
+        // myCAN.sendStateMD(can_configure::state::state::init); // init
+        HAL_Delay(1);
     }
 }
 

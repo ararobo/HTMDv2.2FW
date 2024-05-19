@@ -35,8 +35,8 @@ bool CANDataManager::getMDInit()
         flag_init_command = false;                                           // フラグを下ろす
         if (buff_init_command[1] == can_configure::manage::command::do_init) // 初期化コマンドが実行された場合
         {
-            uint8_t tx_data[can_configure::manage::dlc::init] = {md_id, can_configure::manage::command::success}; // 送信データの設定
-            sendPacket(can_configure::manage::id::init, tx_data, can_configure::manage::dlc::init);               // 送信
+            uint8_t tx_data[can_configure::manage::dlc::re_init] = {md_id, can_configure::manage::command::success}; // 送信データの設定
+            sendPacket(can_configure::manage::id::re_init, tx_data, can_configure::manage::dlc::re_init);            // 送信
             return true;
         }
     }
@@ -126,7 +126,7 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
         }
         else
         {
-            uint16_t rx_id = RxHeader.Identifier & 0x7F0;                                              // CANのIDをマスクして全MD共通で種類分けする
+            uint16_t masked_id = RxHeader.Identifier & 0x7F0;                                          // CANのIDをマスクして全MD共通で種類分けする
             uint8_t rx_md_id = RxHeader.Identifier & 0x00F;                                            // CANのIDをマスクしてMDのIDを取得
             if (uint16_t(RxHeader.Identifier) == (can_configure::control::id::md_targets + md_id / 4)) // MDのIDに対応したモーターの目標値データであった場合
             {
@@ -145,25 +145,7 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
             }
             else if (rx_md_id == md_id) // 対応するMDのIDである場合
             {
-                if (rx_id == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
-                {
-                    if (RxHeader.DataLength == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
-                    {
-                        for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
-                        {
-                            buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
-                        }
-                        if (buff_init_command[0] == md_id)
-                        {
-                            flag_init_command = true; // 初期化コマンドのフラグを立てる
-                        }
-                    }
-                    else
-                    {
-                        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                    }
-                }
-                else if (rx_id == can_configure::manage::id::md_mode) // モード指定のCANのIDである場合
+                if (masked_id == can_configure::manage::id::md_mode) // モード指定のCANのIDである場合
                 {
                     if (RxHeader.DataLength == can_configure::manage::dlc::md_mode) // 受信したデータの長さが正しい場合
                     {
@@ -178,7 +160,7 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
                         HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
                     }
                 }
-                else if (rx_id == can_configure::manage::id::p_gain) // 比例ゲイン指定のCANのIDである場合
+                else if (masked_id == can_configure::manage::id::p_gain) // 比例ゲイン指定のCANのIDである場合
                 {
                     if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
                     {
@@ -193,7 +175,7 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
                         HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
                     }
                 }
-                else if (rx_id == can_configure::manage::id::i_gain) // 積分ゲイン指定のCANのIDである場合
+                else if (masked_id == can_configure::manage::id::i_gain) // 積分ゲイン指定のCANのIDである場合
                 {
                     if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
                     {
@@ -208,7 +190,7 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
                         HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
                     }
                 }
-                else if (rx_id == can_configure::manage::id::d_gain) // 微分ゲイン指定のCANのIDである場合
+                else if (masked_id == can_configure::manage::id::d_gain) // 微分ゲイン指定のCANのIDである場合
                 {
                     if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
                     {
@@ -222,6 +204,24 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
                     {
                         HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
                     }
+                }
+            }
+            if (uint16_t(RxHeader.Identifier) == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
+            {
+                if (RxHeader.DataLength == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
+                {
+                    for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
+                    {
+                        buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
+                    }
+                    if (buff_init_command[0] == md_id)
+                    {
+                        flag_init_command = true; // 初期化コマンドのフラグを立てる
+                    }
+                }
+                else
+                {
+                    HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
                 }
             }
             return true;
