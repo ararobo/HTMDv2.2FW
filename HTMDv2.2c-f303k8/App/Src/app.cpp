@@ -99,12 +99,12 @@ void App::mainLoop()
                 if (target != 0)
                 {
                     indicateBusy(true);
-                    myCAN.sendStateMD(can_configure::state::state::busy); // busy
+                    myCAN.sendStateMD(can_config::code::state::busy); // busy
                 }
                 else
                 {
                     indicateBusy(false);
-                    myCAN.sendStateMD(can_configure::state::state::ready); // ready
+                    myCAN.sendStateMD(can_config::code::state::ready); // ready
                 }
             }
         }

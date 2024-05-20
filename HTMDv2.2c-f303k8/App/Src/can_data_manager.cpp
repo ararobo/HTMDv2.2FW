@@ -310,3 +310,16 @@ void CANDataManager::sendStateAndTemp(uint8_t state_code, uint8_t state_temp)
     uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::status); // 送信IDの設定
     sendPacket(tx_id, tx_data, can_config::dlc::md::state_temp);                                                                       // 送信
 }
+
+uint16_t CANDataManager::encodeCanID(uint8_t dir, uint8_t dev, uint8_t device_id, uint8_t data_name)
+{
+    return (dir << 10) | (dev << 7) | (device_id << 3) | data_name;
+}
+
+void CANDataManager::decodeCanID(uint16_t can_id, uint8_t *dir, uint8_t *dev, uint8_t *device_id, uint8_t *data_name)
+{
+    *dir = (can_id & 0x400) >> 10;
+    *dev = (can_id & 0x380) >> 7;
+    *device_id = (can_id & 0x78) >> 3;
+    *data_name = (can_id & 0x7);
+}

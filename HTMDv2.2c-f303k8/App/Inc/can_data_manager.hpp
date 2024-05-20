@@ -163,6 +163,28 @@ private:
      */
     void sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length);
 
+    /**
+     * @brief CANのIDをデコードする
+     *
+     * @param can_id CANのID(入力)
+     * @param dir 通信方向
+     * @param dev デバイスの種類
+     * @param device_id デバイスのID
+     * @param data_name データの種類
+     */
+    void decodeCanID(uint16_t can_id, uint8_t *dir, uint8_t *dev, uint8_t *device_id, uint8_t *data_name);
+
+    /**
+     * @brief CANのIDをエンコードする
+     *
+     * @param dir 通信方向
+     * @param dev デバイスの種類
+     * @param device_id デバイスのID
+     * @param data_name データの種類
+     * @return uint16_t CANのID
+     */
+    uint16_t encodeCanID(uint8_t dir, uint8_t dev, uint8_t device_id, uint8_t data_name);
+
 private:
     // 内部使用データ
     CAN_RxHeaderTypeDef RxHeader;

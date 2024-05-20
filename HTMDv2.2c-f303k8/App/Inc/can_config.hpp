@@ -91,35 +91,14 @@ namespace can_config
             static constexpr uint8_t init = 1;    // 初期化コマンド
         }
     }
-}
-
-/**
- * @brief CANのIDをデコードする
- *
- * @param can_id CANのID(入力)
- * @param dir 通信方向
- * @param dev デバイスの種類
- * @param device_id デバイスのID
- * @param data_name データの種類
- */
-void decodeCanID(uint16_t can_id, uint8_t *dir, uint8_t *dev, uint8_t *device_id, uint8_t *data_name)
-{
-    *dir = (can_id & 0x400) >> 10;
-    *dev = (can_id & 0x380) >> 7;
-    *device_id = (can_id & 0x78) >> 3;
-    *data_name = (can_id & 0x7);
-}
-
-/**
- * @brief CANのIDをエンコードする
- *
- * @param dir 通信方向
- * @param dev デバイスの種類
- * @param device_id デバイスのID
- * @param data_name データの種類
- * @return uint16_t CANのID
- */
-uint16_t encodeCanID(uint8_t dir, uint8_t dev, uint8_t device_id, uint8_t data_name)
-{
-    return (dir << 10) | (dev << 7) | (device_id << 3) | data_name;
+    namespace code // 通信コード
+    {
+        namespace state
+        {
+            static constexpr int init = 0x00;
+            static constexpr int ready = 0x01;
+            static constexpr int busy = 0x02;
+            static constexpr int error = 0x03;
+        }
+    }
 }
