@@ -1,3 +1,13 @@
+/**
+ * @file can_data_manager.hpp
+ * @author Gento Aiba
+ * @brief CAN通信のデータ管理クラス
+ * @version 0.1
+ * @date 2024-05-21
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
@@ -126,7 +136,7 @@ public:
      * @param encoder_value エンコーダの値
      * @param current 電流センサの値
      */
-    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current);
+    void sendSensorLimitEncoderAndCurrent(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current);
 
     /**
      * @brief MDの状態を送信
@@ -141,7 +151,7 @@ public:
      * @param state_code 状態コード
      * @param state_temp 状態温度
      */
-    void sendStateAll(uint8_t state_code, uint8_t state_temp);
+    void sendStateAndTemp(uint8_t state_code, uint8_t state_temp);
 
 private:
     /**

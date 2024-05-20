@@ -1,3 +1,13 @@
+/**
+ * @file can_data_manager.cpp
+ * @author Gento Aiba
+ * @brief CAN通信のデータを管理
+ * @version 0.1
+ * @date 2024-05-21
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
 #include "can_data_manager.hpp"
 #include "main.h"
 #include "indicator.hpp"
@@ -122,6 +132,29 @@ void CANDataManager::classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t d
     }
 }
 
+void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length)
+{
+    if (data_length > 8) // データ長が8より大きい場合
+    {
+        indicateError(true); // エラー処理
+        return;
+    }
+    if (0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan))
+    {
+        TxHeader.StdId = can_id;               // CANのID
+        TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
+        TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
+        TxHeader.DLC = data_length;            // データ長
+        TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
+
+        HAL_CAN_AddTxMessage(&hcan, &TxHeader, tx_buffer, &TxMailbox); // 送信
+    }
+    else
+    {
+        return;
+    }
+}
+
 bool CANDataManager::getMDInit()
 {
     if (flag_init) // 初期化コマンドのフラグが立っている場合
@@ -233,65 +266,47 @@ void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
 
 void CANDataManager::sendSensorLimit(bool limit_switch1, bool limit_switch2)
 {
-    uint8_t tx_data[can_configure::sensor::dlc::limit] = {0};
+    uint8_t tx_data[can_config::dlc::md::limit] = {0};
     tx_data[0] |= uint8_t(limit_switch1) & 0b1;
-    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                               // 送信データ
-    sendPacket(can_configure::sensor::id::limit + md_id, tx_data, can_configure::sensor::dlc::limit); // 送信
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                                // 送信データ
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::sensor); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::limit);                                                                            // 送信
 }
 
 void CANDataManager::sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value)
 {
-    uint8_t tx_data[can_configure::sensor::dlc::limit_and_encoder] = {0};
+    uint8_t tx_data[can_config::dlc::md::limit_encoder] = {0};
     tx_data[0] |= uint8_t(limit_switch1) & 0b1;
-    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                       // リミットスイッチ
-    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                           // エンコーダーの下位8ビット
-    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                             // エンコーダーの上位8ビット
-    sendPacket(can_configure::sensor::id::limit_and_encoder + md_id, tx_data, can_configure::sensor::dlc::limit_and_encoder); // 送信
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                                // リミットスイッチ
+    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                                    // エンコーダーの下位8ビット
+    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                                      // エンコーダーの上位8ビット
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::sensor); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::limit_encoder);                                                                    // 送信
 }
 
-void CANDataManager::sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current)
+void CANDataManager::sendSensorLimitEncoderAndCurrent(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current)
 {
-    uint8_t tx_data[can_configure::sensor::dlc::all] = {0};
+    uint8_t tx_data[can_config::dlc::md::limit_encoder_current] = {0};
     tx_data[0] |= uint8_t(limit_switch1) & 0b1;
-    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                           // リミットスイッチ
-    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);               // エンコーダーの下位8ビット
-    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                 // エンコーダーの上位8ビット
-    tx_data[3] = static_cast<uint8_t>(current & 0xFF);                                            // 電流の下位8ビット
-    tx_data[4] = static_cast<uint8_t>(current >> 8);                                              // 電流の上位8ビット
-    sendPacket(can_configure::sensor::id::all + md_id, tx_data, can_configure::sensor::dlc::all); // 送信
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                                // リミットスイッチ
+    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                                    // エンコーダーの下位8ビット
+    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                                      // エンコーダーの上位8ビット
+    tx_data[3] = static_cast<uint8_t>(current & 0xFF);                                                                                 // 電流の下位8ビット
+    tx_data[4] = static_cast<uint8_t>(current >> 8);                                                                                   // 電流の上位8ビット
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::sensor); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::limit_encoder_current);                                                            // 送信
 }
 
 void CANDataManager::sendStateMD(uint8_t state_code)
 {
-    uint8_t tx_data[can_configure::state::dlc::md] = {state_code};                            // 送信データ
-    sendPacket(can_configure::state::id::md + md_id, tx_data, can_configure::state::dlc::md); // 送信
+    uint8_t tx_data[can_config::dlc::md::state] = {state_code};                                                                        // 送信データ
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::status); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::state);                                                                            // 送信
 }
 
-void CANDataManager::sendStateAll(uint8_t state_code, uint8_t state_temp)
+void CANDataManager::sendStateAndTemp(uint8_t state_code, uint8_t state_temp)
 {
-    uint8_t tx_data[can_configure::state::dlc::all] = {state_code, state_temp};                 // 送信データ
-    sendPacket(can_configure::state::id::all + md_id, tx_data, can_configure::state::dlc::all); // 送信
-}
-
-void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length)
-{
-    if (data_length > 8) // データ長が8より大きい場合
-    {
-        indicateError(true); // エラー処理
-        return;
-    }
-    if (0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan))
-    {
-        TxHeader.StdId = can_id;               // CANのID
-        TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
-        TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
-        TxHeader.DLC = data_length;            // データ長
-        TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
-
-        HAL_CAN_AddTxMessage(&hcan, &TxHeader, tx_buffer, &TxMailbox); // 送信
-    }
-    else
-    {
-        return;
-    }
+    uint8_t tx_data[can_config::dlc::md::state_temp] = {state_code, state_temp};                                                       // 送信データ
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::status); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::state_temp);                                                                       // 送信
 }

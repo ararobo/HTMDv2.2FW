@@ -64,7 +64,7 @@ Core/Src/system_stm32f3xx.c \
 
 CXX_SOURCES = \
 Core/Src/main.cpp \
-$(wildcard HTMD22c/Src/*.cpp) \
+$(wildcard App/Src/*.cpp) \
 
 # ASM sources
 ASM_SOURCES =  \
@@ -134,7 +134,7 @@ C_INCLUDES =  \
 
 CXX_INCLUDES = \
 $(C_INCLUDES) \
--IHTMD22c/Inc \
+-IApp/Inc \
 
 
 # compile gcc flags
