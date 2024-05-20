@@ -64,9 +64,9 @@ namespace can_config
             static constexpr uint8_t targets_4 = 8;             // 4つのモーターの目標値
             static constexpr uint8_t init = 1;                  // 初期化コマンド
             static constexpr uint8_t mode = 8;                  // モード
-            static constexpr uint8_t p_gain = 6;                // PID制御の比例ゲイン
-            static constexpr uint8_t i_gain = 6;                // PID制御の積分ゲイン
-            static constexpr uint8_t d_gain = 6;                // PID制御の微分ゲイン
+            static constexpr uint8_t p_gain = 4;                // PID制御の比例ゲイン
+            static constexpr uint8_t i_gain = 4;                // PID制御の積分ゲイン
+            static constexpr uint8_t d_gain = 4;                // PID制御の微分ゲイン
             static constexpr uint8_t limit = 1;                 // リミットスイッチの状態
             static constexpr uint8_t limit_encoder = 3;         // エンコーダとリミットスイッチの状態
             static constexpr uint8_t limit_encoder_current = 7; // エンコーダとリミットスイッチの状態と電流

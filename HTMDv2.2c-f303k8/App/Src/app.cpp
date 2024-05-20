@@ -71,7 +71,7 @@ void App::mainLoop()
         serial_printf("reverse_encoder: %d\n", md_mode.flags.reverse_encoder);
         serial_printf("brake: %d\n", md_mode.flags.brake);
         serial_printf("pid: %d\n", md_mode.flags.pid);
-        serial_printf("current: %d\n", md_mode.flags.current);
+        serial_printf("stop_by_limit_switch: %d\n", md_mode.flags.stop_by_limit_switch);
         serial_printf("torque_control: %d\n", md_mode.flags.torque_control);
         serial_printf("state: %d\n", md_mode.flags.state);
         serial_printf("max_acceleration: %d\n", md_mode.values.max_acceleration);
