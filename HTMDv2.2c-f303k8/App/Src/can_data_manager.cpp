@@ -32,6 +32,29 @@ void CANDataManager::init(uint8_t md_id_)
     HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // FIFO0のメッセージペンディング割り込みを有効
 }
 
+void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length)
+{
+    if (data_length > 8) // データ長が8より大きい場合
+    {
+        indicateError(true); // エラー処理
+        return;
+    }
+    if (0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan))
+    {
+        TxHeader.StdId = can_id;               // CANのID
+        TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
+        TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
+        TxHeader.DLC = data_length;            // データ長
+        TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
+
+        HAL_CAN_AddTxMessage(&hcan, &TxHeader, tx_buffer, &TxMailbox); // 送信
+    }
+    else
+    {
+        return;
+    }
+}
+
 void CANDataManager::classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t data_length)
 {
     uint8_t direction;
@@ -129,29 +152,6 @@ void CANDataManager::classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t d
                 }
             }
         }
-    }
-}
-
-void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length)
-{
-    if (data_length > 8) // データ長が8より大きい場合
-    {
-        indicateError(true); // エラー処理
-        return;
-    }
-    if (0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan))
-    {
-        TxHeader.StdId = can_id;               // CANのID
-        TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
-        TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
-        TxHeader.DLC = data_length;            // データ長
-        TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
-
-        HAL_CAN_AddTxMessage(&hcan, &TxHeader, tx_buffer, &TxMailbox); // 送信
-    }
-    else
-    {
-        return;
     }
 }
 

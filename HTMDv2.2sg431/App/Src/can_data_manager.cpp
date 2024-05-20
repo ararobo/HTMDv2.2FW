@@ -28,93 +28,6 @@ void CANDataManager::init(uint8_t md_id_)
     }
 }
 
-bool CANDataManager::getMDInit()
-{
-    if (flag_init_command) // 初期化コマンドのフラグが立っている場合
-    {
-        flag_init_command = false;                                           // フラグを下ろす
-        if (buff_init_command[1] == can_configure::manage::command::do_init) // 初期化コマンドが実行された場合
-        {
-            uint8_t tx_data[can_configure::manage::dlc::re_init] = {md_id, can_configure::manage::command::success}; // 送信データの設定
-            sendPacket(can_configure::manage::id::re_init, tx_data, can_configure::manage::dlc::re_init);            // 送信
-            return true;
-        }
-    }
-    return false;
-}
-
-bool CANDataManager::getMotorTarget(int16_t *target)
-{
-    if (flag_targets) // 目標値のフラグが立っている場合
-    {
-        flag_targets = false;                                        // フラグを下ろす
-        uint16_t target_ = uint16_t(buff_targets[(md_id % 4) * 2]);  // 目標値の下位8ビット
-        target_ |= uint16_t(buff_targets[(md_id % 4) * 2 + 1]) << 8; // 目標値の上位8ビット
-        *target = static_cast<int16_t>(target_);                     // 目標値をint16_tに変換
-        return true;
-    }
-    return false;
-}
-
-bool CANDataManager::getMDMode(uint8_t *mode_code)
-{
-    if (flag_init_mode) // モード指定のフラグが立っている場合
-    {
-        flag_init_mode = false;                                           // フラグを下ろす
-        for (uint8_t i = 0; i < can_configure::manage::dlc::md_mode; i++) // モード指定のデータ長に合わせて繰り返す
-        {
-            mode_code[i] = buff_init_mode[i]; // モード指定のデータをモードコードに格納
-        }
-        return true;
-    }
-    return false;
-}
-
-bool CANDataManager::getPIDGain(float *p_gain, float *i_gain, float *d_gain)
-{
-    if (flag_init_pid[0] && flag_init_pid[1] && flag_init_pid[2]) // PIDゲイン指定のフラグが立っている場合
-    {
-        uint32_t raw_pid_gain[3]; // PIDゲインの生データ
-        // フラグを下ろす
-        flag_init_pid[0] = false;
-        flag_init_pid[1] = false;
-        flag_init_pid[2] = false;
-        // データを結合
-        raw_pid_gain[0] = buff_init_p_gain[0] | (buff_init_p_gain[1] << 8) | (buff_init_p_gain[2] << 16) | (buff_init_p_gain[3] << 24); // 比例ゲイン
-        raw_pid_gain[1] = buff_init_i_gain[0] | (buff_init_i_gain[1] << 8) | (buff_init_i_gain[2] << 16) | (buff_init_i_gain[3] << 24); // 積分ゲイン
-        raw_pid_gain[2] = buff_init_d_gain[0] | (buff_init_d_gain[1] << 8) | (buff_init_d_gain[2] << 16) | (buff_init_d_gain[3] << 24); // 微分ゲイン
-        // ゲインを格納
-        *p_gain = static_cast<float>(raw_pid_gain[0]); // 比例ゲイン
-        *i_gain = static_cast<float>(raw_pid_gain[1]); // 積分ゲイン
-        *d_gain = static_cast<float>(raw_pid_gain[2]); // 微分ゲイン
-
-        return true;
-    }
-    return false;
-}
-
-void CANDataManager::sendReInitPID(float p_gain, float i_gain, float d_gain)
-{
-    uint8_t tx_data[3][can_configure::manage::dlc::pid];
-    uint32_t raw_pid_gain[3] = {static_cast<uint32_t>(p_gain), static_cast<uint32_t>(i_gain), static_cast<uint32_t>(d_gain)}; // ゲインの生データ
-    // 生データを分割
-    for (uint8_t i = 0; i < 3; i++) // ゲインの数だけ繰り返す
-    {
-        tx_data[i][0] = static_cast<uint8_t>(raw_pid_gain[i] & 0xFF);         // 下位8ビット
-        tx_data[i][1] = static_cast<uint8_t>((raw_pid_gain[i] >> 8) & 0xFF);  // 8ビット右シフトして下位8ビット
-        tx_data[i][2] = static_cast<uint8_t>((raw_pid_gain[i] >> 16) & 0xFF); // 16ビット右シフトして下位8ビット
-        tx_data[i][3] = static_cast<uint8_t>((raw_pid_gain[i] >> 24) & 0xFF); // 24ビット右シフトして下位8ビット
-    }
-    sendPacket(can_configure::manage::id::re_p_gain, tx_data[0], can_configure::manage::dlc::pid); // 送信
-    sendPacket(can_configure::manage::id::re_i_gain, tx_data[1], can_configure::manage::dlc::pid); // 送信
-    sendPacket(can_configure::manage::id::re_d_gain, tx_data[2], can_configure::manage::dlc::pid); // 送信
-}
-
-void CANDataManager::sendReInitMode(uint8_t *mode_code)
-{
-    sendPacket(can_configure::manage::id::re_md_mode + md_id, mode_code, can_configure::manage::dlc::re_mode); // 送信
-}
-
 bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
     if (hfdcan->Instance == hfdcan1.Instance)
@@ -126,162 +39,10 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
         }
         else
         {
-            uint16_t masked_id = RxHeader.Identifier & 0x7F0;                                          // CANのIDをマスクして全MD共通で種類分けする
-            uint8_t rx_md_id = RxHeader.Identifier & 0x00F;                                            // CANのIDをマスクしてMDのIDを取得
-            if (uint16_t(RxHeader.Identifier) == (can_configure::control::id::md_targets + md_id / 4)) // MDのIDに対応したモーターの目標値データであった場合
-            {
-                if (RxHeader.DataLength == can_configure::control::dlc::md_targets) // 受信したデータの長さが正しい場合
-                {
-                    for (uint8_t i = 0; i < can_configure::control::dlc::md_targets; i++) // データ長に合わせて繰り返す
-                    {
-                        buff_targets[i] = RxData[i]; // 受信データを目標値バッファに格納
-                    }
-                    flag_targets = true; // 目標値のフラグを立てる
-                }
-                else
-                {
-                    HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                }
-            }
-            else if (rx_md_id == md_id) // 対応するMDのIDである場合
-            {
-                if (masked_id == can_configure::manage::id::md_mode) // モード指定のCANのIDである場合
-                {
-                    if (RxHeader.DataLength == can_configure::manage::dlc::md_mode) // 受信したデータの長さが正しい場合
-                    {
-                        for (uint8_t i = 0; i < can_configure::manage::dlc::md_mode; i++) // データ長に合わせて繰り返す
-                        {
-                            buff_init_mode[i] = RxData[i]; // 受信データをモード指定バッファに格納
-                        }
-                        flag_init_mode = true; // モード指定のフラグを立てる
-                    }
-                    else
-                    {
-                        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                    }
-                }
-                else if (masked_id == can_configure::manage::id::p_gain) // 比例ゲイン指定のCANのIDである場合
-                {
-                    if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
-                    {
-                        for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
-                        {
-                            buff_init_p_gain[i] = RxData[i]; // 受信データを比例ゲイン指定バッファに格納
-                        }
-                        flag_init_pid[0] = true; // 比例ゲイン指定のフラグを立てる
-                    }
-                    else
-                    {
-                        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                    }
-                }
-                else if (masked_id == can_configure::manage::id::i_gain) // 積分ゲイン指定のCANのIDである場合
-                {
-                    if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
-                    {
-                        for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
-                        {
-                            buff_init_i_gain[i] = RxData[i]; // 受信データを積分ゲイン指定バッファに格納
-                        }
-                        flag_init_pid[1] = true; // 積分ゲイン指定のフラグを立てる
-                    }
-                    else
-                    {
-                        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                    }
-                }
-                else if (masked_id == can_configure::manage::id::d_gain) // 微分ゲイン指定のCANのIDである場合
-                {
-                    if (RxHeader.DataLength == can_configure::manage::dlc::pid) // 受信したデータの長さが正しい場合
-                    {
-                        for (uint8_t i = 0; i < can_configure::manage::dlc::pid; i++) // データ長に合わせて繰り返す
-                        {
-                            buff_init_d_gain[i] = RxData[i]; // 受信データを微分ゲイン指定バッファに格納
-                        }
-                        flag_init_pid[2] = true; // 微分ゲイン指定のフラグを立てる
-                    }
-                    else
-                    {
-                        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                    }
-                }
-            }
-            if (uint16_t(RxHeader.Identifier) == can_configure::manage::id::init) // 初期化コマンドのCANのIDである場合
-            {
-                if (RxHeader.DataLength == can_configure::manage::dlc::init) // 受信したデータの長さが正しい場合
-                {
-                    for (uint8_t i = 0; i < can_configure::manage::dlc::init; i++) // データ長に合わせて繰り返す
-                    {
-                        buff_init_command[i] = RxData[i]; // 受信データを初期化コマンドバッファに格納
-                    }
-                    if (buff_init_command[0] == md_id)
-                    {
-                        flag_init_command = true; // 初期化コマンドのフラグを立てる
-                    }
-                }
-                else
-                {
-                    HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
-                }
-            }
-            return true;
+            classifyData(RxHeader.Identifier, RxData, RxHeader.DataLength);
         }
     }
     return false;
-}
-
-void CANDataManager::sendSensorLimit(bool limit_switch1, bool limit_switch2)
-{
-    uint8_t tx_data[can_configure::sensor::dlc::limit] = {0};
-    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
-    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                               // 送信データ
-    sendPacket(can_configure::sensor::id::limit + md_id, tx_data, can_configure::sensor::dlc::limit); // 送信
-}
-
-void CANDataManager::sendSensorEncoder(int16_t encoder_value)
-{
-    uint8_t tx_data[can_configure::sensor::dlc::encoder] = {static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF), static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8)}; // 送信データ
-    sendPacket(can_configure::sensor::id::encoder + md_id, tx_data, can_configure::sensor::dlc::encoder);                                                                                        // 送信
-}
-
-void CANDataManager::sendSensorCurrent(uint16_t current)
-{
-    uint8_t tx_data[can_configure::sensor::dlc::current] = {static_cast<uint8_t>(current & 0xFF), static_cast<uint8_t>(current >> 8)}; // 送信データ
-    sendPacket(can_configure::sensor::id::current + md_id, tx_data, can_configure::sensor::dlc::current);                              // 送信
-}
-
-void CANDataManager::sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value)
-{
-    uint8_t tx_data[can_configure::sensor::dlc::limit_and_encoder] = {0};
-    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
-    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                       // リミットスイッチ
-    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                           // エンコーダーの下位8ビット
-    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                             // エンコーダーの上位8ビット
-    sendPacket(can_configure::sensor::id::limit_and_encoder + md_id, tx_data, can_configure::sensor::dlc::limit_and_encoder); // 送信
-}
-
-void CANDataManager::sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current)
-{
-    uint8_t tx_data[can_configure::sensor::dlc::all] = {0};
-    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
-    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                           // リミットスイッチ
-    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);               // エンコーダーの下位8ビット
-    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                 // エンコーダーの上位8ビット
-    tx_data[3] = static_cast<uint8_t>(current & 0xFF);                                            // 電流の下位8ビット
-    tx_data[4] = static_cast<uint8_t>(current >> 8);                                              // 電流の上位8ビット
-    sendPacket(can_configure::sensor::id::all + md_id, tx_data, can_configure::sensor::dlc::all); // 送信
-}
-
-void CANDataManager::sendStateMD(uint8_t state_code)
-{
-    uint8_t tx_data[can_configure::state::dlc::md] = {state_code};                            // 送信データ
-    sendPacket(can_configure::state::id::md + md_id, tx_data, can_configure::state::dlc::md); // 送信
-}
-
-void CANDataManager::sendStateAll(uint8_t state_code, uint16_t state_temp)
-{
-    uint8_t tx_data[can_configure::state::dlc::all] = {state_code, state_temp && 0xFF, uint8_t(state_temp >> 8)}; // 送信データ
-    sendPacket(can_configure::state::id::all + md_id, tx_data, can_configure::state::dlc::all);                   // 送信
 }
 
 void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length)
@@ -313,4 +74,265 @@ void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t dat
     {
         HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
     }
+}
+
+void CANDataManager::classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t data_length)
+{
+    uint8_t direction;
+    uint8_t device;
+    uint8_t device_id;
+    uint8_t data_name;
+    decodeCanID(can_id, &direction, &device, &device_id, &data_name);                      // CANのIDをデコード
+    if (device == can_config::dev::motor_driver && direction == can_config::dir::to_slave) // モータードライバーへの通信の場合
+    {
+        if (device_id == md_id) // MDのIDが一致する場合
+        {
+            switch (data_name) // データの種類によって処理を分岐
+            {
+            case can_config::data_name::md::targets:
+                if (data_length == can_config::dlc::md::targets_1)
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::targets_1; i++)
+                    {
+                        buff_targets_1[i] = rx_buffer[i];
+                    }
+                    flag_targets_1 = true;
+                }
+                break;
+
+            case can_config::data_name::md::init:
+                if (data_length == can_config::dlc::md::init)
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::init; i++)
+                    {
+                        buff_init_command[i] = rx_buffer[i];
+                    }
+                    flag_init = true;
+                }
+                break;
+
+            case can_config::data_name::md::mode:
+                if (data_length == can_config::dlc::md::mode)
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::mode; i++)
+                    {
+                        buff_init_mode[i] = rx_buffer[i];
+                    }
+                    flag_mode = true;
+                }
+                break;
+
+            case can_config::data_name::md::p_gain:
+                if (data_length == can_config::dlc::md::p_gain)
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::p_gain; i++)
+                    {
+                        buff_init_p_gain[i] = rx_buffer[i];
+                    }
+                    flag_pid[0] = true;
+                }
+                break;
+
+            case can_config::data_name::md::i_gain:
+                if (data_length == can_config::dlc::md::i_gain)
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::i_gain; i++)
+                    {
+                        buff_init_i_gain[i] = rx_buffer[i];
+                    }
+                    flag_pid[1] = true;
+                }
+                break;
+
+            case can_config::data_name::md::d_gain:
+                if (data_length == can_config::dlc::md::d_gain)
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::d_gain; i++)
+                    {
+                        buff_init_d_gain[i] = rx_buffer[i];
+                    }
+                    flag_pid[2] = true;
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
+        else if (device_id == md_id / 4) // MDのIDの4で割った商が一致する場合
+        {
+            if (data_name == can_config::data_name::md::targets) // データの種類が目標値の場合
+            {
+                if (data_length == can_config::dlc::md::targets_4) // データ長が4つの目標値の場合
+                {
+                    for (uint8_t i = 0; i < can_config::dlc::md::targets_4; i++)
+                    {
+                        buff_targets_4[i] = rx_buffer[i];
+                    }
+                    flag_targets_4 = true;
+                }
+            }
+        }
+    }
+}
+
+bool CANDataManager::getMDInit()
+{
+    if (flag_init) // 初期化コマンドのフラグが立っている場合
+    {
+        flag_init = false;             // フラグを下ろす
+        if (buff_init_command[0] == 0) // 初期化コマンドが実行された場合
+        {
+            uint8_t tx_data[can_config::dlc::md::init] = {0};                                                                                // 送信データの設定
+            uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::init); // 送信IDの設定
+            sendPacket(tx_id, tx_data, can_config::dlc::md::init);                                                                           // 送信
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CANDataManager::getMotorTarget(int16_t *target)
+{
+    if (flag_targets_4) // 目標値のフラグが立っている場合
+    {
+        flag_targets_4 = false;                                        // フラグを下ろす
+        uint16_t target_ = uint16_t(buff_targets_4[(md_id % 4) * 2]);  // 目標値の下位8ビット
+        target_ |= uint16_t(buff_targets_4[(md_id % 4) * 2 + 1]) << 8; // 目標値の上位8ビット
+        *target = static_cast<int16_t>(target_);                       // 目標値をint16_tに変換
+        return true;
+    }
+    else if (flag_targets_1)
+    {
+        flag_targets_1 = false;                         // フラグを下ろす
+        uint16_t target_ = uint16_t(buff_targets_1[0]); // 目標値の下位8ビット
+        target_ |= uint16_t(buff_targets_1[1]) << 8;    // 目標値の上位8ビット
+        *target = static_cast<int16_t>(target_);        // 目標値をint16_tに変換
+        return true;
+    }
+
+    return false;
+}
+
+bool CANDataManager::getMDMode(uint8_t *mode_code)
+{
+    if (flag_mode) // モード指定のフラグが立っている場合
+    {
+        flag_mode = false;                                      // フラグを下ろす
+        for (uint8_t i = 0; i < can_config::dlc::md::mode; i++) // モード指定のデータ長に合わせて繰り返す
+        {
+            mode_code[i] = buff_init_mode[i]; // モード指定のデータをモードコードに格納
+        }
+        return true;
+    }
+    return false;
+}
+
+bool CANDataManager::getPIDGain(float *p_gain, float *i_gain, float *d_gain)
+{
+    if (flag_pid[0] && flag_pid[1] && flag_pid[2]) // PIDゲイン指定のフラグが立っている場合
+    {
+        uint32_t raw_pid_gain[3]; // PIDゲインの生データ
+        // フラグを下ろす
+        flag_pid[0] = false;
+        flag_pid[1] = false;
+        flag_pid[2] = false;
+        // データを結合
+        raw_pid_gain[0] = buff_init_p_gain[0] | (buff_init_p_gain[1] << 8) | (buff_init_p_gain[2] << 16) | (buff_init_p_gain[3] << 24); // 比例ゲイン
+        raw_pid_gain[1] = buff_init_i_gain[0] | (buff_init_i_gain[1] << 8) | (buff_init_i_gain[2] << 16) | (buff_init_i_gain[3] << 24); // 積分ゲイン
+        raw_pid_gain[2] = buff_init_d_gain[0] | (buff_init_d_gain[1] << 8) | (buff_init_d_gain[2] << 16) | (buff_init_d_gain[3] << 24); // 微分ゲイン
+        // ゲインを格納
+        *p_gain = static_cast<float>(raw_pid_gain[0]); // 比例ゲイン
+        *i_gain = static_cast<float>(raw_pid_gain[1]); // 積分ゲイン
+        *d_gain = static_cast<float>(raw_pid_gain[2]); // 微分ゲイン
+
+        return true;
+    }
+    return false;
+}
+
+void CANDataManager::sendReInitPID(float p_gain, float i_gain, float d_gain)
+{
+    uint8_t tx_data[3][can_config::dlc::md::p_gain];
+    uint32_t raw_pid_gain[3] = {static_cast<uint32_t>(p_gain), static_cast<uint32_t>(i_gain), static_cast<uint32_t>(d_gain)}; // ゲインの生データ
+    // 生データを分割
+    for (uint8_t i = 0; i < 3; i++) // ゲインの数だけ繰り返す
+    {
+        tx_data[i][0] = static_cast<uint8_t>(raw_pid_gain[i] & 0xFF);         // 下位8ビット
+        tx_data[i][1] = static_cast<uint8_t>((raw_pid_gain[i] >> 8) & 0xFF);  // 8ビット右シフトして下位8ビット
+        tx_data[i][2] = static_cast<uint8_t>((raw_pid_gain[i] >> 16) & 0xFF); // 16ビット右シフトして下位8ビット
+        tx_data[i][3] = static_cast<uint8_t>((raw_pid_gain[i] >> 24) & 0xFF); // 24ビット右シフトして下位8ビット
+    }
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::p_gain); // 送信IDの設定
+    sendPacket(tx_id, tx_data[0], can_config::dlc::md::p_gain);                                                                        // 送信
+    tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::i_gain);          // 送信IDの設定
+    sendPacket(tx_id, tx_data[1], can_config::dlc::md::i_gain);                                                                        // 送信
+    tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::d_gain);          // 送信IDの設定
+    sendPacket(tx_id, tx_data[2], can_config::dlc::md::d_gain);                                                                        // 送信
+}
+
+void CANDataManager::sendReInitMode(uint8_t *mode_code)
+{
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::mode); // 送信IDの設定
+    sendPacket(tx_id, mode_code, can_config::dlc::md::mode);                                                                         // 送信
+}
+
+void CANDataManager::sendSensorLimit(bool limit_switch1, bool limit_switch2)
+{
+    uint8_t tx_data[can_config::dlc::md::limit] = {0};
+    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                                // 送信データ
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::sensor); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::limit);                                                                            // 送信
+}
+
+void CANDataManager::sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value)
+{
+    uint8_t tx_data[can_config::dlc::md::limit_encoder] = {0};
+    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                                // リミットスイッチ
+    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                                    // エンコーダーの下位8ビット
+    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                                      // エンコーダーの上位8ビット
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::sensor); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::limit_encoder);                                                                    // 送信
+}
+
+void CANDataManager::sendSensorLimitEncoderAndCurrent(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current)
+{
+    uint8_t tx_data[can_config::dlc::md::limit_encoder_current] = {0};
+    tx_data[0] |= uint8_t(limit_switch1) & 0b1;
+    tx_data[0] |= (uint8_t(limit_switch2) << 1) & 0b10;                                                                                // リミットスイッチ
+    tx_data[1] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) & 0xFF);                                                    // エンコーダーの下位8ビット
+    tx_data[2] = static_cast<uint8_t>(static_cast<uint16_t>(encoder_value) >> 8);                                                      // エンコーダーの上位8ビット
+    tx_data[3] = static_cast<uint8_t>(current & 0xFF);                                                                                 // 電流の下位8ビット
+    tx_data[4] = static_cast<uint8_t>(current >> 8);                                                                                   // 電流の上位8ビット
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::sensor); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::limit_encoder_current);                                                            // 送信
+}
+
+void CANDataManager::sendStateMD(uint8_t state_code)
+{
+    uint8_t tx_data[can_config::dlc::md::state] = {state_code};                                                                        // 送信データ
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::status); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::state);                                                                            // 送信
+}
+
+void CANDataManager::sendStateAndTemp(uint8_t state_code, uint8_t state_temp)
+{
+    uint8_t tx_data[can_config::dlc::md::state_temp] = {state_code, state_temp};                                                       // 送信データ
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::status); // 送信IDの設定
+    sendPacket(tx_id, tx_data, can_config::dlc::md::state_temp);                                                                       // 送信
+}
+
+uint16_t CANDataManager::encodeCanID(uint8_t dir, uint8_t dev, uint8_t device_id, uint8_t data_name)
+{
+    return (dir << 10) | (dev << 7) | (device_id << 3) | data_name;
+}
+
+void CANDataManager::decodeCanID(uint16_t can_id, uint8_t *dir, uint8_t *dev, uint8_t *device_id, uint8_t *data_name)
+{
+    *dir = (can_id & 0x400) >> 10;
+    *dev = (can_id & 0x380) >> 7;
+    *device_id = (can_id & 0x78) >> 3;
+    *data_name = (can_id & 0x7);
 }

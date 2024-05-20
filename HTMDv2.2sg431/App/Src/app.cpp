@@ -93,9 +93,9 @@ void App::mainLoop()
             {
                 if (md_mode.flags.current)
                 {
-                    myI2C.getCurrent(&current);                                                    // 電流センサーの値を取得
-                    serial_printf("current: %d\n", current);                                       // debug
-                    myCAN.sendSensorAll(limit_status[0], limit_status[1], encoder_value, current); // エンコーダの値とリミットスイッチの状態と電流を送信
+                    myI2C.getCurrent(&current);                                                                       // 電流センサーの値を取得
+                    serial_printf("current: %d\n", current);                                                          // debug
+                    myCAN.sendSensorLimitEncoderAndCurrent(limit_status[0], limit_status[1], encoder_value, current); // エンコーダの値とリミットスイッチの状態と電流を送信
                 }
                 else
                 {
@@ -115,11 +115,11 @@ void App::mainLoop()
                 temp = static_cast<int16_t>(temp_); // uint16_t -> int16_t
                 if (target != 0)
                 {
-                    myCAN.sendStateAll(can_configure::state::state::busy, temp); // busy
+                    myCAN.sendStateAndTemp(can_config::code::state::busy, temp); // busy
                 }
                 else
                 {
-                    myCAN.sendStateAll(can_configure::state::state::ready, temp); // ready
+                    myCAN.sendStateAndTemp(can_config::code::state::ready, temp); // ready
                 }
             }
             HAL_Delay(md_mode.values.report_rate); // レポートレートに応じて待つ

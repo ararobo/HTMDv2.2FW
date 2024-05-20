@@ -2,26 +2,27 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "fdcan.h"
-#include "can_configure.hpp"
+#include "can_config.hpp"
 
 class CANDataManager
 {
 private:
     // param
     uint8_t md_id;
-    static constexpr float PID_GAIN_QUALITY = 10000.0f;
     // buffer
-    uint8_t buff_init_p_gain[can_configure::manage::dlc::pid];
-    uint8_t buff_init_i_gain[can_configure::manage::dlc::pid];
-    uint8_t buff_init_d_gain[can_configure::manage::dlc::pid];
-    uint8_t buff_init_mode[can_configure::manage::dlc::md_mode];
-    uint8_t buff_init_command[can_configure::manage::dlc::init];
-    uint8_t buff_targets[can_configure::control::dlc::md_targets];
+    uint8_t buff_init_p_gain[can_config::dlc::md::p_gain];
+    uint8_t buff_init_i_gain[can_config::dlc::md::i_gain];
+    uint8_t buff_init_d_gain[can_config::dlc::md::d_gain];
+    uint8_t buff_init_mode[can_config::dlc::md::mode];
+    uint8_t buff_init_command[can_config::dlc::md::init];
+    uint8_t buff_targets_4[can_config::dlc::md::targets_4];
+    uint8_t buff_targets_1[can_config::dlc::md::targets_1];
     // flag
-    bool flag_init_pid[3];
-    bool flag_init_mode;
-    bool flag_init_command;
-    bool flag_targets;
+    bool flag_pid[3];
+    bool flag_mode;
+    bool flag_init;
+    bool flag_targets_4;
+    bool flag_targets_1;
 
 public:
     /**
@@ -30,6 +31,15 @@ public:
      * @param md_id_ MDのID
      */
     void init(uint8_t md_id_);
+
+    /**
+     * @brief 受信データを解析して、データを分類する
+     *
+     * @param can_id CANのID
+     * @param rx_buffer 受信データのバッファ
+     * @param data_length 受信データの長さ
+     */
+    void classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t data_length);
 
     /**
      * @brief MDの初期化コマンドを取得する
@@ -91,19 +101,47 @@ public:
      */
     bool onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 
+    /**
+     * @brief リミットスイッチの状態を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     */
     void sendSensorLimit(bool limit_switch1, bool limit_switch2);
 
-    void sendSensorEncoder(int16_t encoder_value);
-
-    void sendSensorCurrent(uint16_t current);
-
+    /**
+     * @brief リミットスイッチの状態とエンコーダの値を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     * @param encoder_value エンコーダの値
+     */
     void sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value);
 
-    void sendSensorAll(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current);
+    /**
+     * @brief リミットスイッチの状態、エンコーダの値、電流センサの値を送信
+     *
+     * @param limit_switch1 １つ目のリミットスイッチ
+     * @param limit_switch2 ２つ目のリミットスイッチ
+     * @param encoder_value エンコーダの値
+     * @param current 電流センサの値
+     */
+    void sendSensorLimitEncoderAndCurrent(bool limit_switch1, bool limit_switch2, int16_t encoder_value, uint16_t current);
 
+    /**
+     * @brief MDの状態を送信
+     *
+     * @param state_code 状態コード
+     */
     void sendStateMD(uint8_t state_code);
 
-    void sendStateAll(uint8_t state_code, uint16_t state_temp);
+    /**
+     * @brief 全てのMDの状態を送信
+     *
+     * @param state_code 状態コード
+     * @param state_temp 状態温度
+     */
+    void sendStateAndTemp(uint8_t state_code, uint8_t state_temp);
 
 private:
     /**
@@ -114,6 +152,28 @@ private:
      * @param data_length 送信データ長
      */
     void sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t data_length);
+
+    /**
+     * @brief CANのIDをデコードする
+     *
+     * @param can_id CANのID(入力)
+     * @param dir 通信方向
+     * @param dev デバイスの種類
+     * @param device_id デバイスのID
+     * @param data_name データの種類
+     */
+    void decodeCanID(uint16_t can_id, uint8_t *dir, uint8_t *dev, uint8_t *device_id, uint8_t *data_name);
+
+    /**
+     * @brief CANのIDをエンコードする
+     *
+     * @param dir 通信方向
+     * @param dev デバイスの種類
+     * @param device_id デバイスのID
+     * @param data_name データの種類
+     * @return uint16_t CANのID
+     */
+    uint16_t encodeCanID(uint8_t dir, uint8_t dev, uint8_t device_id, uint8_t data_name);
 
 private:
     // 内部使用データ
