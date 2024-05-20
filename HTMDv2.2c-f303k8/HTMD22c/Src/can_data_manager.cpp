@@ -26,11 +26,12 @@ bool CANDataManager::getMDInit()
 {
     if (flag_init_command) // 初期化コマンドのフラグが立っている場合
     {
-        flag_init_command = false;                                           // フラグを下ろす
-        if (buff_init_command[1] == can_configure::manage::command::do_init) // 初期化コマンドが実行された場合
+        flag_init_command = false;     // フラグを下ろす
+        if (buff_init_command[0] == 0) // 初期化コマンドが実行された場合
         {
-            uint8_t tx_data[can_configure::manage::dlc::re_init] = {md_id, can_configure::manage::command::success}; // 送信データの設定
-            sendPacket(can_configure::manage::id::re_init, tx_data, can_configure::manage::dlc::re_init);            // 送信
+            uint8_t tx_data[can_config::dlc::md::init] = {0};                                                                                // 送信データの設定
+            uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::init); // 送信IDの設定
+            sendPacket(tx_id, tx_data, can_config::dlc::md::init);                                                                           // 送信
             return true;
         }
     }
@@ -41,10 +42,10 @@ bool CANDataManager::getMotorTarget(int16_t *target)
 {
     if (flag_targets) // 目標値のフラグが立っている場合
     {
-        flag_targets = false;                                        // フラグを下ろす
-        uint16_t target_ = uint16_t(buff_targets[(md_id % 4) * 2]);  // 目標値の下位8ビット
-        target_ |= uint16_t(buff_targets[(md_id % 4) * 2 + 1]) << 8; // 目標値の上位8ビット
-        *target = static_cast<int16_t>(target_);                     // 目標値をint16_tに変換
+        flag_targets = false;                                          // フラグを下ろす
+        uint16_t target_ = uint16_t(buff_targets_8[(md_id % 4) * 2]);  // 目標値の下位8ビット
+        target_ |= uint16_t(buff_targets_8[(md_id % 4) * 2 + 1]) << 8; // 目標値の上位8ビット
+        *target = static_cast<int16_t>(target_);                       // 目標値をint16_tに変換
         return true;
     }
     return false;
@@ -54,8 +55,8 @@ bool CANDataManager::getMDMode(uint8_t *mode_code)
 {
     if (flag_init_mode) // モード指定のフラグが立っている場合
     {
-        flag_init_mode = false;                                           // フラグを下ろす
-        for (uint8_t i = 0; i < can_configure::manage::dlc::md_mode; i++) // モード指定のデータ長に合わせて繰り返す
+        flag_init_mode = false;                                 // フラグを下ろす
+        for (uint8_t i = 0; i < can_config::dlc::md::mode; i++) // モード指定のデータ長に合わせて繰り返す
         {
             mode_code[i] = buff_init_mode[i]; // モード指定のデータをモードコードに格納
         }
@@ -89,7 +90,7 @@ bool CANDataManager::getPIDGain(float *p_gain, float *i_gain, float *d_gain)
 
 void CANDataManager::sendReInitPID(float p_gain, float i_gain, float d_gain)
 {
-    uint8_t tx_data[3][can_configure::manage::dlc::pid];
+    uint8_t tx_data[3][can_config::dlc::md::p_gain];
     uint32_t raw_pid_gain[3] = {static_cast<uint32_t>(p_gain), static_cast<uint32_t>(i_gain), static_cast<uint32_t>(d_gain)}; // ゲインの生データ
     // 生データを分割
     for (uint8_t i = 0; i < 3; i++) // ゲインの数だけ繰り返す
@@ -99,29 +100,37 @@ void CANDataManager::sendReInitPID(float p_gain, float i_gain, float d_gain)
         tx_data[i][2] = static_cast<uint8_t>((raw_pid_gain[i] >> 16) & 0xFF); // 16ビット右シフトして下位8ビット
         tx_data[i][3] = static_cast<uint8_t>((raw_pid_gain[i] >> 24) & 0xFF); // 24ビット右シフトして下位8ビット
     }
-    sendPacket(can_configure::manage::id::re_p_gain, tx_data[0], can_configure::manage::dlc::pid); // 送信
-    sendPacket(can_configure::manage::id::re_i_gain, tx_data[1], can_configure::manage::dlc::pid); // 送信
-    sendPacket(can_configure::manage::id::re_d_gain, tx_data[2], can_configure::manage::dlc::pid); // 送信
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::p_gain); // 送信IDの設定
+    sendPacket(tx_id, tx_data[0], can_config::dlc::md::p_gain);                                                                        // 送信
+    tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::i_gain);          // 送信IDの設定
+    sendPacket(tx_id, tx_data[1], can_config::dlc::md::i_gain);                                                                        // 送信
+    tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::d_gain);          // 送信IDの設定
+    sendPacket(tx_id, tx_data[2], can_config::dlc::md::d_gain);                                                                        // 送信
 }
 
 void CANDataManager::sendReInitMode(uint8_t *mode_code)
 {
-    sendPacket(can_configure::manage::id::re_md_mode + md_id, mode_code, can_configure::manage::dlc::re_mode); // 送信
+    uint16_t tx_id = encodeCanID(can_config::dir::to_master, can_config::dev::motor_driver, md_id, can_config::data_name::md::mode); // 送信IDの設定
+    sendPacket(tx_id, mode_code, can_config::dlc::md::mode);                                                                         // 送信
 }
 
 void CANDataManager::onReceiveTask(CAN_HandleTypeDef *hcan_)
 {
     if (HAL_CAN_GetRxMessage(hcan_, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) // 正常に受信できた場合
     {
-        uint16_t rx_id = RxHeader.StdId & 0x7F0;                                              // CANのIDをマスクして全MD共通で種類分けする
-        uint8_t rx_md_id = RxHeader.StdId & 0x00F;                                            // CANのIDをマスクしてMDのIDを取得
-        if (uint16_t(RxHeader.StdId) == (can_configure::control::id::md_targets + md_id / 4)) // MDのIDに対応したモーターの目標値データであった場合
+        uint16_t rx_id = RxHeader.StdId; // 受信したCANのID
+        uint8_t direction;
+        uint8_t device;
+        uint8_t device_id;
+        uint8_t data_name;
+        decodeCanID(rx_id, &direction, &device, &device_id, &data_name);               // CANのIDをデコード
+        if (device_id == md_id / 4 && data_name == can_config::data_name::md::targets) // 目標値のCANのIDである場合
         {
             if (RxHeader.DLC == can_configure::control::dlc::md_targets) // 受信したデータの長さが正しい場合
             {
                 for (uint8_t i = 0; i < can_configure::control::dlc::md_targets; i++) // データ長に合わせて繰り返す
                 {
-                    buff_targets[i] = RxData[i]; // 受信データを目標値バッファに格納
+                    buff_targets_8[i] = RxData[i]; // 受信データを目標値バッファに格納
                 }
                 flag_targets = true; // 目標値のフラグを立てる
             }
