@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "can.h"
-#include "can_id.hpp"
+#include "can_config.hpp"
 
 class CANDataManager
 {
@@ -15,13 +15,14 @@ private:
     uint8_t buff_init_d_gain[can_config::dlc::md::d_gain];
     uint8_t buff_init_mode[can_config::dlc::md::mode];
     uint8_t buff_init_command[can_config::dlc::md::init];
-    uint8_t buff_targets_8[can_config::dlc::md::targets_4];
+    uint8_t buff_targets_4[can_config::dlc::md::targets_4];
     uint8_t buff_targets_1[can_config::dlc::md::targets_1];
     // flag
-    bool flag_init_pid[3];
-    bool flag_init_mode;
-    bool flag_init_command;
-    bool flag_targets;
+    bool flag_pid[3];
+    bool flag_mode;
+    bool flag_init;
+    bool flag_targets_4;
+    bool flag_targets_1;
 
 public:
     /**
@@ -30,6 +31,15 @@ public:
      * @param md_id_ MDのID
      */
     void init(uint8_t md_id_);
+
+    /**
+     * @brief 受信データを解析して、データを分類する
+     *
+     * @param can_id CANのID
+     * @param rx_buffer 受信データのバッファ
+     * @param data_length 受信データの長さ
+     */
+    void classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t data_length);
 
     /**
      * @brief MDの初期化コマンドを取得する
@@ -100,20 +110,6 @@ public:
     void sendSensorLimit(bool limit_switch1, bool limit_switch2);
 
     /**
-     * @brief エンコーダの値を送信
-     *
-     * @param encoder_value エンコーダの値
-     */
-    void sendSensorEncoder(int16_t encoder_value);
-
-    /**
-     * @brief 電流センサの値を送信
-     *
-     * @param current 電流センサの値
-     */
-    void sendSensorCurrent(int16_t current);
-
-    /**
      * @brief リミットスイッチの状態とエンコーダの値を送信
      *
      * @param limit_switch1 １つ目のリミットスイッチ
@@ -121,15 +117,6 @@ public:
      * @param encoder_value エンコーダの値
      */
     void sendSensorLimitAndEncoder(bool limit_switch1, bool limit_switch2, int16_t encoder_value);
-
-    /**
-     * @brief リミットスイッチの状態と電流センサの値を送信
-     *
-     * @param limit_switch1 １つ目のリミットスイッチ
-     * @param limit_switch2 ２つ目のリミットスイッチ
-     * @param current 電流センサの値
-     */
-    void sendSensorLimitAndCurrent(int16_t encoder_value, int16_t current);
 
     /**
      * @brief リミットスイッチの状態、エンコーダの値、電流センサの値を送信
