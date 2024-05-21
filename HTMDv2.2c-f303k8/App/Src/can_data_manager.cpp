@@ -15,6 +15,13 @@
 void CANDataManager::init(uint8_t md_id_)
 {
     md_id = md_id_;
+    flag_init = false;
+    flag_mode = false;
+    flag_pid[0] = false;
+    flag_pid[1] = false;
+    flag_pid[2] = false;
+    flag_targets_4 = false;
+    flag_targets_1 = false;
     // CANのフィルタ設定
     RxFilter.FilterIdHigh = 0;                    // フィルタのIDの上位16ビット
     RxFilter.FilterIdLow = 0;                     // フィルタのIDの下位16ビット

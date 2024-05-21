@@ -54,13 +54,13 @@ int16_t MotorController::trapezoidalControl(int16_t output, uint8_t max_accelera
     {
         int16_t acceleration = output - prev_out; // 加速度を計算
         // 加速度が最大加速度を超えた場合は最大加速度に制限
-        if (acceleration < -max_acceleration)
+        if (acceleration < -max_acceleration * 10)
         {
-            output = prev_out - max_acceleration;
+            output = prev_out - max_acceleration * 10;
         }
-        else if (acceleration > max_acceleration)
+        else if (acceleration > max_acceleration * 10)
         {
-            output = prev_out + max_acceleration;
+            output = prev_out + max_acceleration * 10;
         }
         prev_out = output; // 前回の出力を保存
         return output;

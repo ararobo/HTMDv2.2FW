@@ -71,7 +71,7 @@ void App::mainLoop()
         serial_printf("reverse_encoder: %d\n", md_mode.flags.reverse_encoder);
         serial_printf("brake: %d\n", md_mode.flags.brake);
         serial_printf("pid: %d\n", md_mode.flags.pid);
-        serial_printf("current: %d\n", md_mode.flags.current);
+        serial_printf("stop_by_limit_switch: %d\n", md_mode.flags.stop_by_limit_switch);
         serial_printf("torque_control: %d\n", md_mode.flags.torque_control);
         serial_printf("state: %d\n", md_mode.flags.state);
         serial_printf("max_acceleration: %d\n", md_mode.values.max_acceleration);
@@ -91,16 +91,9 @@ void App::mainLoop()
             limit_status[1] = HAL_GPIO_ReadPin(LIM2_GPIO_Port, LIM2_Pin);
             if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
             {
-                if (md_mode.flags.current)
-                {
-                    myI2C.getCurrent(&current);                                                                       // 電流センサーの値を取得
-                    serial_printf("current: %d\n", current);                                                          // debug
-                    myCAN.sendSensorLimitEncoderAndCurrent(limit_status[0], limit_status[1], encoder_value, current); // エンコーダの値とリミットスイッチの状態と電流を送信
-                }
-                else
-                {
-                    myCAN.sendSensorLimitAndEncoder(limit_status[0], limit_status[1], encoder_value); // エンコーダの値とリミットスイッチの状態を送信
-                }
+                myI2C.getCurrent(&current);                                                                       // 電流センサーの値を取得
+                serial_printf("current: %d\n", current);                                                          // debug
+                myCAN.sendSensorLimitEncoderAndCurrent(limit_status[0], limit_status[1], encoder_value, current); // エンコーダの値とリミットスイッチの状態と電流を送信
             }
             else
             {
