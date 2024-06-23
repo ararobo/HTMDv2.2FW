@@ -61,9 +61,6 @@ Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim_ex.c \
 Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_uart.c \
 Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_uart_ex.c \
 Core/Src/system_stm32f3xx.c \
-Core/Src/main.c \
-Core/Src/sysmem.c \
-Core/Src/syscalls.c
 
 CXX_SOURCES = \
 Core/Src/main.cpp \

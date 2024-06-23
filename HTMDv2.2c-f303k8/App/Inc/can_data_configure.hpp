@@ -28,10 +28,14 @@ namespace can_config
     }
     namespace data_name // データの種類
     {
+        namespace common
+        {
+            static constexpr uint16_t init = 0; // 初期化コマンド
+        }
         namespace md
         {
-            static constexpr uint16_t targets = 0; // 目標値
-            static constexpr uint16_t init = 1;    // 初期化コマンド
+            static constexpr uint16_t init = 0;    // 初期化コマンド
+            static constexpr uint16_t targets = 1; // 目標値
             static constexpr uint16_t mode = 2;    // モード
             static constexpr uint16_t p_gain = 3;  // PID制御の比例ゲイン
             static constexpr uint16_t i_gain = 4;  // PID制御の積分ゲイン
@@ -41,27 +45,33 @@ namespace can_config
         }
         namespace servo
         {
-            static constexpr uint16_t targets = 0; // 目標値
-            static constexpr uint16_t init = 1;    // 初期化コマンド
-            static constexpr uint16_t freq = 2;    // 周波数
+            static constexpr uint16_t init = 0;        // 初期化コマンド
+            static constexpr uint16_t target = 1;      // 目標値
+            static constexpr uint16_t targets_1_4 = 2; // 1~4のサーボの目標値
+            static constexpr uint16_t targets_5_8 = 3; // 5~8のサーボの目標値
+            static constexpr uint16_t freq = 4;        // 周波数
         }
         namespace solenoid
         {
-            static constexpr uint16_t targets = 0; // 目標値
-            static constexpr uint16_t init = 1;    // 初期化コマンド
+            static constexpr uint16_t init = 0;    // 初期化コマンド
+            static constexpr uint16_t targets = 1; // 目標値
         }
         namespace led
         {
-            static constexpr uint16_t targets = 0; // 目標値
-            static constexpr uint16_t init = 1;    // 初期化コマンド
+            static constexpr uint16_t init = 0;    // 初期化コマンド
+            static constexpr uint16_t targets = 1; // 目標値
         }
     }
     namespace dlc // Data Length Code
     {
+        namespace common
+        {
+            static constexpr uint8_t init = 1; // 初期化コマンド
+        }
         namespace md
         {
-            static constexpr uint8_t targets_1 = 2;             // 一つのモーターの目標値
-            static constexpr uint8_t targets_4 = 8;             // 4つのモーターの目標値
+            static constexpr uint8_t targets_1 = 2;             // 1のモーターの目標値
+            static constexpr uint8_t targets_4 = 8;             // 1~4のモーターの目標値
             static constexpr uint8_t init = 1;                  // 初期化コマンド
             static constexpr uint8_t mode = 8;                  // モード
             static constexpr uint8_t p_gain = 4;                // PID制御の比例ゲイン
@@ -75,10 +85,11 @@ namespace can_config
         }
         namespace servo
         {
-            static constexpr uint8_t targets_1 = 2; // 一つのサーボの目標値
-            static constexpr uint8_t targets_4 = 8; // 4つのサーボの目標値
-            static constexpr uint8_t init = 1;      // 初期化コマンド
-            static constexpr uint8_t freq = 1;      // 周波数
+            static constexpr uint8_t targets_1 = 2;   // 1のサーボの目標値
+            static constexpr uint8_t targets_1_4 = 8; // 1~4のサーボの目標値
+            static constexpr uint8_t targets_5_8 = 8; // 5~8のサーボの目標値
+            static constexpr uint8_t init = 1;        // 初期化コマンド
+            static constexpr uint8_t freq = 1;        // 周波数
         }
         namespace solenoid
         {
@@ -100,5 +111,13 @@ namespace can_config
             static constexpr int busy = 0x02;
             static constexpr int error = 0x03;
         }
+        namespace command
+        {
+            static constexpr int init = 0x00;
+        }
     }
 }
+
+uint16_t encodeCanID(uint8_t dir, uint8_t dev, uint8_t device_id, uint8_t data_name);
+
+void decodeCanID(uint16_t can_id, uint8_t *dir, uint8_t *dev, uint8_t *device_id, uint8_t *data_name);
