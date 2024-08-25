@@ -145,7 +145,7 @@ void CANDataManager::classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t d
                 break;
             }
         }
-        else if (device_id == md_id / 4) // MDのIDの4で割った商が一致する場合
+        if (device_id == md_id / 4) // MDのIDの4で割った商が一致する場合
         {
             if (data_name == can_config::data_name::md::targets) // データの種類が目標値の場合
             {
