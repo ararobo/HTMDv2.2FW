@@ -3,12 +3,12 @@
 #include <can_data_configure.hpp> // CAN通信のIDを生成するため&CAN通信でのパケットのサイズを取得するため。
 #include <htmd_mode.hpp>          // HTMDのモードを生成するため。
 
-union can_data_md_target_t
+union can_data_md_target_t // MDの目標値とCAN通信のデータを変換するための共用体
 {
   int16_t target[4];
   uint8_t raw_data[8];
 };
-can_data_md_target_t can_data_md_target;
+can_data_md_target_t can_data_md_target; // MDの目標値を格納するための共用体
 
 // CAN Buffer
 bool can_rx_buffer_init[8];         // 初期化の状態を格納するためのバッファ。
@@ -22,40 +22,45 @@ uint16_t can_id_md_target;
 // 制御
 int16_t motor_targets[8] = {0}; // モーターの出力値
 
+/**
+ * @brief CAN通信の受信時に呼び出される関数
+ *
+ * @param packet_size 受信したパケットのサイズ
+ */
 void onReceive(int packet_size)
 {
-  uint8_t dir, dev, device_id, data_name;
-  uint16_t can_id = CAN.packetId();
-  decodeCanID(can_id, &dir, &dev, &device_id, &data_name);
-  if (dir == can_config::dir::to_master)
+  uint8_t dir, dev, device_id, data_name;                  // CAN通信のIDをデコードするための変数
+  uint16_t can_id = CAN.packetId();                        // 受信したCAN通信のIDを取得
+  decodeCanID(can_id, &dir, &dev, &device_id, &data_name); // CAN通信のIDをデコード
+  if (dir == can_config::dir::to_master)                   // メイン基板への通信の場合
   {
-    if (dev == can_config::dev::motor_driver)
+    if (dev == can_config::dev::motor_driver) // デバイスの種類がモータードライバの場合
     {
-      switch (data_name)
+      switch (data_name) // データの種類によって処理を分岐
       {
-      case can_config::data_name::md::init:
+      case can_config::data_name::md::init: // 初期化のデータの場合
       {
-        can_rx_buffer_init[device_id] = true;
+        can_rx_buffer_init[device_id] = true; // 初期化の状態をtrueにする。
         break;
       }
-      case can_config::data_name::md::mode:
+      case can_config::data_name::md::mode: // モードのデータの場合
       {
-        for (uint8_t i = 0; i < packet_size; i++)
+        for (uint8_t i = 0; i < packet_size; i++) // パケットサイズ分データを読み込む
         {
-          can_rx_buffer_md_mode[device_id].code[i] = CAN.read();
+          can_rx_buffer_md_mode[device_id].code[i] = CAN.read(); // モードのデータを受信バッファに格納
         }
         break;
       }
-      case can_config::data_name::md::p_gain:
+      case can_config::data_name::md::p_gain: // PID制御の比例ゲインのデータの場合
       {
-        uint32_t p_gain_raw = 0;
+        uint32_t p_gain_raw = 0; // 比例ゲインの値を格納するための変数
         for (uint8_t i = 0; i < packet_size; i++)
         {
           p_gain_raw |= (uint32_t)CAN.read() << (8 * i);
         }
-        can_rx_buffer_pid_gain[device_id][0] = static_cast<float>(p_gain_raw);
+        can_rx_buffer_pid_gain[device_id][0] = static_cast<float>(p_gain_raw); // static_castでfloat型に変換して受信バッファに格納
       }
-      case can_config::data_name::md::i_gain:
+      case can_config::data_name::md::i_gain: // PID制御の積分ゲインのデータの場合
       {
         uint32_t i_gain_raw = 0;
         for (uint8_t i = 0; i < packet_size; i++)
@@ -64,7 +69,7 @@ void onReceive(int packet_size)
         }
         can_rx_buffer_pid_gain[device_id][1] = static_cast<float>(i_gain_raw);
       }
-      case can_config::data_name::md::d_gain:
+      case can_config::data_name::md::d_gain: // PID制御の微分ゲインのデータの場合
       {
         uint32_t d_gain_raw = 0;
         for (uint8_t i = 0; i < packet_size; i++)
@@ -73,13 +78,14 @@ void onReceive(int packet_size)
         }
         can_rx_buffer_pid_gain[device_id][2] = static_cast<float>(d_gain_raw);
       }
-      case can_config::data_name::md::sensor:
+      case can_config::data_name::md::sensor: // センサーのデータの場合
       {
-        if (packet_size == can_config::dlc::md::limit)
+        // パケットサイズによって内容を判別
+        if (packet_size == can_config::dlc::md::limit) // リミットスイッチのデータの場合
         {
-          can_rx_buffer_limit[device_id] = CAN.read();
+          can_rx_buffer_limit[device_id] = CAN.read(); // リミットスイッチの状態を受信バッファに格納
         }
-        else if (packet_size == can_config::dlc::md::limit_encoder)
+        else if (packet_size == can_config::dlc::md::limit_encoder) // リミットスイッチとエンコーダーのデータの場合
         {
           uint16_t encoder_raw = 0;
           can_rx_buffer_limit[device_id] = CAN.read();
@@ -87,9 +93,9 @@ void onReceive(int packet_size)
           {
             encoder_raw |= (uint16_t)CAN.read() << (8 * i);
           }
-          can_rx_buffer_encoder[device_id] = static_cast<int16_t>(encoder_raw);
+          can_rx_buffer_encoder[device_id] = static_cast<int16_t>(encoder_raw); // エンコーダの値を受信バッファに格納
         }
-        else if (packet_size == can_config::dlc::md::limit_encoder_current)
+        else if (packet_size == can_config::dlc::md::limit_encoder_current) // リミットスイッチとエンコーダーと電流センサーのデータの場合
         {
           uint16_t encoder_raw = 0;
           can_rx_buffer_limit[device_id] = CAN.read();
@@ -110,9 +116,10 @@ void setup()
   /* CAN通信を開始する */
   CAN.setPins(4, 5); // TODO : ESP32とCANトランシーバーの接続PinのRXとTXに編集してください。
   CAN.begin(1000E3);
+  // ESP32のCANライブラリのバグを回避するためのコード
   volatile uint32_t *pREG_IER = (volatile uint32_t *)0x3ff6b010;
   *pREG_IER &= ~(uint8_t)0x10;
-  CAN.onReceive(onReceive);
+  CAN.onReceive(onReceive); // CAN通信でデータを受信した際に呼び出される関数を設定
 
   /* MDのモードを設定する */
   md_mode_t can_tx_buffer_md_mode;                              // MDのモード型で送信バッファを生成。
