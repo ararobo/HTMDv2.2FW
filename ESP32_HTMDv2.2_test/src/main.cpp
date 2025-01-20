@@ -21,6 +21,9 @@ uint8_t can_rx_buffer_current[8];   // 電流センサーの値を格納する�
 uint16_t can_id_md_target;
 // 制御
 int16_t motor_targets[8] = {0}; // モーターの出力値
+float motor_p_gain[8] = {0.0f}; // モーターのPID制御の比例ゲイン
+float motor_i_gain[8] = {0.0f}; // モーターのPID制御の積分ゲイン
+float motor_d_gain[8] = {0.0f}; // モーターのPID制御の微分ゲイン
 
 /**
  * @brief CAN通信の受信時に呼び出される関数
@@ -141,6 +144,52 @@ void setup()
   for (uint8_t i = 0; i < can_config::dlc::md::mode; i++)
   {
     CAN.write(can_tx_buffer_md_mode.code[i]);
+  }
+  CAN.endPacket();
+
+  /* PIDゲインを送信する */
+  uint16_t can_id_md_pid_gain = encodeCanID(
+      can_config::dir::to_slave, can_config::dev::motor_driver, 0, can_config::data_name::md::p_gain);
+  uint32_t pid_gain_raw = 0;     // PID制御のゲインの値を格納するための変数
+  uint8_t pid_gain_tx_buffer[4]; // PID制御のゲインの値を送信するためのバッファ
+  // Pゲイン
+  pid_gain_raw = static_cast<uint32_t>(motor_p_gain[0]); // static_castでfloat型からuint32_t型に変換
+  for (uint8_t i = 0; i < 4; i++)                        // 4バイト分データを送信バッファに格納
+  {
+    pid_gain_tx_buffer[i] = (pid_gain_raw >> (8 * i)) & 0xFF; // 8ビットずつデータを送信バッファに格納
+  }
+  CAN.beginPacket(can_id_md_pid_gain);
+  for (uint8_t i = 0; i < can_config::dlc::md::p_gain; i++) // パケットサイズ分データを送信
+  {
+    CAN.write(pid_gain_tx_buffer[i]);
+  }
+  CAN.endPacket();
+  // Iゲイン
+  can_id_md_pid_gain = encodeCanID(
+      can_config::dir::to_slave, can_config::dev::motor_driver, 0, can_config::data_name::md::i_gain); // IゲインのIDを生成
+  pid_gain_raw = static_cast<uint32_t>(motor_i_gain[0]);
+  for (uint8_t i = 0; i < 4; i++)
+  {
+    pid_gain_tx_buffer[i] = (pid_gain_raw >> (8 * i)) & 0xFF;
+  }
+  CAN.beginPacket(can_id_md_pid_gain);
+  for (uint8_t i = 0; i < can_config::dlc::md::i_gain; i++)
+  {
+    CAN.write(pid_gain_tx_buffer[i]);
+  }
+  CAN.endPacket();
+  // Dゲイン
+  can_id_md_pid_gain = encodeCanID(
+      can_config::dir::to_slave, can_config::dev::motor_driver, 0, can_config::data_name::md::d_gain); // DゲインのIDを生成
+  pid_gain_raw = static_cast<uint32_t>(motor_d_gain[0]);
+  for (uint8_t i = 0; i < 4; i++)
+  {
+    pid_gain_tx_buffer[i] = (pid_gain_raw >> (8 * i)) & 0xFF;
+  }
+  CAN.beginPacket(can_id_md_pid_gain);
+  for (uint8_t i = 0; i < can_config::dlc::md::d_gain; i++)
+  {
+    CAN.write(pid_gain_tx_buffer[i]);
   }
   CAN.endPacket();
 
