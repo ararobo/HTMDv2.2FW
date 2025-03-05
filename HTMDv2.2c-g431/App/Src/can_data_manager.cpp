@@ -23,18 +23,15 @@ void CANDataManager::init(uint8_t md_id_)
     if (HAL_FDCAN_ConfigFilter(&hfdcan1, &RxFilter) != HAL_OK)
     {
         Error_Handler();
-        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET);
     }
     if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
     {
         Error_Handler();
-        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET);
     }
     // 割り込み有効
     if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
     {
         Error_Handler();
-        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET);
     }
 }
 
@@ -45,7 +42,6 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
         if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
         {
             Error_Handler();
-            HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET);
         }
         else
         {
@@ -59,7 +55,6 @@ void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t dat
 {
     if (data_length > 8)
     {
-        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
     }
 
     TxHeader.Identifier = can_id;
@@ -77,12 +72,10 @@ void CANDataManager::sendPacket(uint16_t can_id, uint8_t *tx_buffer, uint8_t dat
         if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, tx_buffer) != HAL_OK)
         {
             Error_Handler();
-            HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
         }
     }
     else
     {
-        HAL_GPIO_WritePin(LED_LIM2_GPIO_Port, LED_LIM2_Pin, GPIO_PIN_SET); // エラー処理
     }
 }
 
