@@ -1,3 +1,13 @@
+/**
+ * @file can_data_manager.cpp
+ * @author Gento Aiba
+ * @brief CAN通信のデータを管理
+ * @version 0.1
+ * @date 2025-03-05
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #include "can_data_manager.hpp"
 
 void CANDataManager::init(uint8_t md_id_)
@@ -159,7 +169,7 @@ void CANDataManager::classifyData(uint16_t can_id, uint8_t *rx_buffer, uint8_t d
                 break;
             }
         }
-        else if (device_id == md_id / 4) // MDのIDの4で割った商が一致する場合
+        if (device_id == md_id / 4) // MDのIDの4で割った商が一致する場合
         {
             if (data_name == can_config::data_name::md::targets) // データの種類が目標値の場合
             {

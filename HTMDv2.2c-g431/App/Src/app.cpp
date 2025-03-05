@@ -2,29 +2,28 @@
 #include <cstring>
 #include "app.hpp"
 #include "motor_controller.hpp"
+#include "indicator.hpp"
 #include "main.h"
 #include "fdcan.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 #include "htmd_mode.hpp"
-#include "my_i2c.hpp"
 
 CANDataManager myCAN;
 MotorController motor;
 md_mode_t md_mode;
-MyI2C myI2C;
 
 void App::getMDIdFromDispSW(uint8_t *md_id_)
 {
     uint8_t id = 0;
-    if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
-        id = 1;
-    if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
-        id |= 0b10;
-    if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
-        id |= 0b100;
     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+        id = 1;
+    if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+        id |= 0b10;
+    if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
+        id |= 0b100;
+    if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
         id |= 0b1000;
     *md_id_ = id; // ディップスイッチの値をMDのIDに設定
 }
@@ -36,9 +35,10 @@ void App::init()
     // peripheral init
     myCAN.init(md_id);         // CAN通信の初期化
     motor.init(control_cycle); // モーターの初期化
+    indicateStanby(true);
+    indicateError(false);
     // main timer start
-    HAL_TIM_Base_Start_IT(&htim4);
-    myI2C.init(); // I2C通信の初期化
+    HAL_TIM_Base_Start_IT(&htim6);
 }
 
 void App::mainLoop()
@@ -59,11 +59,11 @@ void App::mainLoop()
         myCAN.sendReInitMode(md_mode.code); // レスポンス
         // モードを更新
         motor_transfer_cofficient = float(md_mode.values.motor_transfer_coefficient) / 100.0f; // 100倍されているので100で割る
-        if (md_mode.values.max_output > 5999)                                                  // 最大出力が5999を超えていたら
+        if (md_mode.values.max_output > 3199)                                                  // 最大出力が3199を超えていたら
         {
-            md_mode.values.max_output = 5999;
+            md_mode.values.max_output = 3199;
         }
-        motor.setBrake(md_mode.flags.brake); // ブレーキの設定
+        motor.setBrake(md_mode.flags.brake); // ブレーキを設定
         // print
         serial_printf("updated md mode\n");
         serial_printf("incremental_encoder: %d\n", md_mode.flags.incremental_encoder);
@@ -86,45 +86,38 @@ void App::mainLoop()
     {
         if (md_mode.values.report_rate != 0) // レポートレートが0でなければ
         {
-            bool limit_status[2];
-            limit_status[0] = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
-            limit_status[1] = HAL_GPIO_ReadPin(LIM2_GPIO_Port, LIM2_Pin);
             if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
             {
-                myI2C.getCurrent(&current);                                                                       // 電流センサーの値を取得
-                serial_printf("current: %d\n", current);                                                          // debug
-                myCAN.sendSensorLimitEncoderAndCurrent(limit_status[0], limit_status[1], encoder_value, current); // エンコーダの値とリミットスイッチの状態と電流を送信
+                myCAN.sendSensorLimitAndEncoder(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false, encoder_value); // エンコーダの値とリミットスイッチの状態を送信
             }
             else
             {
-                myCAN.sendSensorLimit(limit_status[0], limit_status[1]); // リミットスイッチの状態を送信
+                myCAN.sendSensorLimit(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false); // リミットスイッチの状態を送信
             }
-
             if (md_mode.flags.state)
             {
-                uint16_t temp_;
-                myI2C.getTemp(&temp_);              // 温度センサーの値を取得
-                serial_printf("temp: %d\n", temp_); // debug
-                temp = static_cast<int16_t>(temp_); // uint16_t -> int16_t
                 if (target != 0)
                 {
-                    myCAN.sendStateAndTemp(can_config::code::state::busy, temp); // busy
+                    indicateBusy(true);
+                    myCAN.sendStateMD(can_config::code::state::busy); // busy
                 }
                 else
                 {
-                    myCAN.sendStateAndTemp(can_config::code::state::ready, temp); // ready
+                    indicateBusy(false);
+                    myCAN.sendStateMD(can_config::code::state::ready); // ready
                 }
             }
-            HAL_Delay(md_mode.values.report_rate); // レポートレートに応じて待つ
         }
-        // serial_printf("ready\n");
+        serial_printf("target: %d\n", target);
+        HAL_Delay(md_mode.values.report_rate); // レポートレート分待つ
     }
     else
     {
         if (myCAN.getMDInit()) // 初期化コマンドが送られてきたら
         {
             initialized = true; // 初期化されたら
-            HAL_GPIO_WritePin(LED_DEBUG_GPIO_Port, LED_DEBUG_Pin, GPIO_PIN_SET);
+            indicateReady(true);
+            indicateStanby(false);
             serial_printf("initialized\n");
             resetControlVal(); // 制御値をリセット
         }
@@ -140,8 +133,6 @@ void App::timerTask()
     if (myCAN.getMotorTarget(&target))
     {
         no_update_count = 0; // 更新されたらカウントをリセット
-        // serial_printf("target: %d\n", target);
-        HAL_GPIO_WritePin(LED_CAN_GPIO_Port, LED_CAN_Pin, GPIO_PIN_SET);
     }
     else
     {
@@ -184,14 +175,19 @@ void App::timerTask()
 
     if (no_update_count > no_update_max || !initialized) // 値が長い間更新されていなければ or 初期化されていなければ
     {
-        HAL_GPIO_WritePin(LED_CAN_GPIO_Port, LED_CAN_Pin, GPIO_PIN_RESET);
-        resetControlVal(); // 制御値をリセット
+        resetControlVal();                            // 制御値をリセット
+        motor.run(output, md_mode.values.max_output); // モーターを制御
     }
     else
     {
         if (target == 0) // 目標値が0なら
         {
             resetControlVal(); // 制御値をリセット
+            indicateBusy(false);
+        }
+        else
+        {
+            indicateBusy(true);
         }
         motor.run(output, md_mode.values.max_output); // モーターを制御
     }
@@ -217,7 +213,7 @@ void App::serial_printf(const std::string &fmt, Args... args)
     std::vector<char> buf(len + 1);
     std::snprintf(&buf[0], len + 1, fmt.c_str(), args...);
     // ヌル終端された文字列をUARTに送信
-    HAL_UART_Transmit(&huart3, (uint8_t *)&buf[0], len, 0xFF);
+    HAL_UART_Transmit(&huart1, (uint8_t *)&buf[0], len, 0xFFF);
 }
 
 void App::resetControlVal()
@@ -225,5 +221,4 @@ void App::resetControlVal()
     target = 0;
     output = 0;
     motor.resetPID();
-    motor.run(0, md_mode.values.max_output);
 }

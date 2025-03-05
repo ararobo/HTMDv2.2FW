@@ -11,6 +11,7 @@ private:
     float i_out = 0.0f;                                  // I制御の出力
     float prev_error = 0.0f;                             // 前回のエラー
     int16_t prev_out = 0;                                // 前回の出力
+    uint16_t max_output = 3199;                          // 最大出力
     uint8_t control_cycle = 5;                           // 制御周期
 
 public:
@@ -82,10 +83,5 @@ public:
     template <typename T>
     T saturate(T value, T min_value, T max_value);
 
-    /**
-     * @brief ブレーキをかける
-     *
-     * @param brake ブレーキをかけるかどうか
-     */
     void setBrake(bool brake);
 };

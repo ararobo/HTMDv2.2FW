@@ -1,3 +1,13 @@
+/**
+ * @file can_data_manager.hpp
+ * @author Gento Aiba
+ * @brief CAN通信のデータ管理クラス
+ * @version 0.1
+ * @date 2025-03-05
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
