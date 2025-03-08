@@ -38,17 +38,10 @@ bit毎の割り当てを下記に記します。
 
 |data_type|名称|サイズ[byte]|dir:0の時の意味|dir:1の時の意味|
 |:-:|:-:|:-:|:-:|:-:|
-|0|init|8|MDの設定|基板の種類|
+|0|init|8/1|MDの設定（サイズ:8byte）|基板の種類（サイズ:1byte）|
 |1|target|2|モーター１つの制御値|エンコーダーの値|
-|2|limit_switch|1|※１リミットスイッチが押されたときの振る舞い|リミットスイッチの状態(bit毎にSW1, SW2...SW8)|
+|2|limit_switch|1|未使用|リミットスイッチの状態(bit毎にSW1, SW2...SW8)|
 |3|gain|5|1バイト: ゲイン種別 (0=P, 1=I, 2=D) + 4バイト: float値|現在のゲイン値|
-
-※１リミットスイッチが押されたときの振る舞い
-- 0:何もしない
-- 1:制御値がゼロになるまで出力をゼロにする
-- 2:正回転を停止
-- 3:逆回転を停止
-- 4:正回転をスイッチ１で停止,逆回転をスイッチ２で停止
 
 # データフレームについて
 MDとのCAN通信でのデータフレームについて示す。
@@ -61,12 +54,24 @@ MDとのCAN通信でのデータフレームについて示す。
 |名称|サイズ|型|説明|
 |:-:|:-:|:-:|:-:|
 |max_output|2byte|uint16_t|最大出力 duty|
-|max_acceleration|1byte|uint8_t|台形制御の最大加速 duty/ms|
-|brake|1byte|uint8_t|0:自然減速、1:電気ブレーキ（推奨）|
+|max_acceleration|1byte|uint8_t|台形制御の最大加速 duty/10ms|
 |control_period|1byte|uint8_t|制御周期 ms|
 |encoder_period|1byte|uint8_t|エンコーダーのサンプリング周期 ms（0でエンコーダー無し）|
 |encoder_type|1byte|uint8_t|0:無し、1:インクリメンタル、2:アブソリュート|
-|control_mode|1byte|uint8_t|0:未使用、1:PID制御|
+|limit_switch_behavior|1byte|uint8_t|リミットスイッチが押された際の動作設定（以下参照）|
+|option|1byte|uint8_t|基板の固有機能や使用用途に合わせて決定（未定義）|
+
+#### limit_switch_behavior（リミットスイッチの動作設定）
+リミットスイッチが押された際のモーターの動作を、`uint8_t`の値で指定します。
+以下の値を設定することで、リミットスイッチの挙動を制御できる。
+|値|動作|
+|:-:|:-:|
+|0|リミットスイッチが押されても何もしない|
+|1|リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない|
+|2|リミットスイッチが押されたら、正回転のみ停止する|
+|3|リミットスイッチが押されたら、逆回転のみ停止する|
+|4|リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する|
+
 
 ```c++
 union md_init_t
@@ -74,12 +79,12 @@ union md_init_t
     struct
     {
         uint16_t max_output; // 最大出力 duty
-        uint8_t max_acceleration; // 台形制御の最大加速 duty/ms
-        uint8_t brake; // 0:自然減速、1:電気ブレーキ（推奨）
+        uint8_t max_acceleration; // 台形制御の最大加速 duty/10ms
         uint8_t control_period; // 制御周期 ms
         uint8_t encoder_period; // エンコーダーのサンプリング周期 ms
         uint8_t encoder_type; // 0:無し、1:インクリメンタル、2:アブソリュート
-        uint8_t control_mode; // 0:未使用、1:PID制御
+        uint8_t limit_switch_behavior; // リミットスイッチの動作設定
+        uint8_t option; // 基板の固有機能や使用用途に合わせて決定（未定義）
     } __attribute__((__packed__));
     uint8_t code[8]; // 送信バイト配列
 } __attribute__((__packed__));
@@ -92,11 +97,10 @@ board_id = 0;
 md_init_t md_init;
 md_init.max_output = 3199;
 md_init.max_acceleration = 100;
-md_init.brake = 1;
 md_init.control_period = 1;
 md_init.encoder_period = 10;
 md_init.encoder_type = 0;
-md_init.control_mode = 0;
+md_init.limit_switch_behavior = 0;
 
 can_id = encodeCANID(
     can_conf::direction::to_slave, 
@@ -157,18 +161,8 @@ CAN.endPacket();
 フォーマットは制御値と同じように送られるので、自分で考えて(⋈◍＞◡＜◍)。✧♡
 
 ## limit_switch
-リミットスイッチの値や振る舞いを通信する。
-
-### リミットスイッチの動作設定（direction:0）
-リミットスイッチが押された際のモーターの動作を`uint8_t`の値で指定する。
-以下の値を設定することで、リミットスイッチの挙動を制御できる。
-|値|動作|
-|:-:|:-:|
-|0|リミットスイッチが押されても何もしない|
-|1|リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない|
-|2|リミットスイッチが押されたら、正回転のみ停止する|
-|3|リミットスイッチが押されたら、逆回転のみ停止する|
-|4|リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する|
+リミットスイッチの状態を通信する。
+direction:0は未使用です。
 
 ### リミットスイッチの状態（direction:1）
 リミットスイッチの状態が`uint8_t`の値で送信される。
