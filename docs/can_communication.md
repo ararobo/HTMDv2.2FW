@@ -13,6 +13,26 @@ bit毎の割り当てを下記に記します。
 |8~10|board_type|基板の種類を示す|0~7の値に基板が割り当てられる|
 |11|direction|通信方向|0:Main基板からMD等の制御値、1:MD等からMain基板へのフィードバック|
 
+## direction（通信方向）
+0 or 1で通信方向を示す。
+|値|方向|説明|
+|:-:|:-:|:-:|
+|0|master → slave|メイン基板から周辺基板への送信|
+|1|slave → master|周辺基板からメイン基板へのフィードバック|
+
+## board_type（基板の種類）
+0~7で基板の種類を表す。
+|値|名称|説明|
+|:-:|:-:|:-:|
+|0|emergency_stop_board|非常停止基板|
+|1|motor_driver|モータードライバー基板|
+|2|servo_driver|サーボモータードライバー基板|
+|3|solenoid_driver|電磁弁制御基板|
+|4|led_board|LED制御基板|
+|5|sensor_board|センサー基板|
+|6|wireless_board|無線通信基板|
+|7|other|その他基板|
+
 ## data_type (MD)
 以下の表のようにMDではdata_typeを活用する。
 
@@ -80,7 +100,7 @@ md_init.control_mode = 0;
 
 can_id = encodeCANID(
     can_conf::direction::to_slave, 
-    can_conf::board_type::md, 
+    can_conf::board_type::motor_driver, 
     board_id, 
     can_conf::data_type::init);
 CAN.beginPacket(can_id);
@@ -119,7 +139,7 @@ memcpy(tx_data_buffer, &target, 2); // メモリコピーで送信バッファ�
 
 uint16_t can_id = encodeCANID(
     can_conf::direction::to_slave, 
-    can_conf::board_type::md, 
+    can_conf::board_type::motor_driver, 
     board_id, 
     can_conf::data_type::target);
 
