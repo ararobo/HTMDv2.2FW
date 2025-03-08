@@ -42,10 +42,12 @@ bool CANDataManager::onReceiveTask(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0
         if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
         {
             Error_Handler();
+            return false;
         }
         else
         {
             classifyData(RxHeader.Identifier, RxData, RxHeader.DataLength);
+            return true;
         }
     }
     return false;
