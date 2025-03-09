@@ -24,26 +24,44 @@ bit毎の割り当てを下記に記します。
 0~7で基板の種類を表す。
 |値|名称|説明|
 |:-:|:-:|:-:|
-|0|emergency_stop_board|非常停止基板|
-|1|motor_driver|モータードライバー基板|
-|2|servo_driver|サーボモータードライバー基板|
-|3|solenoid_driver|電磁弁制御基板|
+|0|ems|非常停止基板|
+|1|md|モータードライバー基板|
+|2|servo|サーボモータードライバー基板|
+|3|solenoid|電磁弁制御基板|
 |4|未定|未定|
 |5|未定|未定|
 |6|未定|未定|
 |7|未定|未定|
 
-## data_type (MDの場合)
-以下の表のようにMDではdata_typeを活用する。
+## data_type（Emergency Stopの場合）
+|data_type|名称|サイズ[byte]|dir:0の時の内容|dir:1の時の内容|
+|:-:|:-:|:-:|:-:|:-:|
+|0|init|1|非常停止の設定|通信チャンネル|
+|1|status|2|未使用|1byte目：通信状況（0:未接続、1:不安定、2:安定）、2byte目：接続数|
+|2|emergency_stop|1|非常停止の状態を設定（0:解除、1:非常停止）|現在の非常停止の状態（0:解除、1:非常停止）|
 
-|data_type|名称|サイズ[byte]|dir:0の時の意味|dir:1の時の意味|
+## data_type (MDの場合)
+|data_type|名称|サイズ[byte]|dir:0の時の内容|dir:1の時の内容|
 |:-:|:-:|:-:|:-:|:-:|
 |0|init|8/1|MDの設定（サイズ:8byte）|基板の種類（サイズ:1byte）|
 |1|target|2|モーター１つの制御値|エンコーダーの値|
 |2|limit_switch|1|未使用|リミットスイッチの状態(bit毎にSW1, SW2...SW8)|
 |3|gain|5|1バイト: ゲイン種別 (0=P, 1=I, 2=D) + 4バイト: float値|現在のゲイン値|
 
-# データフレームについて
+## data_type（servoの場合）
+|data_type|名称|サイズ[byte]|dir:0の時の内容|dir:1の時の内容|
+|:-:|:-:|:-:|:-:|:-:|
+|0|init|1|サーボドライバーの設定|現在のサーボドライバーの設定|
+|1|target|2|出力PWMのduty|未使用|
+|2|frequency|2|出力PWMの周波数|未使用|
+
+## data_type（solenoidの場合）
+|data_type|名称|サイズ[byte]|dir:0の時の内容|dir:1の時の内容|
+|:-:|:-:|:-:|:-:|:-:|
+|0|init|1|固定値:0|基板の種類|
+|1|target|1|各bitに1つの電磁弁の出力|未使用|
+
+# MDのデータフレームについて
 MDとのCAN通信でのデータフレームについて示す。
 
 ## init（初期化）
@@ -104,10 +122,10 @@ md_config.encoder_type = 0;
 md_config.limit_switch_behavior = 0;
 
 can_id = encodeCANID(
-    can_conf::direction::to_slave, 
-    can_conf::board_type::motor_driver, 
+    can_conf::direction::slave, 
+    can_conf::board_type::md, 
     board_id, 
-    can_conf::data_type::init);
+    can_conf::data_type::md::init);
 CAN.beginPacket(can_id);
 
 for (uint8_t i = 0; i < 8; i++) // 0~7の順にLSBから送信する。
@@ -143,10 +161,10 @@ uint8_t tx_data_buffer[2]; // 送信バッファ
 memcpy(tx_data_buffer, &target, 2); // メモリコピーで送信バッファに制御値を分割して入れる。
 
 uint16_t can_id = encodeCANID(
-    can_conf::direction::to_slave, 
-    can_conf::board_type::motor_driver, 
+    can_conf::direction::slave, 
+    can_conf::board_type::md, 
     board_id, 
-    can_conf::data_type::target);
+    can_conf::data_type::md::target);
 
 CAN.beginPacket(can_id);
 
@@ -185,3 +203,4 @@ PID制御などのゲインを通信する。
 - direction:0（送信）　PIDゲインを設定する。
 - direction:1（受信）　MDに現在設定されているPIDゲインが送信される。
 - データフレームの形式はdirectionに関わらず共通。
+
