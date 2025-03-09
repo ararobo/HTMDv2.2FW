@@ -18,9 +18,61 @@ private:
     uint8_t limit_switch;
     float pid_gain[3];
 
+    void send_gain(uint8_t gain_type, float gain)
+    {
+        uint8_t data[5];
+        data[0] = gain_type;
+        memcpy(&data[1], &gain, sizeof(gain));
+        if (is_master)
+        {
+            send(encode_id(direction::slave, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
+        }
+        else
+        {
+            send(encode_id(direction::master, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
+        }
+    }
+
 protected:
     void send(uint16_t id, uint8_t *data, uint8_t len);
-    void receive(uint16_t id, uint8_t *data, uint8_t len);
+
+    void receive(uint16_t id, uint8_t *data, uint8_t len)
+    {
+        uint8_t direction, board_type, board_id, data_type;
+        decode_id(id, direction, board_type, board_id, data_type);
+        if (board_type != board_type::md || board_id != md_id)
+        {
+            return;
+        }
+        switch (data_type)
+        {
+        case data_type::md::init:
+            if (is_master)
+            {
+                memcpy(&md_kind, data, sizeof(md_kind));
+            }
+            else
+            {
+                memcpy(&md_config, data, sizeof(md_config));
+            }
+            is_received_init = true;
+            break;
+        case data_type::md::target:
+            memcpy(&target, data, sizeof(target));
+            is_received_target = true;
+            break;
+        case data_type::md::limit_switch:
+            memcpy(&limit_switch, data, sizeof(limit_switch));
+            is_received_limit_switch = true;
+            break;
+        case data_type::md::gain:
+            memcpy(pid_gain[data[0]], data + 1, sizeof(pid_gain[data[0]]));
+            is_received_gain = true;
+            break;
+        default:
+            break;
+        }
+    }
 
 public:
     MDDataManager(uint8_t md_id) : md_id(md_id), is_received_init(false), is_received_target(false), is_received_limit_switch(false), is_received_gain(false) {};
@@ -57,11 +109,63 @@ public:
         send(encode_id(direction::master, board_type::md, md_id, data_type::md::limit_switch), &limit_switch, sizeof(limit_switch));
     }
 
-    void send_gain(float p_gain, float i_gain, float d_gain);
-    bool is_md_init();
-    md_config_t get_md_config();
-    uint8_t get_md_kind();
-    bool get_target(int16_t *target);
-    bool get_limit_switch(uint8_t *limit_switch);
-    bool get_gain(float *p_gain, float *i_gain, float *d_gain);
+    void send_gain(float p_gain, float i_gain, float d_gain)
+    {
+        send_gain(0, p_gain);
+        send_gain(1, i_gain);
+        send_gain(2, d_gain);
+    }
+
+    bool is_md_init()
+    {
+        return is_received_init;
+    }
+
+    md_config_t get_md_config()
+    {
+        static_assert(is_master, "This function is only for slave.");
+        return md_config;
+    }
+
+    uint8_t get_md_kind()
+    {
+        static_assert(!is_master, "This function is only for master.");
+        return md_kind;
+    }
+
+    bool get_target(int16_t *target)
+    {
+        if (is_received_target)
+        {
+            *target = this->target;
+            is_received_target = false;
+            return true;
+        }
+        return false;
+    }
+
+    bool get_limit_switch(uint8_t *limit_switch)
+    {
+        static_assert(!is_master, "This function is only for master.");
+        if (is_received_limit_switch)
+        {
+            *limit_switch = this->limit_switch;
+            is_received_limit_switch = false;
+            return true;
+        }
+        return false;
+    }
+
+    bool get_gain(float *p_gain, float *i_gain, float *d_gain)
+    {
+        if (is_received_gain)
+        {
+            *p_gain = pid_gain[0];
+            *i_gain = pid_gain[1];
+            *d_gain = pid_gain[2];
+            is_received_gain = false;
+            return true;
+        }
+        return false;
+    }
 };

@@ -5,8 +5,8 @@ class App
 {
 private:
 public:
-    App();
     void init();
     void mainLoop();
+    void timerTask();
     void CANCallbackProcess(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 };
