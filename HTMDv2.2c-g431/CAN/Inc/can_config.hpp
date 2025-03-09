@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-namespace md_config
+namespace can_config
 {
     namespace direction
     {
@@ -41,26 +41,25 @@ namespace md_config
             static constexpr uint8_t target = 1;
         }
     }
+    /**
+     * @brief CAN IDをエンコードする。
+     *
+     * @param direction 通信方向 to_slave:0, to_master:1
+     * @param board_type 基板の種類 emergency_stop_board:0, motor_driver:1, servo_driver:2, solenoid_driver:3, led_board:4, sensor_board:5, wireless_board:6, other:7
+     * @param board_id 基板のID
+     * @param data_type データの種類
+     * @return uint16_t 生成したCAN ID
+     */
+    uint16_t encode_id(uint8_t direction, uint8_t board_type, uint8_t board_id, uint8_t data_type);
+
+    /**
+     * @brief CAN IDをデコードする。
+     *
+     * @param can_id CAN ID
+     * @param direction 通信方向 to_slave:0, to_master:1
+     * @param board_type 基板の種類 emergency_stop_board:0, motor_driver:1, servo_driver:2, solenoid_driver:3, led_board:4, sensor_board:5, wireless_board:6, other:7
+     * @param board_id 基板のID
+     * @param data_type データの種類
+     */
+    void decode_id(uint16_t can_id, uint8_t &direction, uint8_t &board_type, uint8_t &board_id, uint8_t &data_type);
 }
-
-/**
- * @brief CAN IDをエンコードする。
- *
- * @param direction 通信方向 to_slave:0, to_master:1
- * @param board_type 基板の種類 emergency_stop_board:0, motor_driver:1, servo_driver:2, solenoid_driver:3, led_board:4, sensor_board:5, wireless_board:6, other:7
- * @param board_id 基板のID
- * @param data_type データの種類
- * @return uint16_t 生成したCAN ID
- */
-uint16_t encode_can_id(uint8_t direction, uint8_t board_type, uint8_t board_id, uint8_t data_type);
-
-/**
- * @brief CAN IDをデコードする。
- *
- * @param can_id CAN ID
- * @param direction 通信方向 to_slave:0, to_master:1
- * @param board_type 基板の種類 emergency_stop_board:0, motor_driver:1, servo_driver:2, solenoid_driver:3, led_board:4, sensor_board:5, wireless_board:6, other:7
- * @param board_id 基板のID
- * @param data_type データの種類
- */
-void decode_can_id(uint16_t can_id, uint8_t &direction, uint8_t &board_type, uint8_t &board_id, uint8_t &data_type);
