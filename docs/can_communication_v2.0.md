@@ -74,7 +74,7 @@ MDとのCAN通信でのデータフレームについて示す。
 
 
 ```c++
-union md_init_t
+union md_config_t
 {
     struct
     {
@@ -90,17 +90,18 @@ union md_init_t
 } __attribute__((__packed__));
 ```
 上記unionを用いると簡単にCAN通信で送信できる。
+ただし、エンディアンによる影響を受けるため、マイコンを変更する際は要注意。
 データは下位バイト（LSB）から順に送信する。
 ```c++
 board_id = 0;
 
-md_init_t md_init;
-md_init.max_output = 3199;
-md_init.max_acceleration = 100;
-md_init.control_period = 1;
-md_init.encoder_period = 10;
-md_init.encoder_type = 0;
-md_init.limit_switch_behavior = 0;
+md_config_t md_config;
+md_config.max_output = 3199;
+md_config.max_acceleration = 100;
+md_config.control_period = 1;
+md_config.encoder_period = 10;
+md_config.encoder_type = 0;
+md_config.limit_switch_behavior = 0;
 
 can_id = encodeCANID(
     can_conf::direction::to_slave, 
@@ -111,7 +112,7 @@ CAN.beginPacket(can_id);
 
 for (uint8_t i = 0; i < 8; i++) // 0~7の順にLSBから送信する。
 {
-    CAN.write(md_init.code[i]);
+    CAN.write(md_config.code[i]);
 }
 CAN.endPacket();
 ```
