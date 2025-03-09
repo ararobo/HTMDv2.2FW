@@ -28,10 +28,10 @@ bit毎の割り当てを下記に記します。
 |1|motor_driver|モータードライバー基板|
 |2|servo_driver|サーボモータードライバー基板|
 |3|solenoid_driver|電磁弁制御基板|
-|4|led_board|LED制御基板|
-|5|sensor_board|センサー基板|
-|6|wireless_board|無線通信基板|
-|7|other|その他基板|
+|4|未定|未定|
+|5|未定|未定|
+|6|未定|未定|
+|7|未定|未定|
 
 ## data_type (MDの場合)
 以下の表のようにMDではdata_typeを活用する。
