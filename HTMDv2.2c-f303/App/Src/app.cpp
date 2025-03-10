@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "tim.h"
 #include "motor_controller.hpp"
+#include "serial_printf.hpp"
 
 CANDriver can_driver(0);
 MotorController motor_controller;
@@ -12,6 +13,7 @@ void App::init()
     can_driver.set_md_id(md_id);
     can_driver.init();
     HAL_TIM_Base_Start_IT(&htim6);
+    log_printf(LOG_INFO, "App initialized.\n");
 }
 
 void App::main_loop()
@@ -21,6 +23,7 @@ void App::main_loop()
         if (can_driver.get_target(&target))
         {
             update_target_count = 0;
+            log_printf(LOG_DEBUG, "Target: %d\n", target);
         }
         else
         {
@@ -40,31 +43,30 @@ void App::main_loop()
             }
 
             output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
-
-            if (output != 0)
-            {
-                HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-            }
-            else
-            {
-                HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-            }
-            if (output < 0)
-            {
-                HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-            }
-            else
-            {
-                HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-            }
-
-            motor_controller.run(target, md_config.max_output);
         }
         else
         {
-            motor_controller.run(0, md_config.max_output);
+            output = 0;
             motor_controller.reset_pid();
         }
+
+        if (output != 0)
+        {
+            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+        }
+        else
+        {
+            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+        }
+        if (output < 0)
+        {
+            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+        }
+        else
+        {
+            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+        }
+        motor_controller.run(output, md_config.max_output);
 
         if (loop_count > loop_count_max)
         {
@@ -87,6 +89,7 @@ void App::main_loop()
         motor_controller.reset_pid();
         HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
         initialized = true;
+        log_printf(LOG_INFO, "MD initialized.\n");
     }
 
     if (can_driver.get_gain(&pid_gain[0], &pid_gain[1], &pid_gain[2]))

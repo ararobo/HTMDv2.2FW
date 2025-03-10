@@ -14,7 +14,7 @@ private:
     uint8_t limit_switch;
     float pid_gain[3];
     uint16_t update_target_count = 0;
-    uint16_t update_target_count_max = 1000;
+    uint16_t update_target_count_max = 100;
     uint16_t timer_count = 0;
     uint16_t loop_count = 0;
     uint16_t loop_count_max = 100;
