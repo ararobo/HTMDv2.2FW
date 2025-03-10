@@ -28,14 +28,11 @@ private:
         data[3] = (gain_int >> 16) & 0xFF;
         data[4] = (gain_int >> 24) & 0xFF;
 
-        if (is_master)
-        {
-            send(encode_id(direction::slave, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
-        }
-        else
-        {
-            send(encode_id(direction::master, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
-        }
+#if is_master
+        send(encode_id(direction::slave, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
+#else
+        send(encode_id(direction::master, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
+#endif
     }
 
 protected:
@@ -54,17 +51,14 @@ protected:
         switch (data_type)
         {
         case data_type::md::init:
-            if (is_master)
+#if is_master
+            md_kind = data[0];
+#else
+            for (uint8_t i = 0; i < sizeof(md_config_t); i++)
             {
-                md_kind = data[0];
+                md_config.code[i] = data[i];
             }
-            else
-            {
-                for (uint8_t i = 0; i < sizeof(md_config_t); i++)
-                {
-                    md_config.code[i] = data[i];
-                }
-            }
+#endif
             is_received_init = true;
             break;
         case data_type::md::target:
@@ -109,14 +103,11 @@ public:
         uint8_t data[2];
         data[0] = target & 0xFF;
         data[1] = (target >> 8) & 0xFF;
-        if (is_master)
-        {
-            send(encode_id(direction::slave, board_type::md, md_id, data_type::md::target), data, sizeof(data));
-        }
-        else
-        {
-            send(encode_id(direction::master, board_type::md, md_id, data_type::md::target), data, sizeof(data));
-        }
+#if is_master
+        send(encode_id(direction::slave, board_type::md, md_id, data_type::md::target), data, sizeof(data));
+#else
+        send(encode_id(direction::master, board_type::md, md_id, data_type::md::target), data, sizeof(data));
+#endif
     }
 
     void send_limit_switch(uint8_t limit_switch)
@@ -134,7 +125,12 @@ public:
 
     bool is_md_init()
     {
-        return is_received_init;
+        if (is_received_init)
+        {
+            is_received_init = false;
+            return true;
+        }
+        return false;
     }
 
     md_config_t get_md_config()
