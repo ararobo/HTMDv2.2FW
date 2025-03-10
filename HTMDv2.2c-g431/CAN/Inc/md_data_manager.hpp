@@ -94,13 +94,13 @@ public:
 
     void send_init(md_config_t md_config)
     {
-        static_assert(!is_master, "This function is only for master.");
+        static_assert(is_master, "This function is only for master.");
         send(encode_id(direction::slave, board_type::md, md_id, data_type::md::init), md_config.code, sizeof(md_config.code));
     }
 
     void send_init(uint8_t md_kind)
     {
-        static_assert(is_master, "This function is only for slave.");
+        static_assert(!is_master, "This function is only for slave.");
         send(encode_id(direction::master, board_type::md, md_id, data_type::md::init), &md_kind, sizeof(md_kind));
     }
 
@@ -121,7 +121,7 @@ public:
 
     void send_limit_switch(uint8_t limit_switch)
     {
-        static_assert(is_master, "This function is slave only.");
+        static_assert(!is_master, "This function is slave only.");
         send(encode_id(direction::master, board_type::md, md_id, data_type::md::limit_switch), &limit_switch, sizeof(limit_switch));
     }
 
@@ -139,13 +139,13 @@ public:
 
     md_config_t get_md_config()
     {
-        static_assert(is_master, "This function is only for slave.");
+        static_assert(!is_master, "This function is only for slave.");
         return md_config;
     }
 
     uint8_t get_md_kind()
     {
-        static_assert(!is_master, "This function is only for master.");
+        static_assert(is_master, "This function is only for master.");
         return md_kind;
     }
 
@@ -162,7 +162,7 @@ public:
 
     bool get_limit_switch(uint8_t *limit_switch)
     {
-        static_assert(!is_master, "This function is only for master.");
+        static_assert(is_master, "This function is only for master.");
         if (is_received_limit_switch)
         {
             *limit_switch = this->limit_switch;
