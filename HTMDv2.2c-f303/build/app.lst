@@ -1,0 +1,2173 @@
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"app.cpp"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "App/Src/app.cpp"
+  20              		.section	.text._ZN13MDDataManagerILb0EE4sendEtPhh,"axG",%progbits,_ZN13MDDataManagerILb0EE4sendEtP
+  21              		.align	1
+  22              		.weak	_ZN13MDDataManagerILb0EE4sendEtPhh
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	_ZN13MDDataManagerILb0EE4sendEtPhh:
+  28              		.fnstart
+  29              	.LVL0:
+  30              	.LFB164:
+  31              		.file 2 "CAN/Inc/md_data_manager.hpp"
+   1:CAN/Inc/md_data_manager.hpp **** #include "can_config.hpp"
+   2:CAN/Inc/md_data_manager.hpp **** #include "md_config.hpp"
+   3:CAN/Inc/md_data_manager.hpp **** 
+   4:CAN/Inc/md_data_manager.hpp **** using namespace can_config;
+   5:CAN/Inc/md_data_manager.hpp **** 
+   6:CAN/Inc/md_data_manager.hpp **** template <bool is_master>
+   7:CAN/Inc/md_data_manager.hpp **** class MDDataManager
+   8:CAN/Inc/md_data_manager.hpp **** {
+   9:CAN/Inc/md_data_manager.hpp **** private:
+  10:CAN/Inc/md_data_manager.hpp ****     uint8_t md_id;
+  11:CAN/Inc/md_data_manager.hpp ****     bool is_received_init;
+  12:CAN/Inc/md_data_manager.hpp ****     bool is_received_target;
+  13:CAN/Inc/md_data_manager.hpp ****     bool is_received_limit_switch;
+  14:CAN/Inc/md_data_manager.hpp ****     bool is_received_gain;
+  15:CAN/Inc/md_data_manager.hpp ****     uint8_t md_kind;
+  16:CAN/Inc/md_data_manager.hpp ****     md_config_t md_config;
+  17:CAN/Inc/md_data_manager.hpp ****     int16_t target;
+  18:CAN/Inc/md_data_manager.hpp ****     uint8_t limit_switch;
+  19:CAN/Inc/md_data_manager.hpp ****     float pid_gain[3];
+  20:CAN/Inc/md_data_manager.hpp **** 
+  21:CAN/Inc/md_data_manager.hpp ****     void send_gain(uint8_t gain_type, float gain)
+  22:CAN/Inc/md_data_manager.hpp ****     {
+  23:CAN/Inc/md_data_manager.hpp ****         uint8_t data[5];
+  24:CAN/Inc/md_data_manager.hpp ****         uint32_t gain_int = static_cast<uint32_t>(gain);
+  25:CAN/Inc/md_data_manager.hpp ****         data[0] = gain_type;
+  26:CAN/Inc/md_data_manager.hpp ****         data[1] = gain_int & 0xFF;
+  27:CAN/Inc/md_data_manager.hpp ****         data[2] = (gain_int >> 8) & 0xFF;
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 2
+
+
+  28:CAN/Inc/md_data_manager.hpp ****         data[3] = (gain_int >> 16) & 0xFF;
+  29:CAN/Inc/md_data_manager.hpp ****         data[4] = (gain_int >> 24) & 0xFF;
+  30:CAN/Inc/md_data_manager.hpp **** 
+  31:CAN/Inc/md_data_manager.hpp ****         if (is_master)
+  32:CAN/Inc/md_data_manager.hpp ****         {
+  33:CAN/Inc/md_data_manager.hpp ****             send(encode_id(direction::slave, board_type::md, md_id, data_type::md::gain), data, siz
+  34:CAN/Inc/md_data_manager.hpp ****         }
+  35:CAN/Inc/md_data_manager.hpp ****         else
+  36:CAN/Inc/md_data_manager.hpp ****         {
+  37:CAN/Inc/md_data_manager.hpp ****             send(encode_id(direction::master, board_type::md, md_id, data_type::md::gain), data, si
+  38:CAN/Inc/md_data_manager.hpp ****         }
+  39:CAN/Inc/md_data_manager.hpp ****     }
+  40:CAN/Inc/md_data_manager.hpp **** 
+  41:CAN/Inc/md_data_manager.hpp **** protected:
+  42:CAN/Inc/md_data_manager.hpp ****     virtual void send(uint16_t id, uint8_t *data, uint8_t len)
+  32              		.loc 2 42 18 view -0
+  33              		.cfi_startproc
+  34              		@ args = 0, pretend = 0, frame = 0
+  35              		@ frame_needed = 0, uses_anonymous_args = 0
+  36              		@ link register save eliminated.
+  43:CAN/Inc/md_data_manager.hpp ****     {
+  44:CAN/Inc/md_data_manager.hpp ****     }
+  37              		.loc 2 44 5 is_stmt 0 view .LVU1
+  38 0000 7047     		bx	lr
+  39              		.cfi_endproc
+  40              	.LFE164:
+  41              		.cantunwind
+  42              		.fnend
+  44              		.section	.text._Z41__static_initialization_and_destruction_0v,"ax",%progbits
+  45              		.align	1
+  46              		.syntax unified
+  47              		.thumb
+  48              		.thumb_func
+  50              	_Z41__static_initialization_and_destruction_0v:
+  51              		.fnstart
+  52              	.LFB165:
+   1:App/Src/app.cpp **** #include "app.hpp"
+   2:App/Src/app.cpp **** #include "tim.h"
+   3:App/Src/app.cpp **** #include "motor_controller.hpp"
+   4:App/Src/app.cpp **** 
+   5:App/Src/app.cpp **** CANDriver can_driver(0);
+   6:App/Src/app.cpp **** MotorController motor_controller;
+   7:App/Src/app.cpp **** 
+   8:App/Src/app.cpp **** void App::init()
+   9:App/Src/app.cpp **** {
+  10:App/Src/app.cpp ****     update_md_id();
+  11:App/Src/app.cpp ****     can_driver.set_md_id(md_id);
+  12:App/Src/app.cpp ****     can_driver.init();
+  13:App/Src/app.cpp ****     HAL_TIM_Base_Start_IT(&htim6);
+  14:App/Src/app.cpp **** }
+  15:App/Src/app.cpp **** 
+  16:App/Src/app.cpp **** void App::main_loop()
+  17:App/Src/app.cpp **** {
+  18:App/Src/app.cpp ****     if (initialized)
+  19:App/Src/app.cpp ****     {
+  20:App/Src/app.cpp ****         if (can_driver.get_target(&target))
+  21:App/Src/app.cpp ****         {
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 3
+
+
+  22:App/Src/app.cpp ****             update_target_count = 0;
+  23:App/Src/app.cpp ****         }
+  24:App/Src/app.cpp ****         else
+  25:App/Src/app.cpp ****         {
+  26:App/Src/app.cpp ****             update_target_count++;
+  27:App/Src/app.cpp ****         }
+  28:App/Src/app.cpp **** 
+  29:App/Src/app.cpp ****         if (update_target_count < update_target_count_max)
+  30:App/Src/app.cpp ****         {
+  31:App/Src/app.cpp ****             if (pid_gain[0] != 0.0f && target != 0)
+  32:App/Src/app.cpp ****             {
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+  34:App/Src/app.cpp ****             }
+  35:App/Src/app.cpp ****             else
+  36:App/Src/app.cpp ****             {
+  37:App/Src/app.cpp ****                 motor_controller.reset_pid();
+  38:App/Src/app.cpp ****                 output = target;
+  39:App/Src/app.cpp ****             }
+  40:App/Src/app.cpp **** 
+  41:App/Src/app.cpp ****             output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+  42:App/Src/app.cpp ****             motor_controller.run(target, md_config.max_output);
+  43:App/Src/app.cpp ****         }
+  44:App/Src/app.cpp ****         else
+  45:App/Src/app.cpp ****         {
+  46:App/Src/app.cpp ****             motor_controller.run(0, md_config.max_output);
+  47:App/Src/app.cpp ****             motor_controller.reset_pid();
+  48:App/Src/app.cpp ****         }
+  49:App/Src/app.cpp ****     }
+  50:App/Src/app.cpp **** 
+  51:App/Src/app.cpp ****     if (can_driver.is_md_init())
+  52:App/Src/app.cpp ****     {
+  53:App/Src/app.cpp ****         md_config = can_driver.get_md_config();
+  54:App/Src/app.cpp ****         motor_controller.init(md_config.control_period);
+  55:App/Src/app.cpp ****         motor_controller.set_brake(true);
+  56:App/Src/app.cpp ****         motor_controller.get_count();
+  57:App/Src/app.cpp ****         motor_controller.reset_pid();
+  58:App/Src/app.cpp ****         initialized = true;
+  59:App/Src/app.cpp ****     }
+  60:App/Src/app.cpp **** 
+  61:App/Src/app.cpp ****     if (can_driver.get_gain(&pid_gain[0], &pid_gain[1], &pid_gain[2]))
+  62:App/Src/app.cpp ****     {
+  63:App/Src/app.cpp ****         motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
+  64:App/Src/app.cpp ****         motor_controller.reset_pid();
+  65:App/Src/app.cpp ****     }
+  66:App/Src/app.cpp **** 
+  67:App/Src/app.cpp ****     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+  68:App/Src/app.cpp ****     {
+  69:App/Src/app.cpp ****         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
+  70:App/Src/app.cpp ****         can_driver.send_limit_switch(limit_switch);
+  71:App/Src/app.cpp ****     }
+  72:App/Src/app.cpp **** 
+  73:App/Src/app.cpp ****     if (loop_count > loop_count_max)
+  74:App/Src/app.cpp ****     {
+  75:App/Src/app.cpp ****         can_driver.send_limit_switch(limit_switch);
+  76:App/Src/app.cpp ****         loop_count = 0;
+  77:App/Src/app.cpp ****     }
+  78:App/Src/app.cpp **** 
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 4
+
+
+  79:App/Src/app.cpp ****     HAL_Delay(md_config.control_period);
+  80:App/Src/app.cpp **** }
+  81:App/Src/app.cpp **** 
+  82:App/Src/app.cpp **** void App::timer_task()
+  83:App/Src/app.cpp **** {
+  84:App/Src/app.cpp ****     if (timer_count > md_config.encoder_period)
+  85:App/Src/app.cpp ****     {
+  86:App/Src/app.cpp ****         encoder = motor_controller.get_count();
+  87:App/Src/app.cpp ****         can_driver.send_target(encoder);
+  88:App/Src/app.cpp ****         timer_count = 0;
+  89:App/Src/app.cpp ****     }
+  90:App/Src/app.cpp ****     else
+  91:App/Src/app.cpp ****     {
+  92:App/Src/app.cpp ****         timer_count++;
+  93:App/Src/app.cpp ****     }
+  94:App/Src/app.cpp **** }
+  95:App/Src/app.cpp **** 
+  96:App/Src/app.cpp **** void App::can_callback_process(CAN_HandleTypeDef *hcan)
+  97:App/Src/app.cpp **** {
+  98:App/Src/app.cpp ****     can_driver.can_callback_process(hcan);
+  99:App/Src/app.cpp **** }
+ 100:App/Src/app.cpp **** 
+ 101:App/Src/app.cpp **** void App::update_md_id()
+ 102:App/Src/app.cpp **** {
+ 103:App/Src/app.cpp ****     uint8_t id = 0;
+ 104:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+ 105:App/Src/app.cpp ****         id = 1;
+ 106:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+ 107:App/Src/app.cpp ****         id |= 0b10;
+ 108:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
+ 109:App/Src/app.cpp ****         id |= 0b100;
+ 110:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
+ 111:App/Src/app.cpp ****         id |= 0b1000;
+ 112:App/Src/app.cpp ****     md_id = id;
+ 113:App/Src/app.cpp **** }...
+  53              		.loc 1 113 1 is_stmt 1 view -0
+  54              		.cfi_startproc
+  55              		@ args = 0, pretend = 0, frame = 0
+  56              		@ frame_needed = 0, uses_anonymous_args = 0
+  57              		@ link register save eliminated.
+  58              	.LVL1:
+  59              	.LBB22:
+  60              	.LBI22:
+  61              		.file 3 "App/Inc/can_driver.hpp"
+   1:App/Inc/can_driver.hpp **** #include "md_data_manager.hpp"
+   2:App/Inc/can_driver.hpp **** #include "can.h"
+   3:App/Inc/can_driver.hpp **** 
+   4:App/Inc/can_driver.hpp **** class CANDriver : public MDDataManager<false>
+   5:App/Inc/can_driver.hpp **** {
+   6:App/Inc/can_driver.hpp **** private:
+   7:App/Inc/can_driver.hpp ****     CAN_FilterTypeDef RxFilter;
+   8:App/Inc/can_driver.hpp ****     CAN_RxHeaderTypeDef RxHeader;
+   9:App/Inc/can_driver.hpp ****     CAN_TxHeaderTypeDef TxHeader;
+  10:App/Inc/can_driver.hpp ****     uint32_t TxMailbox;
+  11:App/Inc/can_driver.hpp ****     uint8_t RxData[8];
+  12:App/Inc/can_driver.hpp **** 
+  13:App/Inc/can_driver.hpp ****     void send(uint16_t id, uint8_t *data, uint8_t len) override
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 5
+
+
+  14:App/Inc/can_driver.hpp ****     {
+  15:App/Inc/can_driver.hpp ****         if (len > 8)
+  16:App/Inc/can_driver.hpp ****         {
+  17:App/Inc/can_driver.hpp ****             Error_Handler();
+  18:App/Inc/can_driver.hpp ****         }
+  19:App/Inc/can_driver.hpp ****         TxHeader.StdId = id;                   // CANのID
+  20:App/Inc/can_driver.hpp ****         TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
+  21:App/Inc/can_driver.hpp ****         TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
+  22:App/Inc/can_driver.hpp ****         TxHeader.DLC = len;                    // データ長
+  23:App/Inc/can_driver.hpp ****         TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
+  24:App/Inc/can_driver.hpp ****         if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK)
+  25:App/Inc/can_driver.hpp ****         {
+  26:App/Inc/can_driver.hpp ****             Error_Handler();
+  27:App/Inc/can_driver.hpp ****         }
+  28:App/Inc/can_driver.hpp ****     }
+  29:App/Inc/can_driver.hpp **** 
+  30:App/Inc/can_driver.hpp **** public:
+  31:App/Inc/can_driver.hpp ****     CANDriver(uint8_t md_id) : MDDataManager(md_id) {}
+  62              		.loc 3 31 5 view .LVU3
+  63              	.LBB23:
+  64              	.LBB24:
+  65              	.LBB25:
+  66              	.LBI25:
+  45:CAN/Inc/md_data_manager.hpp **** 
+  46:CAN/Inc/md_data_manager.hpp ****     void receive(uint16_t id, uint8_t *data, uint8_t len)
+  47:CAN/Inc/md_data_manager.hpp ****     {
+  48:CAN/Inc/md_data_manager.hpp ****         uint8_t direction, board_type, board_id, data_type;
+  49:CAN/Inc/md_data_manager.hpp ****         decode_id(id, direction, board_type, board_id, data_type);
+  50:CAN/Inc/md_data_manager.hpp ****         if (board_type != board_type::md || board_id != md_id)
+  51:CAN/Inc/md_data_manager.hpp ****         {
+  52:CAN/Inc/md_data_manager.hpp ****             return;
+  53:CAN/Inc/md_data_manager.hpp ****         }
+  54:CAN/Inc/md_data_manager.hpp ****         switch (data_type)
+  55:CAN/Inc/md_data_manager.hpp ****         {
+  56:CAN/Inc/md_data_manager.hpp ****         case data_type::md::init:
+  57:CAN/Inc/md_data_manager.hpp ****             if (is_master)
+  58:CAN/Inc/md_data_manager.hpp ****             {
+  59:CAN/Inc/md_data_manager.hpp ****                 md_kind = data[0];
+  60:CAN/Inc/md_data_manager.hpp ****             }
+  61:CAN/Inc/md_data_manager.hpp ****             else
+  62:CAN/Inc/md_data_manager.hpp ****             {
+  63:CAN/Inc/md_data_manager.hpp ****                 for (uint8_t i = 0; i < sizeof(md_config_t); i++)
+  64:CAN/Inc/md_data_manager.hpp ****                 {
+  65:CAN/Inc/md_data_manager.hpp ****                     md_config.code[i] = data[i];
+  66:CAN/Inc/md_data_manager.hpp ****                 }
+  67:CAN/Inc/md_data_manager.hpp ****             }
+  68:CAN/Inc/md_data_manager.hpp ****             is_received_init = true;
+  69:CAN/Inc/md_data_manager.hpp ****             break;
+  70:CAN/Inc/md_data_manager.hpp ****         case data_type::md::target:
+  71:CAN/Inc/md_data_manager.hpp ****             target = static_cast<int16_t>((data[1] << 8) | data[0]);
+  72:CAN/Inc/md_data_manager.hpp ****             is_received_target = true;
+  73:CAN/Inc/md_data_manager.hpp ****             break;
+  74:CAN/Inc/md_data_manager.hpp ****         case data_type::md::limit_switch:
+  75:CAN/Inc/md_data_manager.hpp ****             limit_switch = data[0];
+  76:CAN/Inc/md_data_manager.hpp ****             is_received_limit_switch = true;
+  77:CAN/Inc/md_data_manager.hpp ****             break;
+  78:CAN/Inc/md_data_manager.hpp ****         case data_type::md::gain:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 6
+
+
+  79:CAN/Inc/md_data_manager.hpp ****             pid_gain[data[0]] = static_cast<float>((data[4] << 24) | (data[3] << 16) | (data[2] << 
+  80:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+  81:CAN/Inc/md_data_manager.hpp ****             break;
+  82:CAN/Inc/md_data_manager.hpp ****         default:
+  83:CAN/Inc/md_data_manager.hpp ****             break;
+  84:CAN/Inc/md_data_manager.hpp ****         }
+  85:CAN/Inc/md_data_manager.hpp ****     }
+  86:CAN/Inc/md_data_manager.hpp **** 
+  87:CAN/Inc/md_data_manager.hpp **** public:
+  88:CAN/Inc/md_data_manager.hpp ****     MDDataManager(uint8_t md_id) : md_id(md_id), is_received_init(false), is_received_target(false)
+  67              		.loc 2 88 5 view .LVU4
+  68              	.LBB26:
+  69              	.LBB27:
+  70              		.loc 2 88 157 is_stmt 0 view .LVU5
+  71 0000 054B     		ldr	r3, .L3
+  72 0002 064A     		ldr	r2, .L3+4
+  73 0004 1A60     		str	r2, [r3]
+  74              		.loc 2 88 36 view .LVU6
+  75 0006 0022     		movs	r2, #0
+  76 0008 1A71     		strb	r2, [r3, #4]
+  77              		.loc 2 88 50 view .LVU7
+  78 000a 5A71     		strb	r2, [r3, #5]
+  79              		.loc 2 88 75 view .LVU8
+  80 000c 9A71     		strb	r2, [r3, #6]
+  81              		.loc 2 88 102 view .LVU9
+  82 000e DA71     		strb	r2, [r3, #7]
+  83              		.loc 2 88 135 view .LVU10
+  84 0010 1A72     		strb	r2, [r3, #8]
+  85              	.LVL2:
+  86              		.loc 2 88 135 view .LVU11
+  87              	.LBE27:
+  88              	.LBE26:
+  89              	.LBE25:
+  90              		.loc 3 31 51 discriminator 1 view .LVU12
+  91 0012 034A     		ldr	r2, .L3+8
+  92 0014 1A60     		str	r2, [r3]
+  93              	.LVL3:
+  94              		.loc 3 31 51 discriminator 1 view .LVU13
+  95              	.LBE24:
+  96              	.LBE23:
+  97              	.LBE22:
+  98              		.loc 1 113 1 view .LVU14
+  99 0016 7047     		bx	lr
+ 100              	.L4:
+ 101              		.align	2
+ 102              	.L3:
+ 103 0018 00000000 		.word	can_driver
+ 104 001c 08000000 		.word	_ZTV13MDDataManagerILb0EE+8
+ 105 0020 08000000 		.word	_ZTV9CANDriver+8
+ 106              		.cfi_endproc
+ 107              	.LFE165:
+ 108              		.cantunwind
+ 109              		.fnend
+ 111              		.section	.text._ZN9CANDriver4sendEtPhh,"axG",%progbits,_ZN9CANDriver4sendEtPhh,comdat
+ 112              		.align	1
+ 113              		.weak	_ZN9CANDriver4sendEtPhh
+ 114              		.syntax unified
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 7
+
+
+ 115              		.thumb
+ 116              		.thumb_func
+ 118              	_ZN9CANDriver4sendEtPhh:
+ 119              		.fnstart
+ 120              	.LVL4:
+ 121              	.LFB139:
+  13:App/Inc/can_driver.hpp ****     {
+ 122              		.loc 3 13 10 is_stmt 1 view -0
+ 123              		.cfi_startproc
+ 124              		@ args = 0, pretend = 0, frame = 0
+ 125              		@ frame_needed = 0, uses_anonymous_args = 0
+  13:App/Inc/can_driver.hpp ****     {
+ 126              		.loc 3 13 10 is_stmt 0 view .LVU16
+ 127 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 128              		.save {r3, r4, r5, r6, r7, lr}
+ 129              	.LCFI0:
+ 130              		.cfi_def_cfa_offset 24
+ 131              		.cfi_offset 3, -24
+ 132              		.cfi_offset 4, -20
+ 133              		.cfi_offset 5, -16
+ 134              		.cfi_offset 6, -12
+ 135              		.cfi_offset 7, -8
+ 136              		.cfi_offset 14, -4
+ 137 0002 0446     		mov	r4, r0
+ 138 0004 0F46     		mov	r7, r1
+ 139 0006 1646     		mov	r6, r2
+ 140 0008 1D46     		mov	r5, r3
+  15:App/Inc/can_driver.hpp ****         {
+ 141              		.loc 3 15 9 is_stmt 1 view .LVU17
+ 142 000a 082B     		cmp	r3, #8
+ 143 000c 10D8     		bhi	.L9
+ 144              	.LVL5:
+ 145              	.L6:
+  19:App/Inc/can_driver.hpp ****         TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
+ 146              		.loc 3 19 9 view .LVU18
+  19:App/Inc/can_driver.hpp ****         TxHeader.RTR = CAN_RTR_DATA;           // リモートフレーム
+ 147              		.loc 3 19 24 is_stmt 0 view .LVU19
+ 148 000e A766     		str	r7, [r4, #104]
+  20:App/Inc/can_driver.hpp ****         TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
+ 149              		.loc 3 20 9 is_stmt 1 view .LVU20
+  20:App/Inc/can_driver.hpp ****         TxHeader.IDE = CAN_ID_STD;             // 標準フレーム
+ 150              		.loc 3 20 22 is_stmt 0 view .LVU21
+ 151 0010 0023     		movs	r3, #0
+ 152 0012 6367     		str	r3, [r4, #116]
+  21:App/Inc/can_driver.hpp ****         TxHeader.DLC = len;                    // データ長
+ 153              		.loc 3 21 9 is_stmt 1 view .LVU22
+  21:App/Inc/can_driver.hpp ****         TxHeader.DLC = len;                    // データ長
+ 154              		.loc 3 21 22 is_stmt 0 view .LVU23
+ 155 0014 2367     		str	r3, [r4, #112]
+  22:App/Inc/can_driver.hpp ****         TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
+ 156              		.loc 3 22 9 is_stmt 1 view .LVU24
+  22:App/Inc/can_driver.hpp ****         TxHeader.TransmitGlobalTime = DISABLE; // グローバルタイム
+ 157              		.loc 3 22 22 is_stmt 0 view .LVU25
+ 158 0016 A567     		str	r5, [r4, #120]
+  23:App/Inc/can_driver.hpp ****         if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK)
+ 159              		.loc 3 23 9 is_stmt 1 view .LVU26
+  23:App/Inc/can_driver.hpp ****         if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK)
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 8
+
+
+ 160              		.loc 3 23 37 is_stmt 0 view .LVU27
+ 161 0018 84F87C30 		strb	r3, [r4, #124]
+  24:App/Inc/can_driver.hpp ****         {
+ 162              		.loc 3 24 9 is_stmt 1 view .LVU28
+  24:App/Inc/can_driver.hpp ****         {
+ 163              		.loc 3 24 33 is_stmt 0 view .LVU29
+ 164 001c 04F18003 		add	r3, r4, #128
+ 165 0020 3246     		mov	r2, r6
+ 166 0022 04F16801 		add	r1, r4, #104
+ 167 0026 0548     		ldr	r0, .L11
+ 168 0028 FFF7FEFF 		bl	HAL_CAN_AddTxMessage
+ 169              	.LVL6:
+  24:App/Inc/can_driver.hpp ****         {
+ 170              		.loc 3 24 9 discriminator 1 view .LVU30
+ 171 002c 18B9     		cbnz	r0, .L10
+ 172              	.L5:
+  28:App/Inc/can_driver.hpp **** 
+ 173              		.loc 3 28 5 view .LVU31
+ 174 002e F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 175              	.LVL7:
+ 176              	.L9:
+  17:App/Inc/can_driver.hpp ****         }
+ 177              		.loc 3 17 13 is_stmt 1 view .LVU32
+  17:App/Inc/can_driver.hpp ****         }
+ 178              		.loc 3 17 26 is_stmt 0 view .LVU33
+ 179 0030 FFF7FEFF 		bl	Error_Handler
+ 180              	.LVL8:
+  17:App/Inc/can_driver.hpp ****         }
+ 181              		.loc 3 17 26 view .LVU34
+ 182 0034 EBE7     		b	.L6
+ 183              	.L10:
+  26:App/Inc/can_driver.hpp ****         }
+ 184              		.loc 3 26 13 is_stmt 1 view .LVU35
+  26:App/Inc/can_driver.hpp ****         }
+ 185              		.loc 3 26 26 is_stmt 0 view .LVU36
+ 186 0036 FFF7FEFF 		bl	Error_Handler
+ 187              	.LVL9:
+  28:App/Inc/can_driver.hpp **** 
+ 188              		.loc 3 28 5 view .LVU37
+ 189 003a F8E7     		b	.L5
+ 190              	.L12:
+ 191              		.align	2
+ 192              	.L11:
+ 193 003c 00000000 		.word	hcan
+ 194              		.cfi_endproc
+ 195              	.LFE139:
+ 196              		.fnend
+ 198              		.section	.text._ZN9CANDriver4initEv,"axG",%progbits,_ZN9CANDriver4initEv,comdat
+ 199              		.align	1
+ 200              		.weak	_ZN9CANDriver4initEv
+ 201              		.syntax unified
+ 202              		.thumb
+ 203              		.thumb_func
+ 205              	_ZN9CANDriver4initEv:
+ 206              		.fnstart
+ 207              	.LVL10:
+ 208              	.LFB143:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 9
+
+
+  32:App/Inc/can_driver.hpp **** 
+  33:App/Inc/can_driver.hpp ****     void init()
+ 209              		.loc 3 33 10 is_stmt 1 view -0
+ 210              		.cfi_startproc
+ 211              		@ args = 0, pretend = 0, frame = 0
+ 212              		@ frame_needed = 0, uses_anonymous_args = 0
+ 213              		.loc 3 33 10 is_stmt 0 view .LVU39
+ 214 0000 38B5     		push	{r3, r4, r5, lr}
+ 215              		.save {r3, r4, r5, lr}
+ 216              	.LCFI1:
+ 217              		.cfi_def_cfa_offset 16
+ 218              		.cfi_offset 3, -16
+ 219              		.cfi_offset 4, -12
+ 220              		.cfi_offset 5, -8
+ 221              		.cfi_offset 14, -4
+ 222 0002 0446     		mov	r4, r0
+  34:App/Inc/can_driver.hpp ****     {
+  35:App/Inc/can_driver.hpp ****         // CANのフィルタ設定
+  36:App/Inc/can_driver.hpp ****         RxFilter.FilterIdHigh = 0;                    // フィルタのIDの上位16ビット
+ 223              		.loc 3 36 9 is_stmt 1 view .LVU40
+ 224              		.loc 3 36 31 is_stmt 0 view .LVU41
+ 225 0004 0023     		movs	r3, #0
+ 226 0006 4362     		str	r3, [r0, #36]
+  37:App/Inc/can_driver.hpp ****         RxFilter.FilterIdLow = 0;                     // フィルタのIDの下位16ビット
+ 227              		.loc 3 37 9 is_stmt 1 view .LVU42
+ 228              		.loc 3 37 30 is_stmt 0 view .LVU43
+ 229 0008 8362     		str	r3, [r0, #40]
+  38:App/Inc/can_driver.hpp ****         RxFilter.FilterMaskIdHigh = 0;                // フィルタのマスクのIDの上位16�
+ 230              		.loc 3 38 9 is_stmt 1 view .LVU44
+ 231              		.loc 3 38 35 is_stmt 0 view .LVU45
+ 232 000a C362     		str	r3, [r0, #44]
+  39:App/Inc/can_driver.hpp ****         RxFilter.FilterMaskIdLow = 0;                 // フィルタのマスクのIDの下位16�
+ 233              		.loc 3 39 9 is_stmt 1 view .LVU46
+ 234              		.loc 3 39 34 is_stmt 0 view .LVU47
+ 235 000c 0363     		str	r3, [r0, #48]
+  40:App/Inc/can_driver.hpp ****         RxFilter.FilterScale = CAN_FILTERSCALE_32BIT; // フィルタのスケール
+ 236              		.loc 3 40 9 is_stmt 1 view .LVU48
+ 237              		.loc 3 40 30 is_stmt 0 view .LVU49
+ 238 000e 0122     		movs	r2, #1
+ 239 0010 0264     		str	r2, [r0, #64]
+  41:App/Inc/can_driver.hpp ****         RxFilter.FilterBank = 0;                      // フィルタのバンク
+ 240              		.loc 3 41 9 is_stmt 1 view .LVU50
+ 241              		.loc 3 41 29 is_stmt 0 view .LVU51
+ 242 0012 8363     		str	r3, [r0, #56]
+  42:App/Inc/can_driver.hpp ****         RxFilter.FilterMode = CAN_FILTERMODE_IDMASK;  // フィルタのモード
+ 243              		.loc 3 42 9 is_stmt 1 view .LVU52
+ 244              		.loc 3 42 29 is_stmt 0 view .LVU53
+ 245 0014 C363     		str	r3, [r0, #60]
+  43:App/Inc/can_driver.hpp ****         RxFilter.SlaveStartFilterBank = 14;           // スレーブの開始フィルタバンク
+ 246              		.loc 3 43 9 is_stmt 1 view .LVU54
+ 247              		.loc 3 43 39 is_stmt 0 view .LVU55
+ 248 0016 0E23     		movs	r3, #14
+ 249 0018 8364     		str	r3, [r0, #72]
+  44:App/Inc/can_driver.hpp ****         RxFilter.FilterActivation = ENABLE;           // フィルタの有効化
+ 250              		.loc 3 44 9 is_stmt 1 view .LVU56
+ 251              		.loc 3 44 35 is_stmt 0 view .LVU57
+ 252 001a 4264     		str	r2, [r0, #68]
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 10
+
+
+  45:App/Inc/can_driver.hpp ****         // CAN通信のスタート
+  46:App/Inc/can_driver.hpp ****         HAL_CAN_Start(&hcan);                   // CANのスタート
+ 253              		.loc 3 46 9 is_stmt 1 view .LVU58
+ 254              		.loc 3 46 22 is_stmt 0 view .LVU59
+ 255 001c 064D     		ldr	r5, .L15
+ 256 001e 2846     		mov	r0, r5
+ 257              	.LVL11:
+ 258              		.loc 3 46 22 view .LVU60
+ 259 0020 FFF7FEFF 		bl	HAL_CAN_Start
+ 260              	.LVL12:
+  47:App/Inc/can_driver.hpp ****         HAL_CAN_ConfigFilter(&hcan, &RxFilter); // CANのフィルタの設定
+ 261              		.loc 3 47 9 is_stmt 1 view .LVU61
+ 262              		.loc 3 47 29 is_stmt 0 view .LVU62
+ 263 0024 04F12401 		add	r1, r4, #36
+ 264 0028 2846     		mov	r0, r5
+ 265 002a FFF7FEFF 		bl	HAL_CAN_ConfigFilter
+ 266              	.LVL13:
+  48:App/Inc/can_driver.hpp ****         // 割り込み有効
+  49:App/Inc/can_driver.hpp ****         HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // FIFO0のメッセー�
+ 267              		.loc 3 49 9 is_stmt 1 view .LVU63
+ 268              		.loc 3 49 37 is_stmt 0 view .LVU64
+ 269 002e 0221     		movs	r1, #2
+ 270 0030 2846     		mov	r0, r5
+ 271 0032 FFF7FEFF 		bl	HAL_CAN_ActivateNotification
+ 272              	.LVL14:
+  50:App/Inc/can_driver.hpp ****     }
+ 273              		.loc 3 50 5 view .LVU65
+ 274 0036 38BD     		pop	{r3, r4, r5, pc}
+ 275              	.LVL15:
+ 276              	.L16:
+ 277              		.loc 3 50 5 view .LVU66
+ 278              		.align	2
+ 279              	.L15:
+ 280 0038 00000000 		.word	hcan
+ 281              		.cfi_endproc
+ 282              	.LFE143:
+ 283              		.fnend
+ 285              		.section	.text._ZN3App12update_md_idEv,"ax",%progbits
+ 286              		.align	1
+ 287              		.global	_ZN3App12update_md_idEv
+ 288              		.syntax unified
+ 289              		.thumb
+ 290              		.thumb_func
+ 292              	_ZN3App12update_md_idEv:
+ 293              		.fnstart
+ 294              	.LVL16:
+ 295              	.LFB152:
+ 102:App/Src/app.cpp **** {
+ 296              		.loc 1 102 1 is_stmt 1 view -0
+ 297              		.cfi_startproc
+ 298              		@ args = 0, pretend = 0, frame = 0
+ 299              		@ frame_needed = 0, uses_anonymous_args = 0
+ 102:App/Src/app.cpp **** {
+ 300              		.loc 1 102 1 is_stmt 0 view .LVU68
+ 301 0000 38B5     		push	{r3, r4, r5, lr}
+ 302              		.save {r3, r4, r5, lr}
+ 303              	.LCFI2:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 11
+
+
+ 304              		.cfi_def_cfa_offset 16
+ 305              		.cfi_offset 3, -16
+ 306              		.cfi_offset 4, -12
+ 307              		.cfi_offset 5, -8
+ 308              		.cfi_offset 14, -4
+ 309 0002 0546     		mov	r5, r0
+ 103:App/Src/app.cpp ****     uint8_t id = 0;
+ 310              		.loc 1 103 5 is_stmt 1 view .LVU69
+ 311              	.LVL17:
+ 104:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+ 312              		.loc 1 104 5 view .LVU70
+ 104:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+ 313              		.loc 1 104 25 is_stmt 0 view .LVU71
+ 314 0004 2021     		movs	r1, #32
+ 315 0006 1148     		ldr	r0, .L24
+ 316              	.LVL18:
+ 104:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+ 317              		.loc 1 104 25 view .LVU72
+ 318 0008 FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 319              	.LVL19:
+ 104:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
+ 320              		.loc 1 104 5 discriminator 1 view .LVU73
+ 321 000c 0446     		mov	r4, r0
+ 322 000e 00B1     		cbz	r0, .L18
+ 105:App/Src/app.cpp ****         id = 1;
+ 323              		.loc 1 105 12 view .LVU74
+ 324 0010 0124     		movs	r4, #1
+ 325              	.L18:
+ 326              	.LVL20:
+ 106:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+ 327              		.loc 1 106 5 is_stmt 1 view .LVU75
+ 106:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+ 328              		.loc 1 106 25 is_stmt 0 view .LVU76
+ 329 0012 1021     		movs	r1, #16
+ 330 0014 0D48     		ldr	r0, .L24
+ 331 0016 FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 332              	.LVL21:
+ 106:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin))
+ 333              		.loc 1 106 5 discriminator 1 view .LVU77
+ 334 001a 10B1     		cbz	r0, .L19
+ 107:App/Src/app.cpp ****         id |= 0b10;
+ 335              		.loc 1 107 9 is_stmt 1 view .LVU78
+ 107:App/Src/app.cpp ****         id |= 0b10;
+ 336              		.loc 1 107 12 is_stmt 0 view .LVU79
+ 337 001c 44F00204 		orr	r4, r4, #2
+ 338              	.LVL22:
+ 107:App/Src/app.cpp ****         id |= 0b10;
+ 339              		.loc 1 107 12 view .LVU80
+ 340 0020 E4B2     		uxtb	r4, r4
+ 341              	.L19:
+ 342              	.LVL23:
+ 108:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
+ 343              		.loc 1 108 5 is_stmt 1 view .LVU81
+ 108:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
+ 344              		.loc 1 108 25 is_stmt 0 view .LVU82
+ 345 0022 0821     		movs	r1, #8
+ 346 0024 0948     		ldr	r0, .L24
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 12
+
+
+ 347 0026 FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 348              	.LVL24:
+ 108:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP2_GPIO_Port, DIP2_Pin))
+ 349              		.loc 1 108 5 discriminator 1 view .LVU83
+ 350 002a 10B1     		cbz	r0, .L20
+ 109:App/Src/app.cpp ****         id |= 0b100;
+ 351              		.loc 1 109 9 is_stmt 1 view .LVU84
+ 109:App/Src/app.cpp ****         id |= 0b100;
+ 352              		.loc 1 109 12 is_stmt 0 view .LVU85
+ 353 002c 44F00404 		orr	r4, r4, #4
+ 354              	.LVL25:
+ 109:App/Src/app.cpp ****         id |= 0b100;
+ 355              		.loc 1 109 12 view .LVU86
+ 356 0030 E4B2     		uxtb	r4, r4
+ 357              	.L20:
+ 358              	.LVL26:
+ 110:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
+ 359              		.loc 1 110 5 is_stmt 1 view .LVU87
+ 110:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
+ 360              		.loc 1 110 25 is_stmt 0 view .LVU88
+ 361 0032 4FF40041 		mov	r1, #32768
+ 362 0036 4FF09040 		mov	r0, #1207959552
+ 363 003a FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 364              	.LVL27:
+ 110:App/Src/app.cpp ****     if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
+ 365              		.loc 1 110 5 discriminator 1 view .LVU89
+ 366 003e 10B1     		cbz	r0, .L21
+ 111:App/Src/app.cpp ****         id |= 0b1000;
+ 367              		.loc 1 111 9 is_stmt 1 view .LVU90
+ 111:App/Src/app.cpp ****         id |= 0b1000;
+ 368              		.loc 1 111 12 is_stmt 0 view .LVU91
+ 369 0040 44F00804 		orr	r4, r4, #8
+ 370              	.LVL28:
+ 111:App/Src/app.cpp ****         id |= 0b1000;
+ 371              		.loc 1 111 12 view .LVU92
+ 372 0044 E4B2     		uxtb	r4, r4
+ 373              	.L21:
+ 374              	.LVL29:
+ 112:App/Src/app.cpp ****     md_id = id;
+ 375              		.loc 1 112 5 is_stmt 1 view .LVU93
+ 112:App/Src/app.cpp ****     md_id = id;
+ 376              		.loc 1 112 11 is_stmt 0 view .LVU94
+ 377 0046 2C70     		strb	r4, [r5]
+ 378              		.loc 1 113 1 view .LVU95
+ 379 0048 38BD     		pop	{r3, r4, r5, pc}
+ 380              	.LVL30:
+ 381              	.L25:
+ 382              		.loc 1 113 1 view .LVU96
+ 383 004a 00BF     		.align	2
+ 384              	.L24:
+ 385 004c 00040048 		.word	1207960576
+ 386              		.cfi_endproc
+ 387              	.LFE152:
+ 388              		.fnend
+ 390              		.section	.text._ZN3App4initEv,"ax",%progbits
+ 391              		.align	1
+ 392              		.global	_ZN3App4initEv
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 13
+
+
+ 393              		.syntax unified
+ 394              		.thumb
+ 395              		.thumb_func
+ 397              	_ZN3App4initEv:
+ 398              		.fnstart
+ 399              	.LVL31:
+ 400              	.LFB148:
+   9:App/Src/app.cpp **** {
+ 401              		.loc 1 9 1 is_stmt 1 view -0
+ 402              		.cfi_startproc
+ 403              		@ args = 0, pretend = 0, frame = 0
+ 404              		@ frame_needed = 0, uses_anonymous_args = 0
+   9:App/Src/app.cpp **** {
+ 405              		.loc 1 9 1 is_stmt 0 view .LVU98
+ 406 0000 10B5     		push	{r4, lr}
+ 407              		.save {r4, lr}
+ 408              	.LCFI3:
+ 409              		.cfi_def_cfa_offset 8
+ 410              		.cfi_offset 4, -8
+ 411              		.cfi_offset 14, -4
+ 412 0002 0446     		mov	r4, r0
+  10:App/Src/app.cpp ****     update_md_id();
+ 413              		.loc 1 10 5 is_stmt 1 view .LVU99
+  10:App/Src/app.cpp ****     update_md_id();
+ 414              		.loc 1 10 17 is_stmt 0 view .LVU100
+ 415 0004 FFF7FEFF 		bl	_ZN3App12update_md_idEv
+ 416              	.LVL32:
+  11:App/Src/app.cpp ****     can_driver.set_md_id(md_id);
+ 417              		.loc 1 11 5 is_stmt 1 view .LVU101
+  11:App/Src/app.cpp ****     can_driver.set_md_id(md_id);
+ 418              		.loc 1 11 25 is_stmt 0 view .LVU102
+ 419 0008 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 420              	.LVL33:
+ 421              	.LBB28:
+ 422              	.LBI28:
+  89:CAN/Inc/md_data_manager.hpp **** 
+  90:CAN/Inc/md_data_manager.hpp ****     void set_md_id(uint8_t md_id)
+ 423              		.loc 2 90 10 is_stmt 1 view .LVU103
+ 424              	.LBB29:
+  91:CAN/Inc/md_data_manager.hpp ****     {
+  92:CAN/Inc/md_data_manager.hpp ****         this->md_id = md_id;
+ 425              		.loc 2 92 21 is_stmt 0 view .LVU104
+ 426 000a 0448     		ldr	r0, .L28
+ 427 000c 0371     		strb	r3, [r0, #4]
+ 428              	.LVL34:
+ 429              		.loc 2 92 21 view .LVU105
+ 430              	.LBE29:
+ 431              	.LBE28:
+  12:App/Src/app.cpp ****     can_driver.init();
+ 432              		.loc 1 12 5 is_stmt 1 view .LVU106
+  12:App/Src/app.cpp ****     can_driver.init();
+ 433              		.loc 1 12 20 is_stmt 0 view .LVU107
+ 434 000e FFF7FEFF 		bl	_ZN9CANDriver4initEv
+ 435              	.LVL35:
+  13:App/Src/app.cpp ****     HAL_TIM_Base_Start_IT(&htim6);
+ 436              		.loc 1 13 5 is_stmt 1 view .LVU108
+  13:App/Src/app.cpp ****     HAL_TIM_Base_Start_IT(&htim6);
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 14
+
+
+ 437              		.loc 1 13 26 is_stmt 0 view .LVU109
+ 438 0012 0348     		ldr	r0, .L28+4
+ 439 0014 FFF7FEFF 		bl	HAL_TIM_Base_Start_IT
+ 440              	.LVL36:
+  14:App/Src/app.cpp **** }
+ 441              		.loc 1 14 1 view .LVU110
+ 442 0018 10BD     		pop	{r4, pc}
+ 443              	.LVL37:
+ 444              	.L29:
+  14:App/Src/app.cpp **** }
+ 445              		.loc 1 14 1 view .LVU111
+ 446 001a 00BF     		.align	2
+ 447              	.L28:
+ 448 001c 00000000 		.word	can_driver
+ 449 0020 00000000 		.word	htim6
+ 450              		.cfi_endproc
+ 451              	.LFE148:
+ 452              		.fnend
+ 454              		.section	.text._ZN13MDDataManagerILb0EE7receiveEtPhh,"axG",%progbits,_ZN13MDDataManagerILb0EE7rece
+ 455              		.align	1
+ 456              		.weak	_ZN13MDDataManagerILb0EE7receiveEtPhh
+ 457              		.syntax unified
+ 458              		.thumb
+ 459              		.thumb_func
+ 461              	_ZN13MDDataManagerILb0EE7receiveEtPhh:
+ 462              		.fnstart
+ 463              	.LVL38:
+ 464              	.LFB156:
+  46:CAN/Inc/md_data_manager.hpp ****     {
+ 465              		.loc 2 46 10 is_stmt 1 view -0
+ 466              		.cfi_startproc
+ 467              		@ args = 0, pretend = 0, frame = 8
+ 468              		@ frame_needed = 0, uses_anonymous_args = 0
+  46:CAN/Inc/md_data_manager.hpp ****     {
+ 469              		.loc 2 46 10 is_stmt 0 view .LVU113
+ 470 0000 30B5     		push	{r4, r5, lr}
+ 471              		.save {r4, r5, lr}
+ 472              	.LCFI4:
+ 473              		.cfi_def_cfa_offset 12
+ 474              		.cfi_offset 4, -12
+ 475              		.cfi_offset 5, -8
+ 476              		.cfi_offset 14, -4
+ 477              		.pad #20
+ 478 0002 85B0     		sub	sp, sp, #20
+ 479              	.LCFI5:
+ 480              		.cfi_def_cfa_offset 32
+ 481 0004 0446     		mov	r4, r0
+ 482 0006 0846     		mov	r0, r1
+ 483              	.LVL39:
+  46:CAN/Inc/md_data_manager.hpp ****     {
+ 484              		.loc 2 46 10 view .LVU114
+ 485 0008 1546     		mov	r5, r2
+  49:CAN/Inc/md_data_manager.hpp ****         if (board_type != board_type::md || board_id != md_id)
+ 486              		.loc 2 49 18 view .LVU115
+ 487 000a 03AB     		add	r3, sp, #12
+ 488              	.LVL40:
+  49:CAN/Inc/md_data_manager.hpp ****         if (board_type != board_type::md || board_id != md_id)
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 15
+
+
+ 489              		.loc 2 49 18 view .LVU116
+ 490 000c 0093     		str	r3, [sp]
+ 491 000e 0DF10D03 		add	r3, sp, #13
+ 492 0012 0DF10E02 		add	r2, sp, #14
+ 493              	.LVL41:
+  49:CAN/Inc/md_data_manager.hpp ****         if (board_type != board_type::md || board_id != md_id)
+ 494              		.loc 2 49 18 view .LVU117
+ 495 0016 0DF10F01 		add	r1, sp, #15
+ 496              	.LVL42:
+  49:CAN/Inc/md_data_manager.hpp ****         if (board_type != board_type::md || board_id != md_id)
+ 497              		.loc 2 49 18 view .LVU118
+ 498 001a FFF7FEFF 		bl	_ZN10can_config9decode_idEtRhS0_S0_S0_
+ 499              	.LVL43:
+  50:CAN/Inc/md_data_manager.hpp ****         {
+ 500              		.loc 2 50 24 view .LVU119
+ 501 001e 9DF80E30 		ldrb	r3, [sp, #14]	@ zero_extendqisi2
+  50:CAN/Inc/md_data_manager.hpp ****         {
+ 502              		.loc 2 50 9 view .LVU120
+ 503 0022 012B     		cmp	r3, #1
+ 504 0024 15D1     		bne	.L30
+  50:CAN/Inc/md_data_manager.hpp ****         {
+ 505              		.loc 2 50 57 discriminator 1 view .LVU121
+ 506 0026 2279     		ldrb	r2, [r4, #4]	@ zero_extendqisi2
+  50:CAN/Inc/md_data_manager.hpp ****         {
+ 507              		.loc 2 50 54 discriminator 1 view .LVU122
+ 508 0028 9DF80D30 		ldrb	r3, [sp, #13]	@ zero_extendqisi2
+  50:CAN/Inc/md_data_manager.hpp ****         {
+ 509              		.loc 2 50 42 discriminator 1 view .LVU123
+ 510 002c 9A42     		cmp	r2, r3
+ 511 002e 10D1     		bne	.L30
+ 512              	.LBB30:
+  54:CAN/Inc/md_data_manager.hpp ****         {
+ 513              		.loc 2 54 17 view .LVU124
+ 514 0030 9DF80C30 		ldrb	r3, [sp, #12]	@ zero_extendqisi2
+  54:CAN/Inc/md_data_manager.hpp ****         {
+ 515              		.loc 2 54 9 view .LVU125
+ 516 0034 032B     		cmp	r3, #3
+ 517 0036 0CD8     		bhi	.L30
+ 518 0038 DFE803F0 		tbb	[pc, r3]
+ 519              	.L36:
+ 520 003c 07       		.byte	(.L39-.L36)/2
+ 521 003d 0D       		.byte	(.L38-.L36)/2
+ 522 003e 15       		.byte	(.L37-.L36)/2
+ 523 003f 1A       		.byte	(.L35-.L36)/2
+ 524              	.LVL44:
+ 525              		.p2align 1
+ 526              	.L40:
+ 527              	.LBB31:
+ 528              	.LBB32:
+  65:CAN/Inc/md_data_manager.hpp ****                 }
+ 529              		.loc 2 65 47 view .LVU126
+ 530 0040 E95C     		ldrb	r1, [r5, r3]	@ zero_extendqisi2
+  65:CAN/Inc/md_data_manager.hpp ****                 }
+ 531              		.loc 2 65 39 view .LVU127
+ 532 0042 E218     		adds	r2, r4, r3
+ 533 0044 9172     		strb	r1, [r2, #10]
+  63:CAN/Inc/md_data_manager.hpp ****                 {
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 16
+
+
+ 534              		.loc 2 63 17 is_stmt 1 discriminator 3 view .LVU128
+ 535 0046 0133     		adds	r3, r3, #1
+ 536              	.LVL45:
+  63:CAN/Inc/md_data_manager.hpp ****                 {
+ 537              		.loc 2 63 17 is_stmt 0 discriminator 3 view .LVU129
+ 538 0048 DBB2     		uxtb	r3, r3
+ 539              	.LVL46:
+ 540              	.L39:
+  63:CAN/Inc/md_data_manager.hpp ****                 {
+ 541              		.loc 2 63 39 is_stmt 1 discriminator 1 view .LVU130
+ 542 004a 072B     		cmp	r3, #7
+ 543 004c F8D9     		bls	.L40
+ 544              	.LBE32:
+  68:CAN/Inc/md_data_manager.hpp ****             break;
+ 545              		.loc 2 68 30 is_stmt 0 view .LVU131
+ 546 004e 0123     		movs	r3, #1
+ 547              	.LVL47:
+  68:CAN/Inc/md_data_manager.hpp ****             break;
+ 548              		.loc 2 68 30 view .LVU132
+ 549 0050 6371     		strb	r3, [r4, #5]
+ 550              	.LVL48:
+ 551              	.L30:
+  68:CAN/Inc/md_data_manager.hpp ****             break;
+ 552              		.loc 2 68 30 view .LVU133
+ 553              	.LBE31:
+ 554              	.LBE30:
+  85:CAN/Inc/md_data_manager.hpp **** 
+ 555              		.loc 2 85 5 view .LVU134
+ 556 0052 05B0     		add	sp, sp, #20
+ 557              	.LCFI6:
+ 558              		.cfi_remember_state
+ 559              		.cfi_def_cfa_offset 12
+ 560              		@ sp needed
+ 561 0054 30BD     		pop	{r4, r5, pc}
+ 562              	.LVL49:
+ 563              	.L38:
+ 564              	.LCFI7:
+ 565              		.cfi_restore_state
+ 566              	.LBB34:
+ 567              	.LBB33:
+  71:CAN/Inc/md_data_manager.hpp ****             is_received_target = true;
+ 568              		.loc 2 71 50 view .LVU135
+ 569 0056 6A78     		ldrb	r2, [r5, #1]	@ zero_extendqisi2
+  71:CAN/Inc/md_data_manager.hpp ****             is_received_target = true;
+ 570              		.loc 2 71 66 view .LVU136
+ 571 0058 2B78     		ldrb	r3, [r5]	@ zero_extendqisi2
+  71:CAN/Inc/md_data_manager.hpp ****             is_received_target = true;
+ 572              		.loc 2 71 58 view .LVU137
+ 573 005a 43EA0223 		orr	r3, r3, r2, lsl #8
+  71:CAN/Inc/md_data_manager.hpp ****             is_received_target = true;
+ 574              		.loc 2 71 20 view .LVU138
+ 575 005e 6382     		strh	r3, [r4, #18]	@ movhi
+  72:CAN/Inc/md_data_manager.hpp ****             break;
+ 576              		.loc 2 72 32 view .LVU139
+ 577 0060 0123     		movs	r3, #1
+ 578 0062 A371     		strb	r3, [r4, #6]
+  73:CAN/Inc/md_data_manager.hpp ****         case data_type::md::limit_switch:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 17
+
+
+ 579              		.loc 2 73 13 view .LVU140
+ 580 0064 F5E7     		b	.L30
+ 581              	.L37:
+  75:CAN/Inc/md_data_manager.hpp ****             is_received_limit_switch = true;
+ 582              		.loc 2 75 34 view .LVU141
+ 583 0066 2B78     		ldrb	r3, [r5]	@ zero_extendqisi2
+  75:CAN/Inc/md_data_manager.hpp ****             is_received_limit_switch = true;
+ 584              		.loc 2 75 26 view .LVU142
+ 585 0068 2375     		strb	r3, [r4, #20]
+  76:CAN/Inc/md_data_manager.hpp ****             break;
+ 586              		.loc 2 76 38 view .LVU143
+ 587 006a 0123     		movs	r3, #1
+ 588 006c E371     		strb	r3, [r4, #7]
+  77:CAN/Inc/md_data_manager.hpp ****         case data_type::md::gain:
+ 589              		.loc 2 77 13 view .LVU144
+ 590 006e F0E7     		b	.L30
+ 591              	.L35:
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 592              		.loc 2 79 59 view .LVU145
+ 593 0070 2A79     		ldrb	r2, [r5, #4]	@ zero_extendqisi2
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 594              		.loc 2 79 77 view .LVU146
+ 595 0072 EB78     		ldrb	r3, [r5, #3]	@ zero_extendqisi2
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 596              		.loc 2 79 79 view .LVU147
+ 597 0074 1B04     		lsls	r3, r3, #16
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 598              		.loc 2 79 68 view .LVU148
+ 599 0076 43EA0263 		orr	r3, r3, r2, lsl #24
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 600              		.loc 2 79 95 view .LVU149
+ 601 007a AA78     		ldrb	r2, [r5, #2]	@ zero_extendqisi2
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 602              		.loc 2 79 86 view .LVU150
+ 603 007c 43EA0223 		orr	r3, r3, r2, lsl #8
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 604              		.loc 2 79 111 view .LVU151
+ 605 0080 6A78     		ldrb	r2, [r5, #1]	@ zero_extendqisi2
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 606              		.loc 2 79 103 view .LVU152
+ 607 0082 1343     		orrs	r3, r3, r2
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 608              		.loc 2 79 28 view .LVU153
+ 609 0084 2A78     		ldrb	r2, [r5]	@ zero_extendqisi2
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 610              		.loc 2 79 33 view .LVU154
+ 611 0086 07EE903A 		vmov	s15, r3	@ int
+ 612 008a F8EEE77A 		vcvt.f32.s32	s15, s15
+  79:CAN/Inc/md_data_manager.hpp ****             is_received_gain = true;
+ 613              		.loc 2 79 31 view .LVU155
+ 614 008e 931D     		adds	r3, r2, #6
+ 615 0090 04EB8303 		add	r3, r4, r3, lsl #2
+ 616 0094 C3ED007A 		vstr.32	s15, [r3]
+  80:CAN/Inc/md_data_manager.hpp ****             break;
+ 617              		.loc 2 80 30 view .LVU156
+ 618 0098 0123     		movs	r3, #1
+ 619 009a 2372     		strb	r3, [r4, #8]
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 18
+
+
+  81:CAN/Inc/md_data_manager.hpp ****         default:
+ 620              		.loc 2 81 13 view .LVU157
+ 621 009c D9E7     		b	.L30
+ 622              	.LBE33:
+ 623              	.LBE34:
+ 624              		.cfi_endproc
+ 625              	.LFE156:
+ 626              		.fnend
+ 628              		.section	.text._ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef,"axG",%progbits,_ZN9CANDri
+ 629              		.align	1
+ 630              		.weak	_ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef
+ 631              		.syntax unified
+ 632              		.thumb
+ 633              		.thumb_func
+ 635              	_ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef:
+ 636              		.fnstart
+ 637              	.LVL50:
+ 638              	.LFB144:
+  51:App/Inc/can_driver.hpp **** 
+  52:App/Inc/can_driver.hpp ****     void can_callback_process(CAN_HandleTypeDef *hcan)
+ 639              		.loc 3 52 10 is_stmt 1 view -0
+ 640              		.cfi_startproc
+ 641              		@ args = 0, pretend = 0, frame = 0
+ 642              		@ frame_needed = 0, uses_anonymous_args = 0
+ 643              		.loc 3 52 10 is_stmt 0 view .LVU159
+ 644 0000 38B5     		push	{r3, r4, r5, lr}
+ 645              		.save {r3, r4, r5, lr}
+ 646              	.LCFI8:
+ 647              		.cfi_def_cfa_offset 16
+ 648              		.cfi_offset 3, -16
+ 649              		.cfi_offset 4, -12
+ 650              		.cfi_offset 5, -8
+ 651              		.cfi_offset 14, -4
+ 652 0002 0446     		mov	r4, r0
+ 653 0004 0846     		mov	r0, r1
+ 654              	.LVL51:
+  53:App/Inc/can_driver.hpp ****     {
+  54:App/Inc/can_driver.hpp ****         if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+ 655              		.loc 3 54 9 is_stmt 1 view .LVU160
+ 656              		.loc 3 54 65 is_stmt 0 view .LVU161
+ 657 0006 04F18405 		add	r5, r4, #132
+ 658              		.loc 3 54 33 view .LVU162
+ 659 000a 2B46     		mov	r3, r5
+ 660 000c 04F14C02 		add	r2, r4, #76
+ 661 0010 0021     		movs	r1, #0
+ 662              	.LVL52:
+ 663              		.loc 3 54 33 view .LVU163
+ 664 0012 FFF7FEFF 		bl	HAL_CAN_GetRxMessage
+ 665              	.LVL53:
+ 666              		.loc 3 54 9 discriminator 1 view .LVU164
+ 667 0016 40B9     		cbnz	r0, .L47
+ 668              	.L45:
+  55:App/Inc/can_driver.hpp ****         {
+  56:App/Inc/can_driver.hpp ****             Error_Handler();
+  57:App/Inc/can_driver.hpp ****         }
+  58:App/Inc/can_driver.hpp ****         receive(RxHeader.StdId, RxData, RxHeader.DLC);
+ 669              		.loc 3 58 9 is_stmt 1 view .LVU165
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 19
+
+
+ 670              		.loc 3 58 16 is_stmt 0 view .LVU166
+ 671 0018 94F85C30 		ldrb	r3, [r4, #92]	@ zero_extendqisi2
+ 672 001c 2A46     		mov	r2, r5
+ 673 001e B4F84C10 		ldrh	r1, [r4, #76]
+ 674 0022 2046     		mov	r0, r4
+ 675 0024 FFF7FEFF 		bl	_ZN13MDDataManagerILb0EE7receiveEtPhh
+ 676              	.LVL54:
+  59:App/Inc/can_driver.hpp ****     }
+ 677              		.loc 3 59 5 view .LVU167
+ 678 0028 38BD     		pop	{r3, r4, r5, pc}
+ 679              	.LVL55:
+ 680              	.L47:
+  56:App/Inc/can_driver.hpp ****         }
+ 681              		.loc 3 56 13 is_stmt 1 view .LVU168
+  56:App/Inc/can_driver.hpp ****         }
+ 682              		.loc 3 56 26 is_stmt 0 view .LVU169
+ 683 002a FFF7FEFF 		bl	Error_Handler
+ 684              	.LVL56:
+ 685 002e F3E7     		b	.L45
+ 686              		.cfi_endproc
+ 687              	.LFE144:
+ 688              		.fnend
+ 690              		.section	.text._ZN3App20can_callback_processEP17CAN_HandleTypeDef,"ax",%progbits
+ 691              		.align	1
+ 692              		.global	_ZN3App20can_callback_processEP17CAN_HandleTypeDef
+ 693              		.syntax unified
+ 694              		.thumb
+ 695              		.thumb_func
+ 697              	_ZN3App20can_callback_processEP17CAN_HandleTypeDef:
+ 698              		.fnstart
+ 699              	.LVL57:
+ 700              	.LFB151:
+  97:App/Src/app.cpp **** {
+ 701              		.loc 1 97 1 is_stmt 1 view -0
+ 702              		.cfi_startproc
+ 703              		@ args = 0, pretend = 0, frame = 0
+ 704              		@ frame_needed = 0, uses_anonymous_args = 0
+  97:App/Src/app.cpp **** {
+ 705              		.loc 1 97 1 is_stmt 0 view .LVU171
+ 706 0000 08B5     		push	{r3, lr}
+ 707              		.save {r3, lr}
+ 708              	.LCFI9:
+ 709              		.cfi_def_cfa_offset 8
+ 710              		.cfi_offset 3, -8
+ 711              		.cfi_offset 14, -4
+  98:App/Src/app.cpp ****     can_driver.can_callback_process(hcan);
+ 712              		.loc 1 98 5 is_stmt 1 view .LVU172
+  98:App/Src/app.cpp ****     can_driver.can_callback_process(hcan);
+ 713              		.loc 1 98 36 is_stmt 0 view .LVU173
+ 714 0002 0248     		ldr	r0, .L50
+ 715              	.LVL58:
+  98:App/Src/app.cpp ****     can_driver.can_callback_process(hcan);
+ 716              		.loc 1 98 36 view .LVU174
+ 717 0004 FFF7FEFF 		bl	_ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef
+ 718              	.LVL59:
+  99:App/Src/app.cpp **** }
+ 719              		.loc 1 99 1 view .LVU175
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 20
+
+
+ 720 0008 08BD     		pop	{r3, pc}
+ 721              	.L51:
+ 722 000a 00BF     		.align	2
+ 723              	.L50:
+ 724 000c 00000000 		.word	can_driver
+ 725              		.cfi_endproc
+ 726              	.LFE151:
+ 727              		.fnend
+ 729              		.section	.text._ZN13MDDataManagerILb0EE17send_limit_switchEh,"axG",%progbits,_ZN13MDDataManagerILb
+ 730              		.align	1
+ 731              		.weak	_ZN13MDDataManagerILb0EE17send_limit_switchEh
+ 732              		.syntax unified
+ 733              		.thumb
+ 734              		.thumb_func
+ 736              	_ZN13MDDataManagerILb0EE17send_limit_switchEh:
+ 737              		.fnstart
+ 738              	.LVL60:
+ 739              	.LFB162:
+  93:CAN/Inc/md_data_manager.hpp ****     }
+  94:CAN/Inc/md_data_manager.hpp **** 
+  95:CAN/Inc/md_data_manager.hpp ****     void send_init(md_config_t md_config)
+  96:CAN/Inc/md_data_manager.hpp ****     {
+  97:CAN/Inc/md_data_manager.hpp ****         static_assert(is_master, "This function is only for master.");
+  98:CAN/Inc/md_data_manager.hpp ****         send(encode_id(direction::slave, board_type::md, md_id, data_type::md::init), md_config.cod
+  99:CAN/Inc/md_data_manager.hpp ****     }
+ 100:CAN/Inc/md_data_manager.hpp **** 
+ 101:CAN/Inc/md_data_manager.hpp ****     void send_init(uint8_t md_kind)
+ 102:CAN/Inc/md_data_manager.hpp ****     {
+ 103:CAN/Inc/md_data_manager.hpp ****         static_assert(!is_master, "This function is only for slave.");
+ 104:CAN/Inc/md_data_manager.hpp ****         send(encode_id(direction::master, board_type::md, md_id, data_type::md::init), &md_kind, si
+ 105:CAN/Inc/md_data_manager.hpp ****     }
+ 106:CAN/Inc/md_data_manager.hpp **** 
+ 107:CAN/Inc/md_data_manager.hpp ****     void send_target(int16_t target)
+ 108:CAN/Inc/md_data_manager.hpp ****     {
+ 109:CAN/Inc/md_data_manager.hpp ****         uint8_t data[2];
+ 110:CAN/Inc/md_data_manager.hpp ****         data[0] = target & 0xFF;
+ 111:CAN/Inc/md_data_manager.hpp ****         data[1] = (target >> 8) & 0xFF;
+ 112:CAN/Inc/md_data_manager.hpp ****         if (is_master)
+ 113:CAN/Inc/md_data_manager.hpp ****         {
+ 114:CAN/Inc/md_data_manager.hpp ****             send(encode_id(direction::slave, board_type::md, md_id, data_type::md::target), data, s
+ 115:CAN/Inc/md_data_manager.hpp ****         }
+ 116:CAN/Inc/md_data_manager.hpp ****         else
+ 117:CAN/Inc/md_data_manager.hpp ****         {
+ 118:CAN/Inc/md_data_manager.hpp ****             send(encode_id(direction::master, board_type::md, md_id, data_type::md::target), data, 
+ 119:CAN/Inc/md_data_manager.hpp ****         }
+ 120:CAN/Inc/md_data_manager.hpp ****     }
+ 121:CAN/Inc/md_data_manager.hpp **** 
+ 122:CAN/Inc/md_data_manager.hpp ****     void send_limit_switch(uint8_t limit_switch)
+ 740              		.loc 2 122 10 is_stmt 1 view -0
+ 741              		.cfi_startproc
+ 742              		@ args = 0, pretend = 0, frame = 8
+ 743              		@ frame_needed = 0, uses_anonymous_args = 0
+ 744              		.loc 2 122 10 is_stmt 0 view .LVU177
+ 745 0000 30B5     		push	{r4, r5, lr}
+ 746              		.save {r4, r5, lr}
+ 747              	.LCFI10:
+ 748              		.cfi_def_cfa_offset 12
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 21
+
+
+ 749              		.cfi_offset 4, -12
+ 750              		.cfi_offset 5, -8
+ 751              		.cfi_offset 14, -4
+ 752              		.pad #12
+ 753 0002 83B0     		sub	sp, sp, #12
+ 754              	.LCFI11:
+ 755              		.cfi_def_cfa_offset 24
+ 756 0004 0446     		mov	r4, r0
+ 757 0006 8DF80710 		strb	r1, [sp, #7]
+ 123:CAN/Inc/md_data_manager.hpp ****     {
+ 124:CAN/Inc/md_data_manager.hpp ****         static_assert(!is_master, "This function is slave only.");
+ 125:CAN/Inc/md_data_manager.hpp ****         send(encode_id(direction::master, board_type::md, md_id, data_type::md::limit_switch), &lim
+ 758              		.loc 2 125 13 view .LVU178
+ 759 000a 0368     		ldr	r3, [r0]
+ 760 000c 1D68     		ldr	r5, [r3]
+ 761 000e 0223     		movs	r3, #2
+ 762 0010 0279     		ldrb	r2, [r0, #4]	@ zero_extendqisi2
+ 763 0012 0121     		movs	r1, #1
+ 764              	.LVL61:
+ 765              		.loc 2 125 13 view .LVU179
+ 766 0014 0846     		mov	r0, r1
+ 767              	.LVL62:
+ 768              		.loc 2 125 13 view .LVU180
+ 769 0016 FFF7FEFF 		bl	_ZN10can_config9encode_idEhhhh
+ 770              	.LVL63:
+ 771              		.loc 2 125 13 view .LVU181
+ 772 001a 0146     		mov	r1, r0
+ 773              		.loc 2 125 13 discriminator 1 view .LVU182
+ 774 001c 0123     		movs	r3, #1
+ 775 001e 0DF10702 		add	r2, sp, #7
+ 776 0022 2046     		mov	r0, r4
+ 777 0024 A847     		blx	r5
+ 778              	.LVL64:
+ 126:CAN/Inc/md_data_manager.hpp ****     }
+ 779              		.loc 2 126 5 view .LVU183
+ 780 0026 03B0     		add	sp, sp, #12
+ 781              	.LCFI12:
+ 782              		.cfi_def_cfa_offset 12
+ 783              		@ sp needed
+ 784 0028 30BD     		pop	{r4, r5, pc}
+ 785              		.loc 2 126 5 view .LVU184
+ 786              		.cfi_endproc
+ 787              	.LFE162:
+ 788              		.fnend
+ 790              		.section	.text._ZN3App9main_loopEv,"ax",%progbits
+ 791              		.align	1
+ 792              		.global	_ZN3App9main_loopEv
+ 793              		.syntax unified
+ 794              		.thumb
+ 795              		.thumb_func
+ 797              	_ZN3App9main_loopEv:
+ 798              		.fnstart
+ 799              	.LVL65:
+ 800              	.LFB149:
+  17:App/Src/app.cpp **** {
+ 801              		.loc 1 17 1 is_stmt 1 view -0
+ 802              		.cfi_startproc
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 22
+
+
+ 803              		@ args = 0, pretend = 0, frame = 8
+ 804              		@ frame_needed = 0, uses_anonymous_args = 0
+  17:App/Src/app.cpp **** {
+ 805              		.loc 1 17 1 is_stmt 0 view .LVU186
+ 806 0000 30B5     		push	{r4, r5, lr}
+ 807              		.save {r4, r5, lr}
+ 808              	.LCFI13:
+ 809              		.cfi_def_cfa_offset 12
+ 810              		.cfi_offset 4, -12
+ 811              		.cfi_offset 5, -8
+ 812              		.cfi_offset 14, -4
+ 813              		.pad #12
+ 814 0002 83B0     		sub	sp, sp, #12
+ 815              	.LCFI14:
+ 816              		.cfi_def_cfa_offset 24
+ 817 0004 0446     		mov	r4, r0
+  18:App/Src/app.cpp ****     if (initialized)
+ 818              		.loc 1 18 5 is_stmt 1 view .LVU187
+  18:App/Src/app.cpp ****     if (initialized)
+ 819              		.loc 1 18 9 is_stmt 0 view .LVU188
+ 820 0006 4378     		ldrb	r3, [r0, #1]	@ zero_extendqisi2
+  18:App/Src/app.cpp ****     if (initialized)
+ 821              		.loc 1 18 5 view .LVU189
+ 822 0008 4BB3     		cbz	r3, .L55
+  20:App/Src/app.cpp ****         if (can_driver.get_target(&target))
+ 823              		.loc 1 20 9 is_stmt 1 view .LVU190
+ 824              	.LVL66:
+ 825              	.LBB35:
+ 826              	.LBI35:
+ 127:CAN/Inc/md_data_manager.hpp **** 
+ 128:CAN/Inc/md_data_manager.hpp ****     void send_gain(float p_gain, float i_gain, float d_gain)
+ 129:CAN/Inc/md_data_manager.hpp ****     {
+ 130:CAN/Inc/md_data_manager.hpp ****         send_gain(0, p_gain);
+ 131:CAN/Inc/md_data_manager.hpp ****         send_gain(1, i_gain);
+ 132:CAN/Inc/md_data_manager.hpp ****         send_gain(2, d_gain);
+ 133:CAN/Inc/md_data_manager.hpp ****     }
+ 134:CAN/Inc/md_data_manager.hpp **** 
+ 135:CAN/Inc/md_data_manager.hpp ****     bool is_md_init()
+ 136:CAN/Inc/md_data_manager.hpp ****     {
+ 137:CAN/Inc/md_data_manager.hpp ****         return is_received_init;
+ 138:CAN/Inc/md_data_manager.hpp ****     }
+ 139:CAN/Inc/md_data_manager.hpp **** 
+ 140:CAN/Inc/md_data_manager.hpp ****     md_config_t get_md_config()
+ 141:CAN/Inc/md_data_manager.hpp ****     {
+ 142:CAN/Inc/md_data_manager.hpp ****         static_assert(!is_master, "This function is only for slave.");
+ 143:CAN/Inc/md_data_manager.hpp ****         return md_config;
+ 144:CAN/Inc/md_data_manager.hpp ****     }
+ 145:CAN/Inc/md_data_manager.hpp **** 
+ 146:CAN/Inc/md_data_manager.hpp ****     uint8_t get_md_kind()
+ 147:CAN/Inc/md_data_manager.hpp ****     {
+ 148:CAN/Inc/md_data_manager.hpp ****         static_assert(is_master, "This function is only for master.");
+ 149:CAN/Inc/md_data_manager.hpp ****         return md_kind;
+ 150:CAN/Inc/md_data_manager.hpp ****     }
+ 151:CAN/Inc/md_data_manager.hpp **** 
+ 152:CAN/Inc/md_data_manager.hpp ****     bool get_target(int16_t *target)
+ 827              		.loc 2 152 10 view .LVU191
+ 828              	.LBB36:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 23
+
+
+ 153:CAN/Inc/md_data_manager.hpp ****     {
+ 154:CAN/Inc/md_data_manager.hpp ****         if (is_received_target)
+ 829              		.loc 2 154 13 is_stmt 0 view .LVU192
+ 830 000a 5C4B     		ldr	r3, .L71
+ 831 000c 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 832              		.loc 2 154 9 view .LVU193
+ 833 000e 002B     		cmp	r3, #0
+ 834 0010 3FD1     		bne	.L56
+ 835              	.LVL67:
+ 836              		.loc 2 154 9 view .LVU194
+ 837              	.LBE36:
+ 838              	.LBE35:
+  26:App/Src/app.cpp ****             update_target_count++;
+ 839              		.loc 1 26 13 is_stmt 1 view .LVU195
+ 840 0012 038C     		ldrh	r3, [r0, #32]
+  26:App/Src/app.cpp ****             update_target_count++;
+ 841              		.loc 1 26 32 is_stmt 0 view .LVU196
+ 842 0014 0133     		adds	r3, r3, #1
+ 843 0016 0384     		strh	r3, [r0, #32]	@ movhi
+ 844              	.L57:
+  29:App/Src/app.cpp ****         if (update_target_count < update_target_count_max)
+ 845              		.loc 1 29 9 is_stmt 1 view .LVU197
+  29:App/Src/app.cpp ****         if (update_target_count < update_target_count_max)
+ 846              		.loc 1 29 13 is_stmt 0 view .LVU198
+ 847 0018 228C     		ldrh	r2, [r4, #32]
+  29:App/Src/app.cpp ****         if (update_target_count < update_target_count_max)
+ 848              		.loc 1 29 35 view .LVU199
+ 849 001a 638C     		ldrh	r3, [r4, #34]
+  29:App/Src/app.cpp ****         if (update_target_count < update_target_count_max)
+ 850              		.loc 1 29 9 view .LVU200
+ 851 001c 9A42     		cmp	r2, r3
+ 852 001e 5AD2     		bcs	.L58
+  31:App/Src/app.cpp ****             if (pid_gain[0] != 0.0f && target != 0)
+ 853              		.loc 1 31 13 is_stmt 1 view .LVU201
+  31:App/Src/app.cpp ****             if (pid_gain[0] != 0.0f && target != 0)
+ 854              		.loc 1 31 27 is_stmt 0 view .LVU202
+ 855 0020 D4ED057A 		vldr.32	s15, [r4, #20]
+  31:App/Src/app.cpp ****             if (pid_gain[0] != 0.0f && target != 0)
+ 856              		.loc 1 31 13 view .LVU203
+ 857 0024 F5EE407A 		vcmp.f32	s15, #0
+ 858 0028 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 859 002c 03D0     		beq	.L59
+  31:App/Src/app.cpp ****             if (pid_gain[0] != 0.0f && target != 0)
+ 860              		.loc 1 31 40 discriminator 1 view .LVU204
+ 861 002e B4F90A30 		ldrsh	r3, [r4, #10]
+  31:App/Src/app.cpp ****             if (pid_gain[0] != 0.0f && target != 0)
+ 862              		.loc 1 31 37 discriminator 1 view .LVU205
+ 863 0032 002B     		cmp	r3, #0
+ 864 0034 35D1     		bne	.L66
+ 865              	.L59:
+  37:App/Src/app.cpp ****                 motor_controller.reset_pid();
+ 866              		.loc 1 37 17 is_stmt 1 view .LVU206
+  37:App/Src/app.cpp ****                 motor_controller.reset_pid();
+ 867              		.loc 1 37 43 is_stmt 0 view .LVU207
+ 868 0036 5248     		ldr	r0, .L71+4
+ 869              	.LVL68:
+  37:App/Src/app.cpp ****                 motor_controller.reset_pid();
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 24
+
+
+ 870              		.loc 1 37 43 view .LVU208
+ 871 0038 FFF7FEFF 		bl	_ZN15MotorController9reset_pidEv
+ 872              	.LVL69:
+  38:App/Src/app.cpp ****                 output = target;
+ 873              		.loc 1 38 17 is_stmt 1 view .LVU209
+  38:App/Src/app.cpp ****                 output = target;
+ 874              		.loc 1 38 26 is_stmt 0 view .LVU210
+ 875 003c B4F90A30 		ldrsh	r3, [r4, #10]
+  38:App/Src/app.cpp ****                 output = target;
+ 876              		.loc 1 38 24 view .LVU211
+ 877 0040 A381     		strh	r3, [r4, #12]	@ movhi
+ 878              	.L60:
+  41:App/Src/app.cpp ****             output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+ 879              		.loc 1 41 13 is_stmt 1 view .LVU212
+  41:App/Src/app.cpp ****             output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+ 880              		.loc 1 41 58 is_stmt 0 view .LVU213
+ 881 0042 4F4D     		ldr	r5, .L71+4
+ 882 0044 2279     		ldrb	r2, [r4, #4]	@ zero_extendqisi2
+ 883 0046 B4F90C10 		ldrsh	r1, [r4, #12]
+ 884 004a 2846     		mov	r0, r5
+ 885 004c FFF7FEFF 		bl	_ZN15MotorController19trapezoidal_controlEsh
+ 886              	.LVL70:
+  41:App/Src/app.cpp ****             output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+ 887              		.loc 1 41 20 discriminator 1 view .LVU214
+ 888 0050 A081     		strh	r0, [r4, #12]	@ movhi
+  42:App/Src/app.cpp ****             motor_controller.run(target, md_config.max_output);
+ 889              		.loc 1 42 13 is_stmt 1 view .LVU215
+  42:App/Src/app.cpp ****             motor_controller.run(target, md_config.max_output);
+ 890              		.loc 1 42 33 is_stmt 0 view .LVU216
+ 891 0052 6288     		ldrh	r2, [r4, #2]
+ 892 0054 B4F90A10 		ldrsh	r1, [r4, #10]
+ 893 0058 2846     		mov	r0, r5
+ 894 005a FFF7FEFF 		bl	_ZN15MotorController3runEst
+ 895              	.LVL71:
+ 896              	.L55:
+  51:App/Src/app.cpp ****     if (can_driver.is_md_init())
+ 897              		.loc 1 51 5 is_stmt 1 view .LVU217
+ 898              	.LBB38:
+ 899              	.LBI38:
+ 135:CAN/Inc/md_data_manager.hpp ****     {
+ 900              		.loc 2 135 10 view .LVU218
+ 901              	.LBB39:
+ 137:CAN/Inc/md_data_manager.hpp ****     }
+ 902              		.loc 2 137 16 is_stmt 0 view .LVU219
+ 903 005e 474B     		ldr	r3, .L71
+ 904 0060 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 905              	.LVL72:
+ 137:CAN/Inc/md_data_manager.hpp ****     }
+ 906              		.loc 2 137 16 view .LVU220
+ 907              	.LBE39:
+ 908              	.LBE38:
+  51:App/Src/app.cpp ****     if (can_driver.is_md_init())
+ 909              		.loc 1 51 5 discriminator 1 view .LVU221
+ 910 0062 002B     		cmp	r3, #0
+ 911 0064 41D1     		bne	.L67
+ 912              	.L61:
+  61:App/Src/app.cpp ****     if (can_driver.get_gain(&pid_gain[0], &pid_gain[1], &pid_gain[2]))
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 25
+
+
+ 913              		.loc 1 61 5 is_stmt 1 view .LVU222
+ 914              	.LVL73:
+ 915              	.LBB40:
+ 916              	.LBI40:
+ 155:CAN/Inc/md_data_manager.hpp ****         {
+ 156:CAN/Inc/md_data_manager.hpp ****             *target = this->target;
+ 157:CAN/Inc/md_data_manager.hpp ****             is_received_target = false;
+ 158:CAN/Inc/md_data_manager.hpp ****             return true;
+ 159:CAN/Inc/md_data_manager.hpp ****         }
+ 160:CAN/Inc/md_data_manager.hpp ****         return false;
+ 161:CAN/Inc/md_data_manager.hpp ****     }
+ 162:CAN/Inc/md_data_manager.hpp **** 
+ 163:CAN/Inc/md_data_manager.hpp ****     bool get_limit_switch(uint8_t *limit_switch)
+ 164:CAN/Inc/md_data_manager.hpp ****     {
+ 165:CAN/Inc/md_data_manager.hpp ****         static_assert(is_master, "This function is only for master.");
+ 166:CAN/Inc/md_data_manager.hpp ****         if (is_received_limit_switch)
+ 167:CAN/Inc/md_data_manager.hpp ****         {
+ 168:CAN/Inc/md_data_manager.hpp ****             *limit_switch = this->limit_switch;
+ 169:CAN/Inc/md_data_manager.hpp ****             is_received_limit_switch = false;
+ 170:CAN/Inc/md_data_manager.hpp ****             return true;
+ 171:CAN/Inc/md_data_manager.hpp ****         }
+ 172:CAN/Inc/md_data_manager.hpp ****         return false;
+ 173:CAN/Inc/md_data_manager.hpp ****     }
+ 174:CAN/Inc/md_data_manager.hpp **** 
+ 175:CAN/Inc/md_data_manager.hpp ****     bool get_gain(float *p_gain, float *i_gain, float *d_gain)
+ 917              		.loc 2 175 10 view .LVU223
+ 918              	.LBB41:
+ 176:CAN/Inc/md_data_manager.hpp ****     {
+ 177:CAN/Inc/md_data_manager.hpp ****         if (is_received_gain)
+ 919              		.loc 2 177 13 is_stmt 0 view .LVU224
+ 920 0066 454B     		ldr	r3, .L71
+ 921 0068 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 922              		.loc 2 177 9 view .LVU225
+ 923 006a 002B     		cmp	r3, #0
+ 924 006c 5CD1     		bne	.L68
+ 925              	.LVL74:
+ 926              	.L62:
+ 927              		.loc 2 177 9 view .LVU226
+ 928              	.LBE41:
+ 929              	.LBE40:
+  67:App/Src/app.cpp ****     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+ 930              		.loc 1 67 5 is_stmt 1 view .LVU227
+  67:App/Src/app.cpp ****     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+ 931              		.loc 1 67 9 is_stmt 0 view .LVU228
+ 932 006e 257C     		ldrb	r5, [r4, #16]	@ zero_extendqisi2
+  67:App/Src/app.cpp ****     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+ 933              		.loc 1 67 41 view .LVU229
+ 934 0070 4FF48061 		mov	r1, #1024
+ 935 0074 4FF09040 		mov	r0, #1207959552
+ 936 0078 FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 937              	.LVL75:
+  67:App/Src/app.cpp ****     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+ 938              		.loc 1 67 5 discriminator 1 view .LVU230
+ 939 007c 8542     		cmp	r5, r0
+ 940 007e 6AD1     		bne	.L69
+ 941              	.L63:
+  73:App/Src/app.cpp ****     if (loop_count > loop_count_max)
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 26
+
+
+ 942              		.loc 1 73 5 is_stmt 1 view .LVU231
+  73:App/Src/app.cpp ****     if (loop_count > loop_count_max)
+ 943              		.loc 1 73 9 is_stmt 0 view .LVU232
+ 944 0080 E28C     		ldrh	r2, [r4, #38]
+  73:App/Src/app.cpp ****     if (loop_count > loop_count_max)
+ 945              		.loc 1 73 22 view .LVU233
+ 946 0082 238D     		ldrh	r3, [r4, #40]
+  73:App/Src/app.cpp ****     if (loop_count > loop_count_max)
+ 947              		.loc 1 73 5 view .LVU234
+ 948 0084 9A42     		cmp	r2, r3
+ 949 0086 72D8     		bhi	.L70
+ 950              	.L64:
+  79:App/Src/app.cpp ****     HAL_Delay(md_config.control_period);
+ 951              		.loc 1 79 5 is_stmt 1 view .LVU235
+  79:App/Src/app.cpp ****     HAL_Delay(md_config.control_period);
+ 952              		.loc 1 79 14 is_stmt 0 view .LVU236
+ 953 0088 6079     		ldrb	r0, [r4, #5]	@ zero_extendqisi2
+ 954 008a FFF7FEFF 		bl	HAL_Delay
+ 955              	.LVL76:
+  80:App/Src/app.cpp **** }
+ 956              		.loc 1 80 1 view .LVU237
+ 957 008e 03B0     		add	sp, sp, #12
+ 958              	.LCFI15:
+ 959              		.cfi_remember_state
+ 960              		.cfi_def_cfa_offset 12
+ 961              		@ sp needed
+ 962 0090 30BD     		pop	{r4, r5, pc}
+ 963              	.LVL77:
+ 964              	.L56:
+ 965              	.LCFI16:
+ 966              		.cfi_restore_state
+ 967              	.LBB43:
+ 968              	.LBB37:
+ 156:CAN/Inc/md_data_manager.hpp ****             is_received_target = false;
+ 969              		.loc 2 156 29 view .LVU238
+ 970 0092 3A4A     		ldr	r2, .L71
+ 971 0094 B2F91230 		ldrsh	r3, [r2, #18]
+ 156:CAN/Inc/md_data_manager.hpp ****             is_received_target = false;
+ 972              		.loc 2 156 21 view .LVU239
+ 973 0098 4381     		strh	r3, [r0, #10]	@ movhi
+ 157:CAN/Inc/md_data_manager.hpp ****             return true;
+ 974              		.loc 2 157 32 view .LVU240
+ 975 009a 0023     		movs	r3, #0
+ 976 009c 9371     		strb	r3, [r2, #6]
+ 977              	.LVL78:
+ 157:CAN/Inc/md_data_manager.hpp ****             return true;
+ 978              		.loc 2 157 32 view .LVU241
+ 979              	.LBE37:
+ 980              	.LBE43:
+  22:App/Src/app.cpp ****             update_target_count = 0;
+ 981              		.loc 1 22 13 is_stmt 1 view .LVU242
+  22:App/Src/app.cpp ****             update_target_count = 0;
+ 982              		.loc 1 22 33 is_stmt 0 view .LVU243
+ 983 009e 0384     		strh	r3, [r0, #32]	@ movhi
+ 984 00a0 BAE7     		b	.L57
+ 985              	.L66:
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 27
+
+
+ 986              		.loc 1 33 17 is_stmt 1 view .LVU244
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 987              		.loc 1 33 65 is_stmt 0 view .LVU245
+ 988 00a2 B4F90E20 		ldrsh	r2, [r4, #14]
+ 989 00a6 00EE902A 		vmov	s1, r2	@ int
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 990              		.loc 1 33 56 view .LVU246
+ 991 00aa F8EEE00A 		vcvt.f32.s32	s1, s1
+ 992 00ae 07EE903A 		vmov	s15, r3	@ int
+ 993 00b2 B8EEE70A 		vcvt.f32.s32	s0, s15
+ 994 00b6 3248     		ldr	r0, .L71+4
+ 995              	.LVL79:
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 996              		.loc 1 33 56 view .LVU247
+ 997 00b8 FFF7FEFF 		bl	_ZN15MotorController13calculate_pidEff
+ 998              	.LVL80:
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 999              		.loc 1 33 93 discriminator 1 view .LVU248
+ 1000 00bc 6388     		ldrh	r3, [r4, #2]
+ 1001 00be 07EE903A 		vmov	s15, r3	@ int
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 1002              		.loc 1 33 76 discriminator 1 view .LVU249
+ 1003 00c2 F8EE677A 		vcvt.f32.u32	s15, s15
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 1004              		.loc 1 33 74 discriminator 1 view .LVU250
+ 1005 00c6 67EE807A 		vmul.f32	s15, s15, s0
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 1006              		.loc 1 33 24 discriminator 1 view .LVU251
+ 1007 00ca FDEEE77A 		vcvt.s32.f32	s15, s15
+ 1008 00ce 17EE903A 		vmov	r3, s15	@ int
+ 1009 00d2 A381     		strh	r3, [r4, #12]	@ movhi
+  33:App/Src/app.cpp ****                 output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_out
+ 1010              		.loc 1 33 24 view .LVU252
+ 1011 00d4 B5E7     		b	.L60
+ 1012              	.LVL81:
+ 1013              	.L58:
+  46:App/Src/app.cpp ****             motor_controller.run(0, md_config.max_output);
+ 1014              		.loc 1 46 13 is_stmt 1 view .LVU253
+  46:App/Src/app.cpp ****             motor_controller.run(0, md_config.max_output);
+ 1015              		.loc 1 46 33 is_stmt 0 view .LVU254
+ 1016 00d6 2A4D     		ldr	r5, .L71+4
+ 1017 00d8 6288     		ldrh	r2, [r4, #2]
+ 1018 00da 0021     		movs	r1, #0
+ 1019 00dc 2846     		mov	r0, r5
+ 1020              	.LVL82:
+  46:App/Src/app.cpp ****             motor_controller.run(0, md_config.max_output);
+ 1021              		.loc 1 46 33 view .LVU255
+ 1022 00de FFF7FEFF 		bl	_ZN15MotorController3runEst
+ 1023              	.LVL83:
+  47:App/Src/app.cpp ****             motor_controller.reset_pid();
+ 1024              		.loc 1 47 13 is_stmt 1 view .LVU256
+  47:App/Src/app.cpp ****             motor_controller.reset_pid();
+ 1025              		.loc 1 47 39 is_stmt 0 view .LVU257
+ 1026 00e2 2846     		mov	r0, r5
+ 1027 00e4 FFF7FEFF 		bl	_ZN15MotorController9reset_pidEv
+ 1028              	.LVL84:
+ 1029 00e8 B9E7     		b	.L55
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 28
+
+
+ 1030              	.L67:
+  53:App/Src/app.cpp ****         md_config = can_driver.get_md_config();
+ 1031              		.loc 1 53 9 is_stmt 1 view .LVU258
+ 1032              	.LVL85:
+ 1033              	.LBB44:
+ 1034              	.LBI44:
+ 140:CAN/Inc/md_data_manager.hpp ****     {
+ 1035              		.loc 2 140 17 view .LVU259
+ 1036              	.LBB45:
+ 143:CAN/Inc/md_data_manager.hpp ****     }
+ 1037              		.loc 2 143 16 is_stmt 0 view .LVU260
+ 1038 00ea 244A     		ldr	r2, .L71
+ 1039 00ec 6B46     		mov	r3, sp
+ 1040 00ee D2F80A00 		ldr	r0, [r2, #10]	@ unaligned
+ 1041 00f2 D2F80E10 		ldr	r1, [r2, #14]	@ unaligned
+ 1042 00f6 03C3     		stmia	r3!, {r0, r1}
+ 1043              	.LVL86:
+ 143:CAN/Inc/md_data_manager.hpp ****     }
+ 1044              		.loc 2 143 16 view .LVU261
+ 1045              	.LBE45:
+ 1046              	.LBE44:
+  53:App/Src/app.cpp ****         md_config = can_driver.get_md_config();
+ 1047              		.loc 1 53 45 view .LVU262
+ 1048 00f8 6B46     		mov	r3, sp
+ 1049 00fa 03CB     		ldmia	r3!, {r0, r1}
+ 1050 00fc C4F80200 		str	r0, [r4, #2]	@ unaligned
+ 1051 0100 C4F80610 		str	r1, [r4, #6]	@ unaligned
+  54:App/Src/app.cpp ****         motor_controller.init(md_config.control_period);
+ 1052              		.loc 1 54 9 is_stmt 1 view .LVU263
+  54:App/Src/app.cpp ****         motor_controller.init(md_config.control_period);
+ 1053              		.loc 1 54 30 is_stmt 0 view .LVU264
+ 1054 0104 1E4D     		ldr	r5, .L71+4
+ 1055 0106 6179     		ldrb	r1, [r4, #5]	@ zero_extendqisi2
+ 1056 0108 2846     		mov	r0, r5
+ 1057 010a FFF7FEFF 		bl	_ZN15MotorController4initEh
+ 1058              	.LVL87:
+  55:App/Src/app.cpp ****         motor_controller.set_brake(true);
+ 1059              		.loc 1 55 9 is_stmt 1 view .LVU265
+  55:App/Src/app.cpp ****         motor_controller.set_brake(true);
+ 1060              		.loc 1 55 35 is_stmt 0 view .LVU266
+ 1061 010e 0121     		movs	r1, #1
+ 1062 0110 2846     		mov	r0, r5
+ 1063 0112 FFF7FEFF 		bl	_ZN15MotorController9set_brakeEb
+ 1064              	.LVL88:
+  56:App/Src/app.cpp ****         motor_controller.get_count();
+ 1065              		.loc 1 56 9 is_stmt 1 view .LVU267
+  56:App/Src/app.cpp ****         motor_controller.get_count();
+ 1066              		.loc 1 56 35 is_stmt 0 view .LVU268
+ 1067 0116 2846     		mov	r0, r5
+ 1068 0118 FFF7FEFF 		bl	_ZN15MotorController9get_countEv
+ 1069              	.LVL89:
+  57:App/Src/app.cpp ****         motor_controller.reset_pid();
+ 1070              		.loc 1 57 9 is_stmt 1 view .LVU269
+  57:App/Src/app.cpp ****         motor_controller.reset_pid();
+ 1071              		.loc 1 57 35 is_stmt 0 view .LVU270
+ 1072 011c 2846     		mov	r0, r5
+ 1073 011e FFF7FEFF 		bl	_ZN15MotorController9reset_pidEv
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 29
+
+
+ 1074              	.LVL90:
+  58:App/Src/app.cpp ****         initialized = true;
+ 1075              		.loc 1 58 9 is_stmt 1 view .LVU271
+  58:App/Src/app.cpp ****         initialized = true;
+ 1076              		.loc 1 58 21 is_stmt 0 view .LVU272
+ 1077 0122 0123     		movs	r3, #1
+ 1078 0124 6370     		strb	r3, [r4, #1]
+ 1079 0126 9EE7     		b	.L61
+ 1080              	.LVL91:
+ 1081              	.L68:
+ 1082              	.LBB46:
+ 1083              	.LBB42:
+ 178:CAN/Inc/md_data_manager.hpp ****         {
+ 179:CAN/Inc/md_data_manager.hpp ****             *p_gain = pid_gain[0];
+ 1084              		.loc 2 179 33 view .LVU273
+ 1085 0128 144B     		ldr	r3, .L71
+ 1086 012a 93ED060A 		vldr.32	s0, [r3, #24]
+ 1087              		.loc 2 179 21 view .LVU274
+ 1088 012e 84ED050A 		vstr.32	s0, [r4, #20]
+ 180:CAN/Inc/md_data_manager.hpp ****             *i_gain = pid_gain[1];
+ 1089              		.loc 2 180 33 view .LVU275
+ 1090 0132 D3ED070A 		vldr.32	s1, [r3, #28]
+ 1091              		.loc 2 180 21 view .LVU276
+ 1092 0136 C4ED060A 		vstr.32	s1, [r4, #24]
+ 181:CAN/Inc/md_data_manager.hpp ****             *d_gain = pid_gain[2];
+ 1093              		.loc 2 181 33 view .LVU277
+ 1094 013a 93ED081A 		vldr.32	s2, [r3, #32]
+ 1095              		.loc 2 181 21 view .LVU278
+ 1096 013e 84ED071A 		vstr.32	s2, [r4, #28]
+ 182:CAN/Inc/md_data_manager.hpp ****             is_received_gain = false;
+ 1097              		.loc 2 182 30 view .LVU279
+ 1098 0142 0022     		movs	r2, #0
+ 1099 0144 1A72     		strb	r2, [r3, #8]
+ 1100              	.LVL92:
+ 1101              		.loc 2 182 30 view .LVU280
+ 1102              	.LBE42:
+ 1103              	.LBE46:
+  63:App/Src/app.cpp ****         motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
+ 1104              		.loc 1 63 9 is_stmt 1 view .LVU281
+  63:App/Src/app.cpp ****         motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
+ 1105              		.loc 1 63 38 is_stmt 0 view .LVU282
+ 1106 0146 0E4D     		ldr	r5, .L71+4
+ 1107 0148 2846     		mov	r0, r5
+ 1108 014a FFF7FEFF 		bl	_ZN15MotorController12set_pid_gainEfff
+ 1109              	.LVL93:
+  64:App/Src/app.cpp ****         motor_controller.reset_pid();
+ 1110              		.loc 1 64 9 is_stmt 1 view .LVU283
+  64:App/Src/app.cpp ****         motor_controller.reset_pid();
+ 1111              		.loc 1 64 35 is_stmt 0 view .LVU284
+ 1112 014e 2846     		mov	r0, r5
+ 1113 0150 FFF7FEFF 		bl	_ZN15MotorController9reset_pidEv
+ 1114              	.LVL94:
+ 1115 0154 8BE7     		b	.L62
+ 1116              	.L69:
+  69:App/Src/app.cpp ****         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
+ 1117              		.loc 1 69 9 is_stmt 1 view .LVU285
+  69:App/Src/app.cpp ****         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 30
+
+
+ 1118              		.loc 1 69 40 is_stmt 0 view .LVU286
+ 1119 0156 4FF48061 		mov	r1, #1024
+ 1120 015a 4FF09040 		mov	r0, #1207959552
+ 1121 015e FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 1122              	.LVL95:
+ 1123 0162 0146     		mov	r1, r0
+  69:App/Src/app.cpp ****         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
+ 1124              		.loc 1 69 22 discriminator 1 view .LVU287
+ 1125 0164 2074     		strb	r0, [r4, #16]
+  70:App/Src/app.cpp ****         can_driver.send_limit_switch(limit_switch);
+ 1126              		.loc 1 70 9 is_stmt 1 view .LVU288
+  70:App/Src/app.cpp ****         can_driver.send_limit_switch(limit_switch);
+ 1127              		.loc 1 70 37 is_stmt 0 view .LVU289
+ 1128 0166 0548     		ldr	r0, .L71
+ 1129 0168 FFF7FEFF 		bl	_ZN13MDDataManagerILb0EE17send_limit_switchEh
+ 1130              	.LVL96:
+ 1131 016c 88E7     		b	.L63
+ 1132              	.L70:
+  75:App/Src/app.cpp ****         can_driver.send_limit_switch(limit_switch);
+ 1133              		.loc 1 75 9 is_stmt 1 view .LVU290
+  75:App/Src/app.cpp ****         can_driver.send_limit_switch(limit_switch);
+ 1134              		.loc 1 75 37 is_stmt 0 view .LVU291
+ 1135 016e 217C     		ldrb	r1, [r4, #16]	@ zero_extendqisi2
+ 1136 0170 0248     		ldr	r0, .L71
+ 1137 0172 FFF7FEFF 		bl	_ZN13MDDataManagerILb0EE17send_limit_switchEh
+ 1138              	.LVL97:
+  76:App/Src/app.cpp ****         loop_count = 0;
+ 1139              		.loc 1 76 9 is_stmt 1 view .LVU292
+  76:App/Src/app.cpp ****         loop_count = 0;
+ 1140              		.loc 1 76 20 is_stmt 0 view .LVU293
+ 1141 0176 0023     		movs	r3, #0
+ 1142 0178 E384     		strh	r3, [r4, #38]	@ movhi
+ 1143 017a 85E7     		b	.L64
+ 1144              	.L72:
+ 1145              		.align	2
+ 1146              	.L71:
+ 1147 017c 00000000 		.word	can_driver
+ 1148 0180 00000000 		.word	motor_controller
+ 1149              		.cfi_endproc
+ 1150              	.LFE149:
+ 1151              		.fnend
+ 1153              		.section	.text._ZN13MDDataManagerILb0EE11send_targetEs,"axG",%progbits,_ZN13MDDataManagerILb0EE11s
+ 1154              		.align	1
+ 1155              		.weak	_ZN13MDDataManagerILb0EE11send_targetEs
+ 1156              		.syntax unified
+ 1157              		.thumb
+ 1158              		.thumb_func
+ 1160              	_ZN13MDDataManagerILb0EE11send_targetEs:
+ 1161              		.fnstart
+ 1162              	.LVL98:
+ 1163              	.LFB163:
+ 107:CAN/Inc/md_data_manager.hpp ****     {
+ 1164              		.loc 2 107 10 is_stmt 1 view -0
+ 1165              		.cfi_startproc
+ 1166              		@ args = 0, pretend = 0, frame = 8
+ 1167              		@ frame_needed = 0, uses_anonymous_args = 0
+ 107:CAN/Inc/md_data_manager.hpp ****     {
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 31
+
+
+ 1168              		.loc 2 107 10 is_stmt 0 view .LVU295
+ 1169 0000 30B5     		push	{r4, r5, lr}
+ 1170              		.save {r4, r5, lr}
+ 1171              	.LCFI17:
+ 1172              		.cfi_def_cfa_offset 12
+ 1173              		.cfi_offset 4, -12
+ 1174              		.cfi_offset 5, -8
+ 1175              		.cfi_offset 14, -4
+ 1176              		.pad #12
+ 1177 0002 83B0     		sub	sp, sp, #12
+ 1178              	.LCFI18:
+ 1179              		.cfi_def_cfa_offset 24
+ 1180 0004 0446     		mov	r4, r0
+ 110:CAN/Inc/md_data_manager.hpp ****         data[1] = (target >> 8) & 0xFF;
+ 1181              		.loc 2 110 17 view .LVU296
+ 1182 0006 8DF80410 		strb	r1, [sp, #4]
+ 111:CAN/Inc/md_data_manager.hpp ****         if (is_master)
+ 1183              		.loc 2 111 33 view .LVU297
+ 1184 000a C1F30721 		ubfx	r1, r1, #8, #8
+ 1185              	.LVL99:
+ 111:CAN/Inc/md_data_manager.hpp ****         if (is_master)
+ 1186              		.loc 2 111 17 view .LVU298
+ 1187 000e 8DF80510 		strb	r1, [sp, #5]
+ 118:CAN/Inc/md_data_manager.hpp ****         }
+ 1188              		.loc 2 118 17 view .LVU299
+ 1189 0012 0368     		ldr	r3, [r0]
+ 1190 0014 1D68     		ldr	r5, [r3]
+ 1191 0016 0123     		movs	r3, #1
+ 1192 0018 0279     		ldrb	r2, [r0, #4]	@ zero_extendqisi2
+ 1193 001a 1946     		mov	r1, r3
+ 1194 001c 1846     		mov	r0, r3
+ 1195              	.LVL100:
+ 118:CAN/Inc/md_data_manager.hpp ****         }
+ 1196              		.loc 2 118 17 view .LVU300
+ 1197 001e FFF7FEFF 		bl	_ZN10can_config9encode_idEhhhh
+ 1198              	.LVL101:
+ 1199 0022 0146     		mov	r1, r0
+ 118:CAN/Inc/md_data_manager.hpp ****         }
+ 1200              		.loc 2 118 17 discriminator 1 view .LVU301
+ 1201 0024 0223     		movs	r3, #2
+ 1202 0026 01AA     		add	r2, sp, #4
+ 1203 0028 2046     		mov	r0, r4
+ 1204 002a A847     		blx	r5
+ 1205              	.LVL102:
+ 120:CAN/Inc/md_data_manager.hpp **** 
+ 1206              		.loc 2 120 5 view .LVU302
+ 1207 002c 03B0     		add	sp, sp, #12
+ 1208              	.LCFI19:
+ 1209              		.cfi_def_cfa_offset 12
+ 1210              		@ sp needed
+ 1211 002e 30BD     		pop	{r4, r5, pc}
+ 120:CAN/Inc/md_data_manager.hpp **** 
+ 1212              		.loc 2 120 5 view .LVU303
+ 1213              		.cfi_endproc
+ 1214              	.LFE163:
+ 1215              		.fnend
+ 1217              		.section	.text._ZN3App10timer_taskEv,"ax",%progbits
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 32
+
+
+ 1218              		.align	1
+ 1219              		.global	_ZN3App10timer_taskEv
+ 1220              		.syntax unified
+ 1221              		.thumb
+ 1222              		.thumb_func
+ 1224              	_ZN3App10timer_taskEv:
+ 1225              		.fnstart
+ 1226              	.LVL103:
+ 1227              	.LFB150:
+  83:App/Src/app.cpp **** {
+ 1228              		.loc 1 83 1 is_stmt 1 view -0
+ 1229              		.cfi_startproc
+ 1230              		@ args = 0, pretend = 0, frame = 0
+ 1231              		@ frame_needed = 0, uses_anonymous_args = 0
+  83:App/Src/app.cpp **** {
+ 1232              		.loc 1 83 1 is_stmt 0 view .LVU305
+ 1233 0000 10B5     		push	{r4, lr}
+ 1234              		.save {r4, lr}
+ 1235              	.LCFI20:
+ 1236              		.cfi_def_cfa_offset 8
+ 1237              		.cfi_offset 4, -8
+ 1238              		.cfi_offset 14, -4
+ 1239 0002 0446     		mov	r4, r0
+  84:App/Src/app.cpp ****     if (timer_count > md_config.encoder_period)
+ 1240              		.loc 1 84 5 is_stmt 1 view .LVU306
+  84:App/Src/app.cpp ****     if (timer_count > md_config.encoder_period)
+ 1241              		.loc 1 84 9 is_stmt 0 view .LVU307
+ 1242 0004 838C     		ldrh	r3, [r0, #36]
+  84:App/Src/app.cpp ****     if (timer_count > md_config.encoder_period)
+ 1243              		.loc 1 84 33 view .LVU308
+ 1244 0006 8279     		ldrb	r2, [r0, #6]	@ zero_extendqisi2
+  84:App/Src/app.cpp ****     if (timer_count > md_config.encoder_period)
+ 1245              		.loc 1 84 5 view .LVU309
+ 1246 0008 9342     		cmp	r3, r2
+ 1247 000a 02D8     		bhi	.L79
+  92:App/Src/app.cpp ****         timer_count++;
+ 1248              		.loc 1 92 9 is_stmt 1 view .LVU310
+  92:App/Src/app.cpp ****         timer_count++;
+ 1249              		.loc 1 92 20 is_stmt 0 view .LVU311
+ 1250 000c 0133     		adds	r3, r3, #1
+ 1251 000e 8384     		strh	r3, [r0, #36]	@ movhi
+ 1252              	.LVL104:
+ 1253              	.L75:
+  94:App/Src/app.cpp **** }
+ 1254              		.loc 1 94 1 view .LVU312
+ 1255 0010 10BD     		pop	{r4, pc}
+ 1256              	.LVL105:
+ 1257              	.L79:
+  86:App/Src/app.cpp ****         encoder = motor_controller.get_count();
+ 1258              		.loc 1 86 9 is_stmt 1 view .LVU313
+  86:App/Src/app.cpp ****         encoder = motor_controller.get_count();
+ 1259              		.loc 1 86 45 is_stmt 0 view .LVU314
+ 1260 0012 0548     		ldr	r0, .L80
+ 1261              	.LVL106:
+  86:App/Src/app.cpp ****         encoder = motor_controller.get_count();
+ 1262              		.loc 1 86 45 view .LVU315
+ 1263 0014 FFF7FEFF 		bl	_ZN15MotorController9get_countEv
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 33
+
+
+ 1264              	.LVL107:
+ 1265 0018 0146     		mov	r1, r0
+  86:App/Src/app.cpp ****         encoder = motor_controller.get_count();
+ 1266              		.loc 1 86 17 discriminator 1 view .LVU316
+ 1267 001a E081     		strh	r0, [r4, #14]	@ movhi
+  87:App/Src/app.cpp ****         can_driver.send_target(encoder);
+ 1268              		.loc 1 87 9 is_stmt 1 view .LVU317
+  87:App/Src/app.cpp ****         can_driver.send_target(encoder);
+ 1269              		.loc 1 87 31 is_stmt 0 view .LVU318
+ 1270 001c 0348     		ldr	r0, .L80+4
+ 1271 001e FFF7FEFF 		bl	_ZN13MDDataManagerILb0EE11send_targetEs
+ 1272              	.LVL108:
+  88:App/Src/app.cpp ****         timer_count = 0;
+ 1273              		.loc 1 88 9 is_stmt 1 view .LVU319
+  88:App/Src/app.cpp ****         timer_count = 0;
+ 1274              		.loc 1 88 21 is_stmt 0 view .LVU320
+ 1275 0022 0023     		movs	r3, #0
+ 1276 0024 A384     		strh	r3, [r4, #36]	@ movhi
+ 1277 0026 F3E7     		b	.L75
+ 1278              	.L81:
+ 1279              		.align	2
+ 1280              	.L80:
+ 1281 0028 00000000 		.word	motor_controller
+ 1282 002c 00000000 		.word	can_driver
+ 1283              		.cfi_endproc
+ 1284              	.LFE150:
+ 1285              		.fnend
+ 1287              		.section	.text._GLOBAL__sub_I_can_driver,"ax",%progbits
+ 1288              		.align	1
+ 1289              		.syntax unified
+ 1290              		.thumb
+ 1291              		.thumb_func
+ 1293              	_GLOBAL__sub_I_can_driver:
+ 1294              		.fnstart
+ 1295              	.LFB166:
+ 1296              		.loc 1 113 1 is_stmt 1 view -0
+ 1297              		.cfi_startproc
+ 1298              		@ args = 0, pretend = 0, frame = 0
+ 1299              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1300 0000 08B5     		push	{r3, lr}
+ 1301              	.LCFI21:
+ 1302              		.cfi_def_cfa_offset 8
+ 1303              		.cfi_offset 3, -8
+ 1304              		.cfi_offset 14, -4
+ 1305              		.loc 1 113 1 is_stmt 0 view .LVU322
+ 1306 0002 FFF7FEFF 		bl	_Z41__static_initialization_and_destruction_0v
+ 1307              	.LVL109:
+ 1308 0006 08BD     		pop	{r3, pc}
+ 1309              		.cfi_endproc
+ 1310              	.LFE166:
+ 1311              		.cantunwind
+ 1312              		.fnend
+ 1314              		.section	.init_array,"aw",%init_array
+ 1315              		.align	2
+ 1316 0000 00000000 		.word	_GLOBAL__sub_I_can_driver(target1)
+ 1317              		.weak	_ZTS13MDDataManagerILb0EE
+ 1318              		.section	.rodata._ZTS13MDDataManagerILb0EE,"aG",%progbits,_ZTS13MDDataManagerILb0EE,comdat
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 34
+
+
+ 1319              		.align	2
+ 1322              	_ZTS13MDDataManagerILb0EE:
+ 1323 0000 31334D44 		.ascii	"13MDDataManagerILb0EE\000"
+ 1323      44617461 
+ 1323      4D616E61 
+ 1323      67657249 
+ 1323      4C623045 
+ 1324              		.weak	_ZTI13MDDataManagerILb0EE
+ 1325              		.section	.rodata._ZTI13MDDataManagerILb0EE,"aG",%progbits,_ZTI13MDDataManagerILb0EE,comdat
+ 1326              		.align	2
+ 1329              	_ZTI13MDDataManagerILb0EE:
+ 1330 0000 08000000 		.word	_ZTVN10__cxxabiv117__class_type_infoE+8
+ 1331 0004 00000000 		.word	_ZTS13MDDataManagerILb0EE
+ 1332              		.weak	_ZTS9CANDriver
+ 1333              		.section	.rodata._ZTS9CANDriver,"aG",%progbits,_ZTS9CANDriver,comdat
+ 1334              		.align	2
+ 1337              	_ZTS9CANDriver:
+ 1338 0000 3943414E 		.ascii	"9CANDriver\000"
+ 1338      44726976 
+ 1338      657200
+ 1339              		.weak	_ZTI9CANDriver
+ 1340              		.section	.rodata._ZTI9CANDriver,"aG",%progbits,_ZTI9CANDriver,comdat
+ 1341              		.align	2
+ 1344              	_ZTI9CANDriver:
+ 1345 0000 08000000 		.word	_ZTVN10__cxxabiv120__si_class_type_infoE+8
+ 1346 0004 00000000 		.word	_ZTS9CANDriver
+ 1347 0008 00000000 		.word	_ZTI13MDDataManagerILb0EE
+ 1348              		.weak	_ZTV13MDDataManagerILb0EE
+ 1349              		.section	.rodata._ZTV13MDDataManagerILb0EE,"aG",%progbits,_ZTV13MDDataManagerILb0EE,comdat
+ 1350              		.align	2
+ 1353              	_ZTV13MDDataManagerILb0EE:
+ 1354 0000 00000000 		.word	0
+ 1355 0004 00000000 		.word	_ZTI13MDDataManagerILb0EE
+ 1356 0008 00000000 		.word	_ZN13MDDataManagerILb0EE4sendEtPhh
+ 1357              		.weak	_ZTV9CANDriver
+ 1358              		.section	.rodata._ZTV9CANDriver,"aG",%progbits,_ZTV9CANDriver,comdat
+ 1359              		.align	2
+ 1362              	_ZTV9CANDriver:
+ 1363 0000 00000000 		.word	0
+ 1364 0004 00000000 		.word	_ZTI9CANDriver
+ 1365 0008 00000000 		.word	_ZN9CANDriver4sendEtPhh
+ 1366              		.global	motor_controller
+ 1367              		.section	.data.motor_controller,"aw"
+ 1368              		.align	2
+ 1371              	motor_controller:
+ 1372 0000 00000000 		.word	0
+ 1373 0004 00000000 		.word	0
+ 1374 0008 00000000 		.word	0
+ 1375 000c 00000000 		.word	0
+ 1376 0010 00000000 		.word	0
+ 1377 0014 0000     		.short	0
+ 1378 0016 7F0C     		.short	3199
+ 1379 0018 05       		.byte	5
+ 1380 0019 000000   		.space	3
+ 1381              		.global	can_driver
+ 1382              		.section	.bss.can_driver,"aw",%nobits
+ 1383              		.align	2
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 35
+
+
+ 1386              	can_driver:
+ 1387 0000 00000000 		.space	140
+ 1387      00000000 
+ 1387      00000000 
+ 1387      00000000 
+ 1387      00000000 
+ 1388              		.text
+ 1389              	.Letext0:
+ 1390              		.file 4 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/ma
+ 1391              		.file 5 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/sy
+ 1392              		.file 6 "Drivers/CMSIS/Device/ST/STM32F3xx/Include/stm32f303x8.h"
+ 1393              		.file 7 "Drivers/CMSIS/Device/ST/STM32F3xx/Include/stm32f3xx.h"
+ 1394              		.file 8 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_def.h"
+ 1395              		.file 9 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_gpio.h"
+ 1396              		.file 10 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_dma.h"
+ 1397              		.file 11 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_can.h"
+ 1398              		.file 12 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_tim.h"
+ 1399              		.file 13 "CAN/Inc/can_config.hpp"
+ 1400              		.file 14 "CAN/Inc/md_config.hpp"
+ 1401              		.file 15 "App/Inc/app.hpp"
+ 1402              		.file 16 "Core/Inc/can.h"
+ 1403              		.file 17 "Core/Inc/tim.h"
+ 1404              		.file 18 "App/Inc/motor_controller.hpp"
+ 1405              		.file 19 "Core/Inc/main.h"
+ 1406              		.file 20 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal.h"
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 36
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 app.cpp
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:21     .text._ZN13MDDataManagerILb0EE4sendEtPhh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:27     .text._ZN13MDDataManagerILb0EE4sendEtPhh:00000000 _ZN13MDDataManagerILb0EE4sendEtPhh
+.ARM.exidx.text._ZN13MDDataManagerILb0EE4sendEtPhh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:45     .text._Z41__static_initialization_and_destruction_0v:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:50     .text._Z41__static_initialization_and_destruction_0v:00000000 _Z41__static_initialization_and_destruction_0v
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:103    .text._Z41__static_initialization_and_destruction_0v:00000018 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1386   .bss.can_driver:00000000 can_driver
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1353   .rodata._ZTV13MDDataManagerILb0EE:00000000 _ZTV13MDDataManagerILb0EE
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1362   .rodata._ZTV9CANDriver:00000000 _ZTV9CANDriver
+.ARM.exidx.text._Z41__static_initialization_and_destruction_0v:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:112    .text._ZN9CANDriver4sendEtPhh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:118    .text._ZN9CANDriver4sendEtPhh:00000000 _ZN9CANDriver4sendEtPhh
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:193    .text._ZN9CANDriver4sendEtPhh:0000003c $d
+.ARM.exidx.text._ZN9CANDriver4sendEtPhh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:199    .text._ZN9CANDriver4initEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:205    .text._ZN9CANDriver4initEv:00000000 _ZN9CANDriver4initEv
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:280    .text._ZN9CANDriver4initEv:00000038 $d
+.ARM.exidx.text._ZN9CANDriver4initEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:286    .text._ZN3App12update_md_idEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:292    .text._ZN3App12update_md_idEv:00000000 _ZN3App12update_md_idEv
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:385    .text._ZN3App12update_md_idEv:0000004c $d
+.ARM.exidx.text._ZN3App12update_md_idEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:391    .text._ZN3App4initEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:397    .text._ZN3App4initEv:00000000 _ZN3App4initEv
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:448    .text._ZN3App4initEv:0000001c $d
+   .ARM.exidx.text._ZN3App4initEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:455    .text._ZN13MDDataManagerILb0EE7receiveEtPhh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:461    .text._ZN13MDDataManagerILb0EE7receiveEtPhh:00000000 _ZN13MDDataManagerILb0EE7receiveEtPhh
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:520    .text._ZN13MDDataManagerILb0EE7receiveEtPhh:0000003c $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:525    .text._ZN13MDDataManagerILb0EE7receiveEtPhh:00000040 $t
+.ARM.exidx.text._ZN13MDDataManagerILb0EE7receiveEtPhh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:629    .text._ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:635    .text._ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef:00000000 _ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef
+.ARM.exidx.text._ZN9CANDriver20can_callback_processEP17CAN_HandleTypeDef:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:691    .text._ZN3App20can_callback_processEP17CAN_HandleTypeDef:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:697    .text._ZN3App20can_callback_processEP17CAN_HandleTypeDef:00000000 _ZN3App20can_callback_processEP17CAN_HandleTypeDef
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:724    .text._ZN3App20can_callback_processEP17CAN_HandleTypeDef:0000000c $d
+.ARM.extab.text._ZN3App20can_callback_processEP17CAN_HandleTypeDef:00000000 $d
+.ARM.exidx.text._ZN3App20can_callback_processEP17CAN_HandleTypeDef:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:730    .text._ZN13MDDataManagerILb0EE17send_limit_switchEh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:736    .text._ZN13MDDataManagerILb0EE17send_limit_switchEh:00000000 _ZN13MDDataManagerILb0EE17send_limit_switchEh
+.ARM.exidx.text._ZN13MDDataManagerILb0EE17send_limit_switchEh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:791    .text._ZN3App9main_loopEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:797    .text._ZN3App9main_loopEv:00000000 _ZN3App9main_loopEv
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1147   .text._ZN3App9main_loopEv:0000017c $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1371   .data.motor_controller:00000000 motor_controller
+.ARM.exidx.text._ZN3App9main_loopEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1154   .text._ZN13MDDataManagerILb0EE11send_targetEs:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1160   .text._ZN13MDDataManagerILb0EE11send_targetEs:00000000 _ZN13MDDataManagerILb0EE11send_targetEs
+.ARM.exidx.text._ZN13MDDataManagerILb0EE11send_targetEs:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1218   .text._ZN3App10timer_taskEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1224   .text._ZN3App10timer_taskEv:00000000 _ZN3App10timer_taskEv
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1281   .text._ZN3App10timer_taskEv:00000028 $d
+.ARM.exidx.text._ZN3App10timer_taskEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1288   .text._GLOBAL__sub_I_can_driver:00000000 $t
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s 			page 37
+
+
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1293   .text._GLOBAL__sub_I_can_driver:00000000 _GLOBAL__sub_I_can_driver
+.ARM.exidx.text._GLOBAL__sub_I_can_driver:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1315   .init_array:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1322   .rodata._ZTS13MDDataManagerILb0EE:00000000 _ZTS13MDDataManagerILb0EE
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1319   .rodata._ZTS13MDDataManagerILb0EE:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1329   .rodata._ZTI13MDDataManagerILb0EE:00000000 _ZTI13MDDataManagerILb0EE
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1326   .rodata._ZTI13MDDataManagerILb0EE:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1337   .rodata._ZTS9CANDriver:00000000 _ZTS9CANDriver
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1334   .rodata._ZTS9CANDriver:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1344   .rodata._ZTI9CANDriver:00000000 _ZTI9CANDriver
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1341   .rodata._ZTI9CANDriver:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1350   .rodata._ZTV13MDDataManagerILb0EE:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1359   .rodata._ZTV9CANDriver:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1368   .data.motor_controller:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccWVDBEh.s:1383   .bss.can_driver:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_CAN_AddTxMessage
+Error_Handler
+hcan
+__aeabi_unwind_cpp_pr0
+HAL_CAN_Start
+HAL_CAN_ConfigFilter
+HAL_CAN_ActivateNotification
+HAL_GPIO_ReadPin
+HAL_TIM_Base_Start_IT
+htim6
+_ZN10can_config9decode_idEtRhS0_S0_S0_
+HAL_CAN_GetRxMessage
+__aeabi_unwind_cpp_pr1
+_ZN10can_config9encode_idEhhhh
+_ZN15MotorController9reset_pidEv
+_ZN15MotorController19trapezoidal_controlEsh
+_ZN15MotorController3runEst
+HAL_Delay
+_ZN15MotorController13calculate_pidEff
+_ZN15MotorController4initEh
+_ZN15MotorController9set_brakeEb
+_ZN15MotorController9get_countEv
+_ZN15MotorController12set_pid_gainEfff
+_ZTVN10__cxxabiv117__class_type_infoE
+_ZTVN10__cxxabiv120__si_class_type_infoE

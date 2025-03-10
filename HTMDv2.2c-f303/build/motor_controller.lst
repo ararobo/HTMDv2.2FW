@@ -1,0 +1,956 @@
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"motor_controller.cpp"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "App/Src/motor_controller.cpp"
+  20              		.section	.text._ZN15MotorController4initEh,"ax",%progbits
+  21              		.align	1
+  22              		.global	_ZN15MotorController4initEh
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	_ZN15MotorController4initEh:
+  28              		.fnstart
+  29              	.LVL0:
+  30              	.LFB123:
+   1:App/Src/motor_controller.cpp **** #include "motor_controller.hpp"
+   2:App/Src/motor_controller.cpp **** #include "tim.h"
+   3:App/Src/motor_controller.cpp **** #include "usart.h"
+   4:App/Src/motor_controller.cpp **** #include "gpio.h"
+   5:App/Src/motor_controller.cpp **** 
+   6:App/Src/motor_controller.cpp **** void MotorController::init(uint8_t control_cycle_)
+   7:App/Src/motor_controller.cpp **** {
+  31              		.loc 1 7 1 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 1 7 1 is_stmt 0 view .LVU1
+  36 0000 10B5     		push	{r4, lr}
+  37              		.save {r4, lr}
+  38              	.LCFI0:
+  39              		.cfi_def_cfa_offset 8
+  40              		.cfi_offset 4, -8
+  41              		.cfi_offset 14, -4
+   8:App/Src/motor_controller.cpp ****     // 変数の初期化
+   9:App/Src/motor_controller.cpp ****     control_cycle = control_cycle_;
+  42              		.loc 1 9 5 is_stmt 1 view .LVU2
+  43              		.loc 1 9 19 is_stmt 0 view .LVU3
+  44 0002 0176     		strb	r1, [r0, #24]
+  10:App/Src/motor_controller.cpp ****     // モータードライバの初期化
+  11:App/Src/motor_controller.cpp ****     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+  45              		.loc 1 11 5 is_stmt 1 view .LVU4
+  46              		.loc 1 11 22 is_stmt 0 view .LVU5
+  47 0004 0C4C     		ldr	r4, .L3
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 2
+
+
+  48 0006 0421     		movs	r1, #4
+  49              	.LVL1:
+  50              		.loc 1 11 22 view .LVU6
+  51 0008 2046     		mov	r0, r4
+  52              	.LVL2:
+  53              		.loc 1 11 22 view .LVU7
+  54 000a FFF7FEFF 		bl	HAL_TIM_PWM_Start
+  55              	.LVL3:
+  12:App/Src/motor_controller.cpp ****     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+  56              		.loc 1 12 5 is_stmt 1 view .LVU8
+  57              		.loc 1 12 22 is_stmt 0 view .LVU9
+  58 000e 0821     		movs	r1, #8
+  59 0010 2046     		mov	r0, r4
+  60 0012 FFF7FEFF 		bl	HAL_TIM_PWM_Start
+  61              	.LVL4:
+  13:App/Src/motor_controller.cpp ****     HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_SET);
+  62              		.loc 1 13 5 is_stmt 1 view .LVU10
+  63              		.loc 1 13 22 is_stmt 0 view .LVU11
+  64 0016 0122     		movs	r2, #1
+  65 0018 0821     		movs	r1, #8
+  66 001a 4FF09040 		mov	r0, #1207959552
+  67 001e FFF7FEFF 		bl	HAL_GPIO_WritePin
+  68              	.LVL5:
+  14:App/Src/motor_controller.cpp ****     HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET);
+  69              		.loc 1 14 5 is_stmt 1 view .LVU12
+  70              		.loc 1 14 22 is_stmt 0 view .LVU13
+  71 0022 0122     		movs	r2, #1
+  72 0024 0421     		movs	r1, #4
+  73 0026 4FF09040 		mov	r0, #1207959552
+  74 002a FFF7FEFF 		bl	HAL_GPIO_WritePin
+  75              	.LVL6:
+  15:App/Src/motor_controller.cpp ****     // エンコーダーの初期化
+  16:App/Src/motor_controller.cpp ****     HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
+  76              		.loc 1 16 5 is_stmt 1 view .LVU14
+  77              		.loc 1 16 26 is_stmt 0 view .LVU15
+  78 002e 3C21     		movs	r1, #60
+  79 0030 0248     		ldr	r0, .L3+4
+  80 0032 FFF7FEFF 		bl	HAL_TIM_Encoder_Start
+  81              	.LVL7:
+  17:App/Src/motor_controller.cpp **** }
+  82              		.loc 1 17 1 view .LVU16
+  83 0036 10BD     		pop	{r4, pc}
+  84              	.L4:
+  85              		.align	2
+  86              	.L3:
+  87 0038 00000000 		.word	htim2
+  88 003c 00000000 		.word	htim1
+  89              		.cfi_endproc
+  90              	.LFE123:
+  91              		.fnend
+  93              		.section	.text._ZN15MotorController9get_countEv,"ax",%progbits
+  94              		.align	1
+  95              		.global	_ZN15MotorController9get_countEv
+  96              		.syntax unified
+  97              		.thumb
+  98              		.thumb_func
+ 100              	_ZN15MotorController9get_countEv:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 3
+
+
+ 101              		.fnstart
+ 102              	.LVL8:
+ 103              	.LFB125:
+  18:App/Src/motor_controller.cpp **** 
+  19:App/Src/motor_controller.cpp **** void MotorController::run(int16_t output, uint16_t max_output)
+  20:App/Src/motor_controller.cpp **** {
+  21:App/Src/motor_controller.cpp ****     // 出力を最大出力に制限
+  22:App/Src/motor_controller.cpp ****     output = saturate(int(output), -int(max_output), int(max_output));
+  23:App/Src/motor_controller.cpp ****     // 出力が負の場合は回転方向を反転
+  24:App/Src/motor_controller.cpp ****     if (output < 0)
+  25:App/Src/motor_controller.cpp ****     {
+  26:App/Src/motor_controller.cpp ****         HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_RESET);
+  27:App/Src/motor_controller.cpp ****         output = -output;
+  28:App/Src/motor_controller.cpp ****     }
+  29:App/Src/motor_controller.cpp ****     else
+  30:App/Src/motor_controller.cpp ****     {
+  31:App/Src/motor_controller.cpp ****         HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_SET);
+  32:App/Src/motor_controller.cpp ****     }
+  33:App/Src/motor_controller.cpp ****     // 出力を設定
+  34:App/Src/motor_controller.cpp ****     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, output);
+  35:App/Src/motor_controller.cpp ****     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 3200);
+  36:App/Src/motor_controller.cpp **** }
+  37:App/Src/motor_controller.cpp **** 
+  38:App/Src/motor_controller.cpp **** int16_t MotorController::get_count()
+  39:App/Src/motor_controller.cpp **** {
+ 104              		.loc 1 39 1 is_stmt 1 view -0
+ 105              		.cfi_startproc
+ 106              		@ args = 0, pretend = 0, frame = 0
+ 107              		@ frame_needed = 0, uses_anonymous_args = 0
+ 108              		@ link register save eliminated.
+  40:App/Src/motor_controller.cpp ****     // エンコーダのカウントを取得
+  41:App/Src/motor_controller.cpp ****     uint16_t enc_buff = TIM1->CNT;
+ 109              		.loc 1 41 5 view .LVU18
+ 110              		.loc 1 41 31 is_stmt 0 view .LVU19
+ 111 0000 024B     		ldr	r3, .L6
+ 112 0002 586A     		ldr	r0, [r3, #36]
+ 113              	.LVL9:
+  42:App/Src/motor_controller.cpp ****     TIM1->CNT = 0;
+ 114              		.loc 1 42 5 is_stmt 1 view .LVU20
+ 115              		.loc 1 42 15 is_stmt 0 view .LVU21
+ 116 0004 0022     		movs	r2, #0
+ 117 0006 5A62     		str	r2, [r3, #36]
+  43:App/Src/motor_controller.cpp ****     return static_cast<int16_t>(enc_buff); // カウントをint16_tに変換
+ 118              		.loc 1 43 5 is_stmt 1 view .LVU22
+  44:App/Src/motor_controller.cpp **** }
+ 119              		.loc 1 44 1 is_stmt 0 view .LVU23
+ 120 0008 00B2     		sxth	r0, r0
+ 121              		.loc 1 44 1 view .LVU24
+ 122 000a 7047     		bx	lr
+ 123              	.L7:
+ 124              		.align	2
+ 125              	.L6:
+ 126 000c 002C0140 		.word	1073818624
+ 127              		.cfi_endproc
+ 128              	.LFE125:
+ 129              		.cantunwind
+ 130              		.fnend
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 4
+
+
+ 132              		.section	.text._ZN15MotorController19trapezoidal_controlEsh,"ax",%progbits
+ 133              		.align	1
+ 134              		.global	_ZN15MotorController19trapezoidal_controlEsh
+ 135              		.syntax unified
+ 136              		.thumb
+ 137              		.thumb_func
+ 139              	_ZN15MotorController19trapezoidal_controlEsh:
+ 140              		.fnstart
+ 141              	.LVL10:
+ 142              	.LFB126:
+  45:App/Src/motor_controller.cpp **** 
+  46:App/Src/motor_controller.cpp **** int16_t MotorController::trapezoidal_control(int16_t output, uint8_t max_acceleration)
+  47:App/Src/motor_controller.cpp **** {
+ 143              		.loc 1 47 1 is_stmt 1 view -0
+ 144              		.cfi_startproc
+ 145              		@ args = 0, pretend = 0, frame = 0
+ 146              		@ frame_needed = 0, uses_anonymous_args = 0
+ 147              		.loc 1 47 1 is_stmt 0 view .LVU26
+ 148 0000 0346     		mov	r3, r0
+  48:App/Src/motor_controller.cpp ****     if (output == 0)
+ 149              		.loc 1 48 5 is_stmt 1 view .LVU27
+ 150              	.LBB2:
+ 151 0002 0846     		mov	r0, r1
+ 152              	.LVL11:
+ 153              		.loc 1 48 5 is_stmt 0 view .LVU28
+ 154 0004 11B9     		cbnz	r1, .L9
+  49:App/Src/motor_controller.cpp ****     {
+  50:App/Src/motor_controller.cpp ****         prev_out = 0;
+ 155              		.loc 1 50 9 is_stmt 1 view .LVU29
+ 156              		.loc 1 50 18 is_stmt 0 view .LVU30
+ 157 0006 0022     		movs	r2, #0
+ 158              	.LVL12:
+ 159              		.loc 1 50 18 view .LVU31
+ 160 0008 9A82     		strh	r2, [r3, #20]	@ movhi
+  51:App/Src/motor_controller.cpp ****         return 0;
+ 161              		.loc 1 51 9 is_stmt 1 view .LVU32
+ 162              	.LBE2:
+  52:App/Src/motor_controller.cpp ****     }
+  53:App/Src/motor_controller.cpp ****     else
+  54:App/Src/motor_controller.cpp ****     {
+  55:App/Src/motor_controller.cpp ****         int16_t acceleration = output - prev_out; // 加速度を計算
+  56:App/Src/motor_controller.cpp ****         if (acceleration < -max_acceleration)
+  57:App/Src/motor_controller.cpp ****         {
+  58:App/Src/motor_controller.cpp ****             output = prev_out - max_acceleration;
+  59:App/Src/motor_controller.cpp ****         }
+  60:App/Src/motor_controller.cpp ****         else if (acceleration > max_acceleration)
+  61:App/Src/motor_controller.cpp ****         {
+  62:App/Src/motor_controller.cpp ****             output = prev_out + max_acceleration;
+  63:App/Src/motor_controller.cpp ****         }
+  64:App/Src/motor_controller.cpp ****         prev_out = output;
+  65:App/Src/motor_controller.cpp ****         return output;
+  66:App/Src/motor_controller.cpp ****     }
+  67:App/Src/motor_controller.cpp **** }
+ 163              		.loc 1 67 1 is_stmt 0 view .LVU33
+ 164 000a 7047     		bx	lr
+ 165              	.LVL13:
+ 166              	.L9:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 5
+
+
+  47:App/Src/motor_controller.cpp ****     if (output == 0)
+ 167              		.loc 1 47 1 view .LVU34
+ 168 000c 00B5     		push	{lr}
+ 169              	.LCFI1:
+ 170              		.cfi_def_cfa_offset 4
+ 171              		.cfi_offset 14, -4
+ 172              	.LBB5:
+ 173              	.LBB3:
+  55:App/Src/motor_controller.cpp ****         if (acceleration < -max_acceleration)
+ 174              		.loc 1 55 9 is_stmt 1 view .LVU35
+  55:App/Src/motor_controller.cpp ****         if (acceleration < -max_acceleration)
+ 175              		.loc 1 55 41 is_stmt 0 view .LVU36
+ 176 000e B3F814C0 		ldrh	ip, [r3, #20]
+  55:App/Src/motor_controller.cpp ****         if (acceleration < -max_acceleration)
+ 177              		.loc 1 55 39 view .LVU37
+ 178 0012 A1EB0C01 		sub	r1, r1, ip
+ 179              	.LVL14:
+  55:App/Src/motor_controller.cpp ****         if (acceleration < -max_acceleration)
+ 180              		.loc 1 55 17 view .LVU38
+ 181 0016 09B2     		sxth	r1, r1
+ 182              	.LVL15:
+  56:App/Src/motor_controller.cpp ****         {
+ 183              		.loc 1 56 9 is_stmt 1 view .LVU39
+  56:App/Src/motor_controller.cpp ****         {
+ 184              		.loc 1 56 28 is_stmt 0 view .LVU40
+ 185 0018 C2F1000E 		rsb	lr, r2, #0
+  56:App/Src/motor_controller.cpp ****         {
+ 186              		.loc 1 56 9 view .LVU41
+ 187 001c 7145     		cmp	r1, lr
+ 188 001e 06DA     		bge	.L11
+  58:App/Src/motor_controller.cpp ****         }
+ 189              		.loc 1 58 13 is_stmt 1 view .LVU42
+  58:App/Src/motor_controller.cpp ****         }
+ 190              		.loc 1 58 31 is_stmt 0 view .LVU43
+ 191 0020 ACEB020C 		sub	ip, ip, r2
+  58:App/Src/motor_controller.cpp ****         }
+ 192              		.loc 1 58 20 view .LVU44
+ 193 0024 0FFA8CF0 		sxth	r0, ip
+ 194              	.LVL16:
+ 195              	.L12:
+  64:App/Src/motor_controller.cpp ****         return output;
+ 196              		.loc 1 64 9 is_stmt 1 view .LVU45
+  64:App/Src/motor_controller.cpp ****         return output;
+ 197              		.loc 1 64 18 is_stmt 0 view .LVU46
+ 198 0028 9882     		strh	r0, [r3, #20]	@ movhi
+  65:App/Src/motor_controller.cpp ****     }
+ 199              		.loc 1 65 9 is_stmt 1 view .LVU47
+ 200              	.LBE3:
+ 201              	.LBE5:
+ 202              		.loc 1 67 1 is_stmt 0 view .LVU48
+ 203 002a 5DF804FB 		ldr	pc, [sp], #4
+ 204              	.LVL17:
+ 205              	.L11:
+ 206              	.LBB6:
+ 207              	.LBB4:
+  60:App/Src/motor_controller.cpp ****         {
+ 208              		.loc 1 60 14 is_stmt 1 view .LVU49
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 6
+
+
+ 209 002e 9142     		cmp	r1, r2
+ 210 0030 FADD     		ble	.L12
+  62:App/Src/motor_controller.cpp ****         }
+ 211              		.loc 1 62 13 view .LVU50
+  62:App/Src/motor_controller.cpp ****         }
+ 212              		.loc 1 62 31 is_stmt 0 view .LVU51
+ 213 0032 6244     		add	r2, r2, ip
+ 214              	.LVL18:
+  62:App/Src/motor_controller.cpp ****         }
+ 215              		.loc 1 62 20 view .LVU52
+ 216 0034 10B2     		sxth	r0, r2
+ 217              	.LVL19:
+  62:App/Src/motor_controller.cpp ****         }
+ 218              		.loc 1 62 20 view .LVU53
+ 219 0036 F7E7     		b	.L12
+ 220              	.LBE4:
+ 221              	.LBE6:
+ 222              		.cfi_endproc
+ 223              	.LFE126:
+ 224              		.cantunwind
+ 225              		.fnend
+ 227              		.section	.text._ZN15MotorController12set_pid_gainEfff,"ax",%progbits
+ 228              		.align	1
+ 229              		.global	_ZN15MotorController12set_pid_gainEfff
+ 230              		.syntax unified
+ 231              		.thumb
+ 232              		.thumb_func
+ 234              	_ZN15MotorController12set_pid_gainEfff:
+ 235              		.fnstart
+ 236              	.LVL20:
+ 237              	.LFB128:
+  68:App/Src/motor_controller.cpp **** 
+  69:App/Src/motor_controller.cpp **** float MotorController::calculate_pid(float target, float now_value)
+  70:App/Src/motor_controller.cpp **** {
+  71:App/Src/motor_controller.cpp ****     // ターゲットが0の場合は出力を0にする
+  72:App/Src/motor_controller.cpp ****     if (target == 0.0f)
+  73:App/Src/motor_controller.cpp ****     {
+  74:App/Src/motor_controller.cpp ****         i_out = 0.0f;
+  75:App/Src/motor_controller.cpp ****         prev_error = 0.0f;
+  76:App/Src/motor_controller.cpp ****         return 0.0f;
+  77:App/Src/motor_controller.cpp ****     }
+  78:App/Src/motor_controller.cpp ****     i_out = saturate(i_out, -(float)max_output, (float)max_output); // I制御の出力を制限
+  79:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+  80:App/Src/motor_controller.cpp ****     float p_out = error;                                            // P制御
+  81:App/Src/motor_controller.cpp ****     i_out += error * (float)control_cycle;                          // I制御
+  82:App/Src/motor_controller.cpp ****     float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+  83:App/Src/motor_controller.cpp ****     prev_error = error;                                             // 前回のエラーを保存
+  84:App/Src/motor_controller.cpp ****     return p_out * Kp + i_out * Ki + d_out * Kd;                    // PID制御
+  85:App/Src/motor_controller.cpp **** }
+  86:App/Src/motor_controller.cpp **** 
+  87:App/Src/motor_controller.cpp **** void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
+  88:App/Src/motor_controller.cpp **** {
+ 238              		.loc 1 88 1 is_stmt 1 view -0
+ 239              		.cfi_startproc
+ 240              		@ args = 0, pretend = 0, frame = 0
+ 241              		@ frame_needed = 0, uses_anonymous_args = 0
+ 242              		@ link register save eliminated.
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 7
+
+
+  89:App/Src/motor_controller.cpp ****     Kp = p_gain;
+ 243              		.loc 1 89 5 view .LVU55
+ 244              		.loc 1 89 8 is_stmt 0 view .LVU56
+ 245 0000 80ED000A 		vstr.32	s0, [r0]
+  90:App/Src/motor_controller.cpp ****     Ki = i_gain;
+ 246              		.loc 1 90 5 is_stmt 1 view .LVU57
+ 247              		.loc 1 90 8 is_stmt 0 view .LVU58
+ 248 0004 C0ED010A 		vstr.32	s1, [r0, #4]
+  91:App/Src/motor_controller.cpp ****     Kd = d_gain;
+ 249              		.loc 1 91 5 is_stmt 1 view .LVU59
+ 250              		.loc 1 91 8 is_stmt 0 view .LVU60
+ 251 0008 80ED021A 		vstr.32	s2, [r0, #8]
+  92:App/Src/motor_controller.cpp **** }
+ 252              		.loc 1 92 1 view .LVU61
+ 253 000c 7047     		bx	lr
+ 254              		.cfi_endproc
+ 255              	.LFE128:
+ 256              		.cantunwind
+ 257              		.fnend
+ 259              		.section	.text._ZN15MotorController9reset_pidEv,"ax",%progbits
+ 260              		.align	1
+ 261              		.global	_ZN15MotorController9reset_pidEv
+ 262              		.syntax unified
+ 263              		.thumb
+ 264              		.thumb_func
+ 266              	_ZN15MotorController9reset_pidEv:
+ 267              		.fnstart
+ 268              	.LVL21:
+ 269              	.LFB129:
+  93:App/Src/motor_controller.cpp **** 
+  94:App/Src/motor_controller.cpp **** void MotorController::reset_pid()
+  95:App/Src/motor_controller.cpp **** {
+ 270              		.loc 1 95 1 is_stmt 1 view -0
+ 271              		.cfi_startproc
+ 272              		@ args = 0, pretend = 0, frame = 0
+ 273              		@ frame_needed = 0, uses_anonymous_args = 0
+ 274              		@ link register save eliminated.
+  96:App/Src/motor_controller.cpp ****     i_out = 0.0f;
+ 275              		.loc 1 96 5 view .LVU63
+ 276              		.loc 1 96 11 is_stmt 0 view .LVU64
+ 277 0000 0023     		movs	r3, #0
+ 278 0002 C360     		str	r3, [r0, #12]	@ float
+  97:App/Src/motor_controller.cpp ****     prev_error = 0.0f;
+ 279              		.loc 1 97 5 is_stmt 1 view .LVU65
+ 280              		.loc 1 97 16 is_stmt 0 view .LVU66
+ 281 0004 0361     		str	r3, [r0, #16]	@ float
+  98:App/Src/motor_controller.cpp **** }
+ 282              		.loc 1 98 1 view .LVU67
+ 283 0006 7047     		bx	lr
+ 284              		.cfi_endproc
+ 285              	.LFE129:
+ 286              		.cantunwind
+ 287              		.fnend
+ 289              		.section	.text._ZN15MotorController9set_brakeEb,"ax",%progbits
+ 290              		.align	1
+ 291              		.global	_ZN15MotorController9set_brakeEb
+ 292              		.syntax unified
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 8
+
+
+ 293              		.thumb
+ 294              		.thumb_func
+ 296              	_ZN15MotorController9set_brakeEb:
+ 297              		.fnstart
+ 298              	.LVL22:
+ 299              	.LFB131:
+  99:App/Src/motor_controller.cpp **** 
+ 100:App/Src/motor_controller.cpp **** template <typename T>
+ 101:App/Src/motor_controller.cpp **** T MotorController::saturate(T value, T min_value, T max_value)
+ 102:App/Src/motor_controller.cpp **** {
+ 103:App/Src/motor_controller.cpp ****     if (value < min_value)
+ 104:App/Src/motor_controller.cpp ****     {
+ 105:App/Src/motor_controller.cpp ****         return min_value;
+ 106:App/Src/motor_controller.cpp ****     }
+ 107:App/Src/motor_controller.cpp ****     else if (value > max_value)
+ 108:App/Src/motor_controller.cpp ****     {
+ 109:App/Src/motor_controller.cpp ****         return max_value;
+ 110:App/Src/motor_controller.cpp ****     }
+ 111:App/Src/motor_controller.cpp ****     else
+ 112:App/Src/motor_controller.cpp ****     {
+ 113:App/Src/motor_controller.cpp ****         return value;
+ 114:App/Src/motor_controller.cpp ****     }
+ 115:App/Src/motor_controller.cpp **** }
+ 116:App/Src/motor_controller.cpp **** 
+ 117:App/Src/motor_controller.cpp **** void MotorController::set_brake(bool brake)
+ 118:App/Src/motor_controller.cpp **** {
+ 300              		.loc 1 118 1 is_stmt 1 view -0
+ 301              		.cfi_startproc
+ 302              		@ args = 0, pretend = 0, frame = 0
+ 303              		@ frame_needed = 0, uses_anonymous_args = 0
+ 304              		.loc 1 118 1 is_stmt 0 view .LVU69
+ 305 0000 08B5     		push	{r3, lr}
+ 306              		.save {r3, lr}
+ 307              	.LCFI2:
+ 308              		.cfi_def_cfa_offset 8
+ 309              		.cfi_offset 3, -8
+ 310              		.cfi_offset 14, -4
+ 119:App/Src/motor_controller.cpp ****     if (brake)
+ 311              		.loc 1 119 5 is_stmt 1 view .LVU70
+ 312 0002 31B1     		cbz	r1, .L20
+ 120:App/Src/motor_controller.cpp ****     {
+ 121:App/Src/motor_controller.cpp ****         HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET);
+ 313              		.loc 1 121 9 view .LVU71
+ 314              		.loc 1 121 26 is_stmt 0 view .LVU72
+ 315 0004 0122     		movs	r2, #1
+ 316 0006 0421     		movs	r1, #4
+ 317              	.LVL23:
+ 318              		.loc 1 121 26 view .LVU73
+ 319 0008 4FF09040 		mov	r0, #1207959552
+ 320              	.LVL24:
+ 321              		.loc 1 121 26 view .LVU74
+ 322 000c FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 323              	.LVL25:
+ 324              	.L19:
+ 122:App/Src/motor_controller.cpp ****     }
+ 123:App/Src/motor_controller.cpp ****     else
+ 124:App/Src/motor_controller.cpp ****     {
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 9
+
+
+ 125:App/Src/motor_controller.cpp ****         HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_RESET);
+ 126:App/Src/motor_controller.cpp ****     }
+ 127:App/Src/motor_controller.cpp **** }
+ 325              		.loc 1 127 1 view .LVU75
+ 326 0010 08BD     		pop	{r3, pc}
+ 327              	.LVL26:
+ 328              	.L20:
+ 125:App/Src/motor_controller.cpp ****     }
+ 329              		.loc 1 125 9 is_stmt 1 view .LVU76
+ 125:App/Src/motor_controller.cpp ****     }
+ 330              		.loc 1 125 26 is_stmt 0 view .LVU77
+ 331 0012 0022     		movs	r2, #0
+ 332 0014 0421     		movs	r1, #4
+ 333              	.LVL27:
+ 125:App/Src/motor_controller.cpp ****     }
+ 334              		.loc 1 125 26 view .LVU78
+ 335 0016 4FF09040 		mov	r0, #1207959552
+ 336              	.LVL28:
+ 125:App/Src/motor_controller.cpp ****     }
+ 337              		.loc 1 125 26 view .LVU79
+ 338 001a FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 339              	.LVL29:
+ 340              		.loc 1 127 1 view .LVU80
+ 341 001e F7E7     		b	.L19
+ 342              		.cfi_endproc
+ 343              	.LFE131:
+ 344              		.fnend
+ 346              		.section	.text._ZN15MotorController8saturateIiEET_S1_S1_S1_,"axG",%progbits,_ZN15MotorController8s
+ 347              		.align	1
+ 348              		.weak	_ZN15MotorController8saturateIiEET_S1_S1_S1_
+ 349              		.syntax unified
+ 350              		.thumb
+ 351              		.thumb_func
+ 353              	_ZN15MotorController8saturateIiEET_S1_S1_S1_:
+ 354              		.fnstart
+ 355              	.LVL30:
+ 356              	.LFB132:
+ 101:App/Src/motor_controller.cpp **** {
+ 357              		.loc 1 101 3 is_stmt 1 view -0
+ 358              		.cfi_startproc
+ 359              		@ args = 0, pretend = 0, frame = 0
+ 360              		@ frame_needed = 0, uses_anonymous_args = 0
+ 361              		@ link register save eliminated.
+ 103:App/Src/motor_controller.cpp ****     {
+ 362              		.loc 1 103 5 is_stmt 0 view .LVU82
+ 363 0000 9142     		cmp	r1, r2
+ 364 0002 03DB     		blt	.L25
+ 107:App/Src/motor_controller.cpp ****     {
+ 365              		.loc 1 107 10 view .LVU83
+ 366 0004 9942     		cmp	r1, r3
+ 367 0006 03DD     		ble	.L26
+ 109:App/Src/motor_controller.cpp ****     }
+ 368              		.loc 1 109 16 view .LVU84
+ 369 0008 1846     		mov	r0, r3
+ 370              	.LVL31:
+ 109:App/Src/motor_controller.cpp ****     }
+ 371              		.loc 1 109 16 view .LVU85
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 10
+
+
+ 372 000a 7047     		bx	lr
+ 373              	.LVL32:
+ 374              	.L25:
+ 105:App/Src/motor_controller.cpp ****     }
+ 375              		.loc 1 105 16 view .LVU86
+ 376 000c 1046     		mov	r0, r2
+ 377              	.LVL33:
+ 105:App/Src/motor_controller.cpp ****     }
+ 378              		.loc 1 105 16 view .LVU87
+ 379 000e 7047     		bx	lr
+ 380              	.LVL34:
+ 381              	.L26:
+ 113:App/Src/motor_controller.cpp ****     }
+ 382              		.loc 1 113 16 view .LVU88
+ 383 0010 0846     		mov	r0, r1
+ 384              	.LVL35:
+ 115:App/Src/motor_controller.cpp **** 
+ 385              		.loc 1 115 1 view .LVU89
+ 386 0012 7047     		bx	lr
+ 387              		.cfi_endproc
+ 388              	.LFE132:
+ 389              		.cantunwind
+ 390              		.fnend
+ 392              		.section	.text._ZN15MotorController3runEst,"ax",%progbits
+ 393              		.align	1
+ 394              		.global	_ZN15MotorController3runEst
+ 395              		.syntax unified
+ 396              		.thumb
+ 397              		.thumb_func
+ 399              	_ZN15MotorController3runEst:
+ 400              		.fnstart
+ 401              	.LVL36:
+ 402              	.LFB124:
+  20:App/Src/motor_controller.cpp ****     // 出力を最大出力に制限
+ 403              		.loc 1 20 1 is_stmt 1 view -0
+ 404              		.cfi_startproc
+ 405              		@ args = 0, pretend = 0, frame = 0
+ 406              		@ frame_needed = 0, uses_anonymous_args = 0
+  20:App/Src/motor_controller.cpp ****     // 出力を最大出力に制限
+ 407              		.loc 1 20 1 is_stmt 0 view .LVU91
+ 408 0000 38B5     		push	{r3, r4, r5, lr}
+ 409              		.save {r3, r4, r5, lr}
+ 410              	.LCFI3:
+ 411              		.cfi_def_cfa_offset 16
+ 412              		.cfi_offset 3, -16
+ 413              		.cfi_offset 4, -12
+ 414              		.cfi_offset 5, -8
+ 415              		.cfi_offset 14, -4
+  22:App/Src/motor_controller.cpp ****     // 出力が負の場合は回転方向を反転
+ 416              		.loc 1 22 5 is_stmt 1 view .LVU92
+  22:App/Src/motor_controller.cpp ****     // 出力が負の場合は回転方向を反転
+ 417              		.loc 1 22 22 is_stmt 0 view .LVU93
+ 418 0002 1346     		mov	r3, r2
+ 419 0004 5242     		rsbs	r2, r2, #0
+ 420              	.LVL37:
+  22:App/Src/motor_controller.cpp ****     // 出力が負の場合は回転方向を反転
+ 421              		.loc 1 22 22 view .LVU94
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 11
+
+
+ 422 0006 FFF7FEFF 		bl	_ZN15MotorController8saturateIiEET_S1_S1_S1_
+ 423              	.LVL38:
+  22:App/Src/motor_controller.cpp ****     // 出力が負の場合は回転方向を反転
+ 424              		.loc 1 22 12 discriminator 1 view .LVU95
+ 425 000a 05B2     		sxth	r5, r0
+ 426              	.LVL39:
+  24:App/Src/motor_controller.cpp ****     {
+ 427              		.loc 1 24 5 is_stmt 1 view .LVU96
+ 428 000c 002D     		cmp	r5, #0
+ 429 000e 0CDB     		blt	.L31
+  31:App/Src/motor_controller.cpp ****     }
+ 430              		.loc 1 31 9 view .LVU97
+  31:App/Src/motor_controller.cpp ****     }
+ 431              		.loc 1 31 26 is_stmt 0 view .LVU98
+ 432 0010 0122     		movs	r2, #1
+ 433 0012 0821     		movs	r1, #8
+ 434 0014 4FF09040 		mov	r0, #1207959552
+ 435 0018 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 436              	.LVL40:
+ 437              	.L29:
+  34:App/Src/motor_controller.cpp ****     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 3200);
+ 438              		.loc 1 34 5 is_stmt 1 view .LVU99
+ 439 001c 084B     		ldr	r3, .L32
+ 440 001e 1B68     		ldr	r3, [r3]
+ 441 0020 9D63     		str	r5, [r3, #56]
+  35:App/Src/motor_controller.cpp **** }
+ 442              		.loc 1 35 5 view .LVU100
+ 443 0022 4FF44862 		mov	r2, #3200
+ 444 0026 DA63     		str	r2, [r3, #60]
+  36:App/Src/motor_controller.cpp **** 
+ 445              		.loc 1 36 1 is_stmt 0 view .LVU101
+ 446 0028 38BD     		pop	{r3, r4, r5, pc}
+ 447              	.LVL41:
+ 448              	.L31:
+  36:App/Src/motor_controller.cpp **** 
+ 449              		.loc 1 36 1 view .LVU102
+ 450 002a 0446     		mov	r4, r0
+  26:App/Src/motor_controller.cpp ****         output = -output;
+ 451              		.loc 1 26 9 is_stmt 1 view .LVU103
+  26:App/Src/motor_controller.cpp ****         output = -output;
+ 452              		.loc 1 26 26 is_stmt 0 view .LVU104
+ 453 002c 0022     		movs	r2, #0
+ 454 002e 0821     		movs	r1, #8
+ 455 0030 4FF09040 		mov	r0, #1207959552
+ 456 0034 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 457              	.LVL42:
+  27:App/Src/motor_controller.cpp ****     }
+ 458              		.loc 1 27 9 is_stmt 1 view .LVU105
+  27:App/Src/motor_controller.cpp ****     }
+ 459              		.loc 1 27 16 is_stmt 0 view .LVU106
+ 460 0038 6442     		rsbs	r4, r4, #0
+ 461 003a 25B2     		sxth	r5, r4
+ 462              	.LVL43:
+  27:App/Src/motor_controller.cpp ****     }
+ 463              		.loc 1 27 16 view .LVU107
+ 464 003c EEE7     		b	.L29
+ 465              	.L33:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 12
+
+
+ 466 003e 00BF     		.align	2
+ 467              	.L32:
+ 468 0040 00000000 		.word	htim2
+ 469              		.cfi_endproc
+ 470              	.LFE124:
+ 471              		.fnend
+ 473              		.section	.text._ZN15MotorController8saturateIfEET_S1_S1_S1_,"axG",%progbits,_ZN15MotorController8s
+ 474              		.align	1
+ 475              		.weak	_ZN15MotorController8saturateIfEET_S1_S1_S1_
+ 476              		.syntax unified
+ 477              		.thumb
+ 478              		.thumb_func
+ 480              	_ZN15MotorController8saturateIfEET_S1_S1_S1_:
+ 481              		.fnstart
+ 482              	.LVL44:
+ 483              	.LFB133:
+ 101:App/Src/motor_controller.cpp **** {
+ 484              		.loc 1 101 3 is_stmt 1 view -0
+ 485              		.cfi_startproc
+ 486              		@ args = 0, pretend = 0, frame = 0
+ 487              		@ frame_needed = 0, uses_anonymous_args = 0
+ 488              		@ link register save eliminated.
+ 103:App/Src/motor_controller.cpp ****     {
+ 489              		.loc 1 103 5 is_stmt 0 view .LVU109
+ 490 0000 B4EEE00A 		vcmpe.f32	s0, s1
+ 491 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 492 0008 07D4     		bmi	.L37
+ 107:App/Src/motor_controller.cpp ****     {
+ 493              		.loc 1 107 10 view .LVU110
+ 494 000a B4EEC10A 		vcmpe.f32	s0, s2
+ 495 000e F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 496 0012 04DD     		ble	.L34
+ 109:App/Src/motor_controller.cpp ****     }
+ 497              		.loc 1 109 16 view .LVU111
+ 498 0014 B0EE410A 		vmov.f32	s0, s2
+ 499              	.LVL45:
+ 109:App/Src/motor_controller.cpp ****     }
+ 500              		.loc 1 109 16 view .LVU112
+ 501 0018 7047     		bx	lr
+ 502              	.LVL46:
+ 503              	.L37:
+ 105:App/Src/motor_controller.cpp ****     }
+ 504              		.loc 1 105 16 view .LVU113
+ 505 001a B0EE600A 		vmov.f32	s0, s1
+ 506              	.LVL47:
+ 507              	.L34:
+ 115:App/Src/motor_controller.cpp **** 
+ 508              		.loc 1 115 1 view .LVU114
+ 509 001e 7047     		bx	lr
+ 510              		.cfi_endproc
+ 511              	.LFE133:
+ 512              		.cantunwind
+ 513              		.fnend
+ 515              		.section	.text._ZN15MotorController13calculate_pidEff,"ax",%progbits
+ 516              		.align	1
+ 517              		.global	_ZN15MotorController13calculate_pidEff
+ 518              		.syntax unified
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 13
+
+
+ 519              		.thumb
+ 520              		.thumb_func
+ 522              	_ZN15MotorController13calculate_pidEff:
+ 523              		.fnstart
+ 524              	.LVL48:
+ 525              	.LFB127:
+  70:App/Src/motor_controller.cpp ****     // ターゲットが0の場合は出力を0にする
+ 526              		.loc 1 70 1 is_stmt 1 view -0
+ 527              		.cfi_startproc
+ 528              		@ args = 0, pretend = 0, frame = 0
+ 529              		@ frame_needed = 0, uses_anonymous_args = 0
+  70:App/Src/motor_controller.cpp ****     // ターゲットが0の場合は出力を0にする
+ 530              		.loc 1 70 1 is_stmt 0 view .LVU116
+ 531 0000 10B5     		push	{r4, lr}
+ 532              	.LCFI4:
+ 533              		.cfi_def_cfa_offset 8
+ 534              		.cfi_offset 4, -8
+ 535              		.cfi_offset 14, -4
+ 536 0002 2DED028B 		vpush.64	{d8}
+ 537              	.LCFI5:
+ 538              		.cfi_def_cfa_offset 16
+ 539              		.cfi_offset 80, -16
+ 540              		.cfi_offset 81, -12
+ 541 0006 0446     		mov	r4, r0
+  72:App/Src/motor_controller.cpp ****     {
+ 542              		.loc 1 72 5 is_stmt 1 view .LVU117
+ 543 0008 B5EE400A 		vcmp.f32	s0, #0
+ 544 000c F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 545 0010 38D0     		beq	.L45
+ 546 0012 B0EE408A 		vmov.f32	s16, s0
+ 547 0016 F0EE608A 		vmov.f32	s17, s1
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 548              		.loc 1 78 5 view .LVU118
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 549              		.loc 1 78 37 is_stmt 0 view .LVU119
+ 550 001a C38A     		ldrh	r3, [r0, #22]
+ 551 001c 01EE103A 		vmov	s2, r3	@ int
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 552              		.loc 1 78 30 view .LVU120
+ 553 0020 B8EE411A 		vcvt.f32.u32	s2, s2
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 554              		.loc 1 78 21 view .LVU121
+ 555 0024 F1EE410A 		vneg.f32	s1, s2
+ 556              	.LVL49:
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 557              		.loc 1 78 21 view .LVU122
+ 558 0028 90ED030A 		vldr.32	s0, [r0, #12]
+ 559              	.LVL50:
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 560              		.loc 1 78 21 view .LVU123
+ 561 002c FFF7FEFF 		bl	_ZN15MotorController8saturateIfEET_S1_S1_S1_
+ 562              	.LVL51:
+  78:App/Src/motor_controller.cpp ****     float error = target - now_value;                               // エラーを計算
+ 563              		.loc 1 78 11 discriminator 1 view .LVU124
+ 564 0030 84ED030A 		vstr.32	s0, [r4, #12]
+  79:App/Src/motor_controller.cpp ****     float p_out = error;                                            // P制御
+ 565              		.loc 1 79 5 is_stmt 1 view .LVU125
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 14
+
+
+  79:App/Src/motor_controller.cpp ****     float p_out = error;                                            // P制御
+ 566              		.loc 1 79 11 is_stmt 0 view .LVU126
+ 567 0034 78EE680A 		vsub.f32	s1, s16, s17
+ 568              	.LVL52:
+  80:App/Src/motor_controller.cpp ****     i_out += error * (float)control_cycle;                          // I制御
+ 569              		.loc 1 80 5 is_stmt 1 view .LVU127
+  81:App/Src/motor_controller.cpp ****     float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+ 570              		.loc 1 81 5 view .LVU128
+  81:App/Src/motor_controller.cpp ****     float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+ 571              		.loc 1 81 29 is_stmt 0 view .LVU129
+ 572 0038 237E     		ldrb	r3, [r4, #24]	@ zero_extendqisi2
+ 573 003a 07EE103A 		vmov	s14, r3	@ int
+  81:App/Src/motor_controller.cpp ****     float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+ 574              		.loc 1 81 22 view .LVU130
+ 575 003e B8EE477A 		vcvt.f32.u32	s14, s14
+  81:App/Src/motor_controller.cpp ****     float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+ 576              		.loc 1 81 20 view .LVU131
+ 577 0042 67EE207A 		vmul.f32	s15, s14, s1
+  81:App/Src/motor_controller.cpp ****     float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+ 578              		.loc 1 81 11 view .LVU132
+ 579 0046 70EE277A 		vadd.f32	s15, s0, s15
+ 580 004a C4ED037A 		vstr.32	s15, [r4, #12]
+  82:App/Src/motor_controller.cpp ****     prev_error = error;                                             // 前回のエラーを保存
+ 581              		.loc 1 82 5 is_stmt 1 view .LVU133
+  82:App/Src/motor_controller.cpp ****     prev_error = error;                                             // 前回のエラーを保存
+ 582              		.loc 1 82 28 is_stmt 0 view .LVU134
+ 583 004e D4ED046A 		vldr.32	s13, [r4, #16]
+  82:App/Src/motor_controller.cpp ****     prev_error = error;                                             // 前回のエラーを保存
+ 584              		.loc 1 82 26 view .LVU135
+ 585 0052 70EEE66A 		vsub.f32	s13, s1, s13
+  82:App/Src/motor_controller.cpp ****     prev_error = error;                                             // 前回のエラーを保存
+ 586              		.loc 1 82 11 view .LVU136
+ 587 0056 86EE876A 		vdiv.f32	s12, s13, s14
+ 588              	.LVL53:
+  83:App/Src/motor_controller.cpp ****     return p_out * Kp + i_out * Ki + d_out * Kd;                    // PID制御
+ 589              		.loc 1 83 5 is_stmt 1 view .LVU137
+  83:App/Src/motor_controller.cpp ****     return p_out * Kp + i_out * Ki + d_out * Kd;                    // PID制御
+ 590              		.loc 1 83 16 is_stmt 0 view .LVU138
+ 591 005a C4ED040A 		vstr.32	s1, [r4, #16]
+  84:App/Src/motor_controller.cpp **** }
+ 592              		.loc 1 84 5 is_stmt 1 view .LVU139
+  84:App/Src/motor_controller.cpp **** }
+ 593              		.loc 1 84 20 is_stmt 0 view .LVU140
+ 594 005e 94ED000A 		vldr.32	s0, [r4]
+  84:App/Src/motor_controller.cpp **** }
+ 595              		.loc 1 84 18 view .LVU141
+ 596 0062 20EE200A 		vmul.f32	s0, s0, s1
+  84:App/Src/motor_controller.cpp **** }
+ 597              		.loc 1 84 33 view .LVU142
+ 598 0066 94ED017A 		vldr.32	s14, [r4, #4]
+  84:App/Src/motor_controller.cpp **** }
+ 599              		.loc 1 84 31 view .LVU143
+ 600 006a 67EE877A 		vmul.f32	s15, s15, s14
+  84:App/Src/motor_controller.cpp **** }
+ 601              		.loc 1 84 23 view .LVU144
+ 602 006e 30EE270A 		vadd.f32	s0, s0, s15
+  84:App/Src/motor_controller.cpp **** }
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 15
+
+
+ 603              		.loc 1 84 46 view .LVU145
+ 604 0072 D4ED027A 		vldr.32	s15, [r4, #8]
+  84:App/Src/motor_controller.cpp **** }
+ 605              		.loc 1 84 44 view .LVU146
+ 606 0076 67EE867A 		vmul.f32	s15, s15, s12
+  84:App/Src/motor_controller.cpp **** }
+ 607              		.loc 1 84 46 view .LVU147
+ 608 007a 30EE270A 		vadd.f32	s0, s0, s15
+ 609              	.LVL54:
+ 610              	.L41:
+  85:App/Src/motor_controller.cpp **** 
+ 611              		.loc 1 85 1 view .LVU148
+ 612 007e BDEC028B 		vldm	sp!, {d8}
+ 613              	.LCFI6:
+ 614              		.cfi_remember_state
+ 615              		.cfi_restore 80
+ 616              		.cfi_restore 81
+ 617              		.cfi_def_cfa_offset 8
+ 618 0082 10BD     		pop	{r4, pc}
+ 619              	.LVL55:
+ 620              	.L45:
+ 621              	.LCFI7:
+ 622              		.cfi_restore_state
+  74:App/Src/motor_controller.cpp ****         prev_error = 0.0f;
+ 623              		.loc 1 74 9 is_stmt 1 view .LVU149
+  74:App/Src/motor_controller.cpp ****         prev_error = 0.0f;
+ 624              		.loc 1 74 15 is_stmt 0 view .LVU150
+ 625 0084 9FED030A 		vldr.32	s0, .L46
+ 626              	.LVL56:
+  74:App/Src/motor_controller.cpp ****         prev_error = 0.0f;
+ 627              		.loc 1 74 15 view .LVU151
+ 628 0088 80ED030A 		vstr.32	s0, [r0, #12]
+  75:App/Src/motor_controller.cpp ****         return 0.0f;
+ 629              		.loc 1 75 9 is_stmt 1 view .LVU152
+  75:App/Src/motor_controller.cpp ****         return 0.0f;
+ 630              		.loc 1 75 20 is_stmt 0 view .LVU153
+ 631 008c 80ED040A 		vstr.32	s0, [r0, #16]
+  76:App/Src/motor_controller.cpp ****     }
+ 632              		.loc 1 76 9 is_stmt 1 view .LVU154
+  76:App/Src/motor_controller.cpp ****     }
+ 633              		.loc 1 76 16 is_stmt 0 view .LVU155
+ 634 0090 F5E7     		b	.L41
+ 635              	.L47:
+ 636 0092 00BF     		.align	2
+ 637              	.L46:
+ 638 0094 00000000 		.word	0
+ 639              		.cfi_endproc
+ 640              	.LFE127:
+ 641              		.cantunwind
+ 642              		.fnend
+ 644              		.text
+ 645              	.Letext0:
+ 646              		.file 2 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/ma
+ 647              		.file 3 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/sy
+ 648              		.file 4 "App/Inc/motor_controller.hpp"
+ 649              		.file 5 "Drivers/CMSIS/Device/ST/STM32F3xx/Include/stm32f303x8.h"
+ 650              		.file 6 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_def.h"
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 16
+
+
+ 651              		.file 7 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_gpio.h"
+ 652              		.file 8 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_dma.h"
+ 653              		.file 9 "Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_tim.h"
+ 654              		.file 10 "Core/Inc/tim.h"
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s 			page 17
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 motor_controller.cpp
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:21     .text._ZN15MotorController4initEh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:27     .text._ZN15MotorController4initEh:00000000 _ZN15MotorController4initEh
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:87     .text._ZN15MotorController4initEh:00000038 $d
+.ARM.exidx.text._ZN15MotorController4initEh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:94     .text._ZN15MotorController9get_countEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:100    .text._ZN15MotorController9get_countEv:00000000 _ZN15MotorController9get_countEv
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:126    .text._ZN15MotorController9get_countEv:0000000c $d
+.ARM.exidx.text._ZN15MotorController9get_countEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:133    .text._ZN15MotorController19trapezoidal_controlEsh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:139    .text._ZN15MotorController19trapezoidal_controlEsh:00000000 _ZN15MotorController19trapezoidal_controlEsh
+.ARM.exidx.text._ZN15MotorController19trapezoidal_controlEsh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:228    .text._ZN15MotorController12set_pid_gainEfff:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:234    .text._ZN15MotorController12set_pid_gainEfff:00000000 _ZN15MotorController12set_pid_gainEfff
+.ARM.exidx.text._ZN15MotorController12set_pid_gainEfff:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:260    .text._ZN15MotorController9reset_pidEv:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:266    .text._ZN15MotorController9reset_pidEv:00000000 _ZN15MotorController9reset_pidEv
+.ARM.exidx.text._ZN15MotorController9reset_pidEv:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:290    .text._ZN15MotorController9set_brakeEb:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:296    .text._ZN15MotorController9set_brakeEb:00000000 _ZN15MotorController9set_brakeEb
+.ARM.extab.text._ZN15MotorController9set_brakeEb:00000000 $d
+.ARM.exidx.text._ZN15MotorController9set_brakeEb:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:347    .text._ZN15MotorController8saturateIiEET_S1_S1_S1_:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:353    .text._ZN15MotorController8saturateIiEET_S1_S1_S1_:00000000 _ZN15MotorController8saturateIiEET_S1_S1_S1_
+.ARM.exidx.text._ZN15MotorController8saturateIiEET_S1_S1_S1_:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:393    .text._ZN15MotorController3runEst:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:399    .text._ZN15MotorController3runEst:00000000 _ZN15MotorController3runEst
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:468    .text._ZN15MotorController3runEst:00000040 $d
+.ARM.exidx.text._ZN15MotorController3runEst:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:474    .text._ZN15MotorController8saturateIfEET_S1_S1_S1_:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:480    .text._ZN15MotorController8saturateIfEET_S1_S1_S1_:00000000 _ZN15MotorController8saturateIfEET_S1_S1_S1_
+.ARM.exidx.text._ZN15MotorController8saturateIfEET_S1_S1_S1_:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:516    .text._ZN15MotorController13calculate_pidEff:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:522    .text._ZN15MotorController13calculate_pidEff:00000000 _ZN15MotorController13calculate_pidEff
+C:\Users\gn10g\AppData\Local\Temp\ccQ8EqOn.s:638    .text._ZN15MotorController13calculate_pidEff:00000094 $d
+.ARM.exidx.text._ZN15MotorController13calculate_pidEff:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_TIM_PWM_Start
+HAL_GPIO_WritePin
+HAL_TIM_Encoder_Start
+htim2
+htim1
+__aeabi_unwind_cpp_pr0
+__aeabi_unwind_cpp_pr1

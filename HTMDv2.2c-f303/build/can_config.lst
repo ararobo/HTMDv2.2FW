@@ -1,0 +1,154 @@
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"can_config.cpp"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "CAN/Src/can_config.cpp"
+  20              		.section	.text._ZN10can_config9encode_idEhhhh,"ax",%progbits
+  21              		.align	1
+  22              		.global	_ZN10can_config9encode_idEhhhh
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	_ZN10can_config9encode_idEhhhh:
+  28              		.fnstart
+  29              	.LVL0:
+  30              	.LFB0:
+   1:CAN/Src/can_config.cpp **** #include "can_config.hpp"
+   2:CAN/Src/can_config.cpp **** 
+   3:CAN/Src/can_config.cpp **** namespace can_config
+   4:CAN/Src/can_config.cpp **** {
+   5:CAN/Src/can_config.cpp ****     uint16_t encode_id(uint8_t direction, uint8_t board_type, uint8_t board_id, uint8_t data_type)
+   6:CAN/Src/can_config.cpp ****     {
+  31              		.loc 1 6 5 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
+   7:CAN/Src/can_config.cpp ****         return ((direction & 0x1) << 10) | ((board_type & 0x7) << 7) | ((board_id & 0xf) << 3) | (d
+  36              		.loc 1 7 9 view .LVU1
+  37              		.loc 1 7 35 is_stmt 0 view .LVU2
+  38 0000 8002     		lsls	r0, r0, #10
+  39              	.LVL1:
+  40              		.loc 1 7 35 view .LVU3
+  41 0002 00F48060 		and	r0, r0, #1024
+  42              		.loc 1 7 64 view .LVU4
+  43 0006 C901     		lsls	r1, r1, #7
+  44              	.LVL2:
+  45              		.loc 1 7 64 view .LVU5
+  46 0008 01F46071 		and	r1, r1, #896
+  47              		.loc 1 7 42 view .LVU6
+  48 000c 0843     		orrs	r0, r0, r1
+  49              		.loc 1 7 90 view .LVU7
+  50 000e D200     		lsls	r2, r2, #3
+  51              	.LVL3:
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s 			page 2
+
+
+  52              		.loc 1 7 90 view .LVU8
+  53 0010 02F07802 		and	r2, r2, #120
+  54              		.loc 1 7 70 view .LVU9
+  55 0014 1043     		orrs	r0, r0, r2
+  56              		.loc 1 7 109 view .LVU10
+  57 0016 03F00703 		and	r3, r3, #7
+  58              	.LVL4:
+   8:CAN/Src/can_config.cpp ****     }
+  59              		.loc 1 8 5 view .LVU11
+  60 001a 1843     		orrs	r0, r0, r3
+  61 001c 7047     		bx	lr
+  62              		.cfi_endproc
+  63              	.LFE0:
+  64              		.cantunwind
+  65              		.fnend
+  67              		.section	.text._ZN10can_config9decode_idEtRhS0_S0_S0_,"ax",%progbits
+  68              		.align	1
+  69              		.global	_ZN10can_config9decode_idEtRhS0_S0_S0_
+  70              		.syntax unified
+  71              		.thumb
+  72              		.thumb_func
+  74              	_ZN10can_config9decode_idEtRhS0_S0_S0_:
+  75              		.fnstart
+  76              	.LVL5:
+  77              	.LFB1:
+   9:CAN/Src/can_config.cpp **** 
+  10:CAN/Src/can_config.cpp ****     void decode_id(uint16_t can_id, uint8_t &direction, uint8_t &board_type, uint8_t &board_id, uin
+  11:CAN/Src/can_config.cpp ****     {
+  78              		.loc 1 11 5 is_stmt 1 view -0
+  79              		.cfi_startproc
+  80              		@ args = 4, pretend = 0, frame = 0
+  81              		@ frame_needed = 0, uses_anonymous_args = 0
+  82              		@ link register save eliminated.
+  12:CAN/Src/can_config.cpp ****         direction = (can_id >> 10) & 0x1;
+  83              		.loc 1 12 9 view .LVU13
+  84              		.loc 1 12 36 is_stmt 0 view .LVU14
+  85 0000 C0F3802C 		ubfx	ip, r0, #10, #1
+  86              		.loc 1 12 19 view .LVU15
+  87 0004 81F800C0 		strb	ip, [r1]
+  13:CAN/Src/can_config.cpp ****         board_type = (can_id >> 7) & 0x7;
+  88              		.loc 1 13 9 is_stmt 1 view .LVU16
+  89              		.loc 1 13 36 is_stmt 0 view .LVU17
+  90 0008 C0F3C211 		ubfx	r1, r0, #7, #3
+  91              	.LVL6:
+  92              		.loc 1 13 20 view .LVU18
+  93 000c 1170     		strb	r1, [r2]
+  14:CAN/Src/can_config.cpp ****         board_id = (can_id >> 3) & 0xf;
+  94              		.loc 1 14 9 is_stmt 1 view .LVU19
+  95              		.loc 1 14 34 is_stmt 0 view .LVU20
+  96 000e C0F3C302 		ubfx	r2, r0, #3, #4
+  97              	.LVL7:
+  98              		.loc 1 14 18 view .LVU21
+  99 0012 1A70     		strb	r2, [r3]
+  15:CAN/Src/can_config.cpp ****         data_type = can_id & 0x7;
+ 100              		.loc 1 15 9 is_stmt 1 view .LVU22
+ 101              		.loc 1 15 28 is_stmt 0 view .LVU23
+ 102 0014 00F00700 		and	r0, r0, #7
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s 			page 3
+
+
+ 103              	.LVL8:
+ 104              		.loc 1 15 19 view .LVU24
+ 105 0018 009B     		ldr	r3, [sp]
+ 106              	.LVL9:
+ 107              		.loc 1 15 19 view .LVU25
+ 108 001a 1870     		strb	r0, [r3]
+  16:CAN/Src/can_config.cpp ****     }
+ 109              		.loc 1 16 5 view .LVU26
+ 110 001c 7047     		bx	lr
+ 111              		.cfi_endproc
+ 112              	.LFE1:
+ 113              		.cantunwind
+ 114              		.fnend
+ 116              		.text
+ 117              	.Letext0:
+ 118              		.file 2 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/ma
+ 119              		.file 3 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/sy
+ 120              		.file 4 "CAN/Inc/can_config.hpp"
+ARM GAS  C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 can_config.cpp
+C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s:21     .text._ZN10can_config9encode_idEhhhh:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s:27     .text._ZN10can_config9encode_idEhhhh:00000000 _ZN10can_config9encode_idEhhhh
+.ARM.exidx.text._ZN10can_config9encode_idEhhhh:00000000 $d
+C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s:68     .text._ZN10can_config9decode_idEtRhS0_S0_S0_:00000000 $t
+C:\Users\gn10g\AppData\Local\Temp\ccKVyqhm.s:74     .text._ZN10can_config9decode_idEtRhS0_S0_S0_:00000000 _ZN10can_config9decode_idEtRhS0_S0_S0_
+.ARM.exidx.text._ZN10can_config9decode_idEtRhS0_S0_S0_:00000000 $d
+
+NO UNDEFINED SYMBOLS
