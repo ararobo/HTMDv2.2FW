@@ -7,6 +7,7 @@ MotorController motor_controller;
 
 void App::init()
 {
+    HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
     update_md_id();
     can_driver.set_md_id(md_id);
     can_driver.init();
@@ -39,12 +40,41 @@ void App::main_loop()
             }
 
             output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+
+            if (output != 0)
+            {
+                HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+            }
+            else
+            {
+                HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+            }
+            if (output < 0)
+            {
+                HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+            }
+            else
+            {
+                HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+            }
+
             motor_controller.run(target, md_config.max_output);
         }
         else
         {
             motor_controller.run(0, md_config.max_output);
             motor_controller.reset_pid();
+        }
+
+        if (loop_count > loop_count_max)
+        {
+            can_driver.send_limit_switch(limit_switch);
+            HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+            loop_count = 0;
+        }
+        else
+        {
+            loop_count++;
         }
     }
 
@@ -55,6 +85,7 @@ void App::main_loop()
         motor_controller.set_brake(true);
         motor_controller.get_count();
         motor_controller.reset_pid();
+        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
         initialized = true;
     }
 
@@ -68,12 +99,6 @@ void App::main_loop()
     {
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
         can_driver.send_limit_switch(limit_switch);
-    }
-
-    if (loop_count > loop_count_max)
-    {
-        can_driver.send_limit_switch(limit_switch);
-        loop_count = 0;
     }
 
     HAL_Delay(md_config.control_period);
