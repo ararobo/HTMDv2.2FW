@@ -35,7 +35,7 @@ void MotorController::run(int16_t output, uint16_t max_output)
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 3200);
 }
 
-int16_t MotorController::getCount()
+int16_t MotorController::get_count()
 {
     // エンコーダのカウントを取得
     uint16_t enc_buff = TIM1->CNT;
@@ -43,7 +43,7 @@ int16_t MotorController::getCount()
     return static_cast<int16_t>(enc_buff); // カウントをint16_tに変換
 }
 
-int16_t MotorController::trapezoidalControl(int16_t output, uint8_t max_acceleration)
+int16_t MotorController::trapezoidal_control(int16_t output, uint8_t max_acceleration)
 {
     if (output == 0)
     {
@@ -66,7 +66,7 @@ int16_t MotorController::trapezoidalControl(int16_t output, uint8_t max_accelera
     }
 }
 
-float MotorController::calculatePID(float target, float now_value)
+float MotorController::calculate_pid(float target, float now_value)
 {
     // ターゲットが0の場合は出力を0にする
     if (target == 0.0f)
@@ -84,14 +84,14 @@ float MotorController::calculatePID(float target, float now_value)
     return p_out * Kp + i_out * Ki + d_out * Kd;                    // PID制御
 }
 
-void MotorController::setPIDGain(float p_gain, float i_gain, float d_gain)
+void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
 {
     Kp = p_gain;
     Ki = i_gain;
     Kd = d_gain;
 }
 
-void MotorController::resetPID()
+void MotorController::reset_pid()
 {
     i_out = 0.0f;
     prev_error = 0.0f;
@@ -114,7 +114,7 @@ T MotorController::saturate(T value, T min_value, T max_value)
     }
 }
 
-void MotorController::setBrake(bool brake)
+void MotorController::set_brake(bool brake)
 {
     if (brake)
     {

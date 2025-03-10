@@ -38,7 +38,7 @@ public:
      * @param max_acceleration 最大加速度
      * @return int16_t 台形制御の出力
      */
-    int16_t trapezoidalControl(int16_t output, uint8_t max_acceleration);
+    int16_t trapezoidal_control(int16_t output, uint8_t max_acceleration);
 
     /**
      * @brief PID制御を行う
@@ -47,14 +47,14 @@ public:
      * @param now_value 現在の値
      * @return float PID制御の出力
      */
-    float calculatePID(float target, float now_value);
+    float calculate_pid(float target, float now_value);
 
     /**
      * @brief エンコーダのカウントを取得する
      *
      * @return int16_t エンコーダのカウント
      */
-    int16_t getCount();
+    int16_t get_count();
 
     /**
      * @brief PIDゲインを設定する
@@ -63,13 +63,13 @@ public:
      * @param i_gain 積分ゲイン
      * @param d_gain 微分ゲイン
      */
-    void setPIDGain(float p_gain, float i_gain, float d_gain);
+    void set_pid_gain(float p_gain, float i_gain, float d_gain);
 
     /**
      * @brief 過去のPIDをリセットする
      *
      */
-    void resetPID();
+    void reset_pid();
 
     /**
      * @brief 値を指定された範囲内に制限する汎用関数
@@ -83,5 +83,5 @@ public:
     template <typename T>
     T saturate(T value, T min_value, T max_value);
 
-    void setBrake(bool brake);
+    void set_brake(bool brake);
 };

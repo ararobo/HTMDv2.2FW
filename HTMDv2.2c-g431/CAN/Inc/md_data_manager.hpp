@@ -21,8 +21,13 @@ private:
     void send_gain(uint8_t gain_type, float gain)
     {
         uint8_t data[5];
+        uint32_t gain_int = static_cast<uint32_t>(gain);
         data[0] = gain_type;
-        memcpy(&data[1], &gain, sizeof(gain));
+        data[1] = gain_int & 0xFF;
+        data[2] = (gain_int >> 8) & 0xFF;
+        data[3] = (gain_int >> 16) & 0xFF;
+        data[4] = (gain_int >> 24) & 0xFF;
+
         if (is_master)
         {
             send(encode_id(direction::slave, board_type::md, md_id, data_type::md::gain), data, sizeof(data));
@@ -34,7 +39,9 @@ private:
     }
 
 protected:
-    void send(uint16_t id, uint8_t *data, uint8_t len);
+    virtual void send(uint16_t id, uint8_t *data, uint8_t len)
+    {
+    }
 
     void receive(uint16_t id, uint8_t *data, uint8_t len)
     {
@@ -49,24 +56,27 @@ protected:
         case data_type::md::init:
             if (is_master)
             {
-                memcpy(&md_kind, data, sizeof(md_kind));
+                md_kind = data[0];
             }
             else
             {
-                memcpy(&md_config, data, sizeof(md_config));
+                for (uint8_t i = 0; i < sizeof(md_config_t); i++)
+                {
+                    md_config.code[i] = data[i];
+                }
             }
             is_received_init = true;
             break;
         case data_type::md::target:
-            memcpy(&target, data, sizeof(target));
+            target = static_cast<int16_t>((data[1] << 8) | data[0]);
             is_received_target = true;
             break;
         case data_type::md::limit_switch:
-            memcpy(&limit_switch, data, sizeof(limit_switch));
+            limit_switch = data[0];
             is_received_limit_switch = true;
             break;
         case data_type::md::gain:
-            memcpy(pid_gain[data[0]], data + 1, sizeof(pid_gain[data[0]]));
+            pid_gain[data[0]] = static_cast<float>((data[4] << 24) | (data[3] << 16) | (data[2] << 8) | data[1]);
             is_received_gain = true;
             break;
         default:
@@ -76,6 +86,11 @@ protected:
 
 public:
     MDDataManager(uint8_t md_id) : md_id(md_id), is_received_init(false), is_received_target(false), is_received_limit_switch(false), is_received_gain(false) {};
+
+    void set_md_id(uint8_t md_id)
+    {
+        this->md_id = md_id;
+    }
 
     void send_init(md_config_t md_config)
     {
@@ -92,7 +107,8 @@ public:
     void send_target(int16_t target)
     {
         uint8_t data[2];
-        memcpy(data, &target, sizeof(target));
+        data[0] = target & 0xFF;
+        data[1] = (target >> 8) & 0xFF;
         if (is_master)
         {
             send(encode_id(direction::slave, board_type::md, md_id, data_type::md::target), data, sizeof(data));
