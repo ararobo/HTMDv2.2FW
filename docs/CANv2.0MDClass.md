@@ -1,8 +1,9 @@
 # MDのデータ管理用クラス
-MDDataManagerというクラスがある。
-MDDataManagerクラスを用いるとMDでのCAN通信の実装が簡単になる。
+クラス名はMDDataManagerである。
+このクラスを継承して新たにクラスを作成することによって使用可能である。
+継承後のクラスでCAN通信の処理を記述する必要がある。
 
-## 受信系の関数
+## 受信系
 CAN通信で受信したデータは、can_callbackメソッドによってクラス内のバッファに保存されている。
 
 ### bool get_init(md_config_t *md_config)
@@ -22,4 +23,18 @@ PID制御のゲインを取得するメソッド。
 与えられたポインタのうちCAN通信で更新されているデータがあれば、ポインタの指すオブジェクトを受信したゲインに書き換える。
 前回メソッドを用いてからPIDゲインの一つでも受信があった場合、trueを返す。
 
-## 要素 
+## 送信系
+送信時はsend(uint16_t id, uint8_t *data, uint8_t len)メソッドが用いられる。
+sendメソッドは継承後のクラスでオーバーライドすることによってCAN通信の送信を行う。
+
+### void send_init(uint8_t md_kind)
+MDの種類を送信するメソッド。
+
+### void send_encoder(int16_t encoder)
+エンコーダーの値を引数に与えると送信するメソッド。
+
+### void send_limit_switch(uint8_t limit_switch_state)
+リミットスイッチの状態を1bitにつき1SWで送信するメソッド。
+
+### void send_gain(float *p_gain, float *i_gain, float *d_gain)
+PIDゲインを送信するメソッド。
