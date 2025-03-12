@@ -83,6 +83,8 @@ void App::main_loop()
     if (can_driver.is_md_init())
     {
         md_config = can_driver.get_md_config();
+        log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
+        log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
         motor_controller.init(md_config.control_period);
         motor_controller.set_brake(true);
         motor_controller.get_count();

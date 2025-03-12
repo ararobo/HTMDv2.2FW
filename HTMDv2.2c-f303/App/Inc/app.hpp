@@ -12,7 +12,7 @@ private:
     int16_t output;
     int16_t encoder;
     uint8_t limit_switch;
-    float pid_gain[3];
+    float pid_gain[3] = {0.0f, 0.0f, 0.0f};
     uint16_t update_target_count = 0;
     uint16_t update_target_count_max = 100;
     uint16_t timer_count = 0;
