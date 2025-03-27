@@ -1,7 +1,8 @@
 #include "md_data_manager.hpp"
+#include "ems_data_manager.hpp"
 #include "can.h"
 
-class CANDriver : public MDDataManager<false>
+class CANDriver : public MDDataManager<false>, EMSDataManager
 {
 private:
     CAN_FilterTypeDef RxFilter;

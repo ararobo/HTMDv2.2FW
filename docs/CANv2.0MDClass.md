@@ -24,7 +24,7 @@ PID制御のゲインを取得するメソッド。
 前回メソッドを用いてからPIDゲインの一つでも受信があった場合、trueを返す。
 
 ## 送信系
-送信時はsend(uint16_t id, uint8_t *data, uint8_t len)メソッドが用いられる。
+送信時はsend(uint16_t id, uint8_t *data, uint8_t len)メソッドを用いる。
 sendメソッドは継承後のクラスでオーバーライドすることによってCAN通信の送信を行う。
 
 ### void send_init(uint8_t md_kind)

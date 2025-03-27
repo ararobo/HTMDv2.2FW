@@ -36,10 +36,7 @@ private:
     }
 
 protected:
-    virtual void send(uint16_t id, uint8_t *data, uint8_t len)
-    {
-    }
-
+    virtual void send(uint16_t id, uint8_t *data, uint8_t len) = 0;
     void receive(uint16_t id, uint8_t *data, uint8_t len)
     {
         uint8_t direction, board_type, board_id, data_type;
