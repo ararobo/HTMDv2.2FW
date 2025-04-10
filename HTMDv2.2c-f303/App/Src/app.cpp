@@ -2,15 +2,17 @@
 #include "tim.h"
 #include "motor_controller.hpp"
 #include "serial_printf.hpp"
+#define FW_VERSION 0x01
+#define BOARD_KIND 0x01
 
-CANDriver can_driver(0);
+CANDriver can_driver(0, BOARD_KIND, FW_VERSION);
 MotorController motor_controller;
 
 void App::init()
 {
     HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
     update_md_id();
-    can_driver.set_md_id(md_id);
+    can_driver.set_board_id(md_id);
     can_driver.init();
     HAL_TIM_Base_Start_IT(&htim6);
     log_printf(LOG_INFO, "App initialized.\n");
@@ -80,9 +82,8 @@ void App::main_loop()
         }
     }
 
-    if (can_driver.is_md_init())
+    if (can_driver.get_init(&md_config))
     {
-        md_config = can_driver.get_md_config();
         log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
         log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
         motor_controller.init(md_config.control_period);
@@ -94,7 +95,22 @@ void App::main_loop()
         log_printf(LOG_INFO, "MD initialized.\n");
     }
 
-    if (can_driver.get_gain(&pid_gain[0], &pid_gain[1], &pid_gain[2]))
+    if (can_driver.get_gain(0, pid_gain))
+    {
+        log_printf(LOG_INFO, "p_gain:%f\n", pid_gain[0]);
+        can_driver.send_gain(0, pid_gain[0]);
+    }
+    if (can_driver.get_gain(1, pid_gain + 1))
+    {
+        log_printf(LOG_INFO, "i_gain:%f\n", pid_gain[1]);
+        can_driver.send_gain(1, pid_gain[1]);
+    }
+    if (can_driver.get_gain(2, pid_gain + 2))
+    {
+        log_printf(LOG_INFO, "d_gain:%f\n", pid_gain[2]);
+        can_driver.send_gain(2, pid_gain[2]);
+    }
+
     {
         motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
         motor_controller.reset_pid();
@@ -114,7 +130,7 @@ void App::timer_task()
     if (timer_count > md_config.encoder_period)
     {
         encoder = motor_controller.get_count();
-        can_driver.send_target(encoder);
+        can_driver.send_encoder(encoder);
         timer_count = 0;
     }
     else

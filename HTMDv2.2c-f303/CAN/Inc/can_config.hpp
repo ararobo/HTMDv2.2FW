@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 namespace can_config
@@ -28,6 +29,7 @@ namespace can_config
             static constexpr uint8_t target = 1;
             static constexpr uint8_t limit_switch = 2;
             static constexpr uint8_t gain = 3;
+            static constexpr uint8_t multi_target = 4;
         }
         namespace servo
         {

@@ -1,8 +1,8 @@
-#include "md_data_manager.hpp"
+#include "md_manager.hpp"
 #include "ems_data_manager.hpp"
 #include "can.h"
 
-class CANDriver : public MDDataManager<false>, EMSDataManager
+class CANDriver : public MDManager, EMSDataManager
 {
 private:
     CAN_FilterTypeDef RxFilter;
@@ -29,7 +29,7 @@ private:
     }
 
 public:
-    CANDriver(uint8_t md_id) : MDDataManager(md_id) {}
+    CANDriver(uint8_t board_id, uint8_t board_kind, uint8_t fw_version) : MDManager(board_id, board_kind, fw_version) {}
 
     void init()
     {

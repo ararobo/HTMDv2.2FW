@@ -22,6 +22,11 @@ private:
     bool limit_switch_flag; // リミットスイッチフラグ
     bool gain_flag;         // ゲインフラグ
     bool multi_target_flag; // 複数の目標値フラグ
+    /* 一時処理用変数 */
+    uint8_t packet_direction;  // 進行方向
+    uint8_t packet_board_type; // 基板の種類
+    uint8_t packet_board_id;   // 基板のID
+    uint8_t packet_data_type;  // データの種類
 
 protected:
     virtual void send(uint16_t id, uint8_t *data, uint8_t len) = 0;
@@ -29,10 +34,11 @@ protected:
 
 public:
     MDManager(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
+    void set_board_id(uint8_t board_id) { this->board_id = board_id; }
     bool get_init(md_config_t *md_config);
     void send_init(uint8_t md_kind);
-    bool get_target(uint16_t *target);
-    void send_encoder(uint16_t encoder);
+    bool get_target(int16_t *target);
+    void send_encoder(int16_t encoder);
     void send_limit_switch(uint8_t limit_switch);
     bool get_gain(uint8_t gain_kind, float *gain);
     void send_gain(uint8_t gain_kind, float gain);
