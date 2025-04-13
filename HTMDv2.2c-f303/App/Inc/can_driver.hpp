@@ -10,8 +10,8 @@ private:
     CAN_TxHeaderTypeDef TxHeader;
     uint32_t TxMailbox;
     uint8_t RxData[8];
-    uint16_t filter_mask; // フィルタマスク
-    uint16_t filter_id;   // フィルタID
+    uint32_t filter_mask; // フィルタマスク
+    uint32_t filter_id;   // フィルタID
 
     /**
      * @brief CANの送信処理(オーバーライド)

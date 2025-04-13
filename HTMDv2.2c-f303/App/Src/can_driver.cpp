@@ -3,8 +3,8 @@
 CANDriver::CANDriver(uint8_t board_id, uint8_t board_kind, uint8_t fw_version)
     : MDController(board_id, board_kind, fw_version)
 {
-    filter_mask = (0x11110000000 << 21) | 0x4; // フィルタマスク
-    filter_id = 0x00010000000 << 21;           // フィルタID
+    filter_mask = (0b11110000000 << 21) | 0x4; // フィルタマスク
+    filter_id = 0b00010000000 << 21;           // フィルタID
 }
 
 void CANDriver::init()
