@@ -28,18 +28,87 @@ private:
     uint8_t packet_data_type;  // データの種類
 
 protected:
+    /**
+     * @brief CANの送信処理(オーバーライドしてください)
+     *
+     * @param id CANのID
+     * @param data 送信するデータ
+     * @param len データの長さ
+     */
     virtual void send(uint16_t id, uint8_t *data, uint8_t len) = 0;
+
+    /**
+     * @brief 受信データの処理を行う
+     *
+     * @param id CANのID
+     * @param data 受信データ
+     * @param len データの長さ
+     */
     void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
     MDController(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
+    /**
+     * @brief 基板のIDを設定する
+     *
+     * @param board_id
+     */
     void set_board_id(uint8_t board_id) { this->board_id = board_id; }
-    void send_init(uint8_t md_kind);
+
+    /**
+     * @brief 基板の種類を設定する
+     *
+     * @param md_type 基板の種類
+     */
+    void send_init(uint8_t md_type);
+
+    /**
+     * @brief エンコーダーの値を送信する
+     *
+     * @param encoder エンコーダーの値
+     */
     void send_encoder(int16_t encoder);
+
+    /**
+     * @brief リミットスイッチの状態を送信する
+     *
+     * @param limit_switch リミットスイッチの状態
+     */
     void send_limit_switch(uint8_t limit_switch);
-    void send_pid_gain(float p_gain, float i_gain, float d_gain);
-    bool get_init(md_config_t *md_config);
-    bool get_target(int16_t *target);
-    bool get_gain(uint8_t gain_kind, float *gain);
+
+    /**
+     * @brief ゲインを送信する
+     *
+     * @param gain_kind ゲインの種類 0: Pゲイン、1: Iゲイン、2: Dゲイン
+     * @param gain ゲイン
+     */
     void send_gain(uint8_t gain_kind, float gain);
+
+    /**
+     * @brief MDの設定を取得する
+     *
+     * @param md_config MDの設定
+     * @return true 初期化フラグが立っている
+     * @return false 初期化フラグが立っていない
+     */
+    bool get_init(md_config_t *md_config);
+
+    /**
+     * @brief 目標値を取得する
+     *
+     * @param target 目標値
+     * @return true 更新されている
+     * @return false 更新されていない
+     */
+    bool get_target(int16_t *target);
+
+    /**
+     * @brief ゲインを取得する
+     *
+     * @param gain_kind ゲインの種類 0: Pゲイン、1: Iゲイン、2: Dゲイン
+     * @param gain ゲイン
+     * @return true 更新されている
+     * @return false 更新されていない
+     */
+    bool get_gain(uint8_t gain_kind, float *gain);
 };

@@ -51,18 +51,7 @@ void MDController::receive(uint16_t id, uint8_t *data, uint8_t len)
     }
 }
 
-bool MDController::get_init(md_config_t *md_config)
-{
-    if (this->init_flag)
-    {
-        this->init_flag = false;
-        memcpy(md_config, this->init_buffer, sizeof(md_config_t));
-        return true;
-    }
-    return false;
-}
-
-void MDController::send_init(uint8_t md_kind)
+void MDController::send_init(uint8_t md_type)
 {
     // CAN-IDの生成
     uint16_t can_id = can_config::encode_id(
@@ -72,18 +61,7 @@ void MDController::send_init(uint8_t md_kind)
         can_config::data_type::md::init);
 
     // 送信
-    this->send(can_id, &md_kind, sizeof(uint8_t));
-}
-
-bool MDController::get_target(int16_t *target)
-{
-    if (this->target_flag)
-    {
-        this->target_flag = false;
-        memcpy(target, this->target_buffer, sizeof(int16_t));
-        return true;
-    }
-    return false;
+    this->send(can_id, &md_type, sizeof(uint8_t));
 }
 
 void MDController::send_encoder(int16_t encoder)
@@ -113,17 +91,6 @@ void MDController::send_limit_switch(uint8_t limit_switch)
     this->send(can_id, &limit_switch, sizeof(uint8_t));
 }
 
-bool MDController::get_gain(uint8_t gain_type, float *gain)
-{
-    if (this->gain_flag[gain_type])
-    {
-        this->gain_flag[gain_type] = false;
-        memcpy(gain, this->gain_buffer[gain_type], sizeof(float));
-        return true;
-    }
-    return false;
-}
-
 void MDController::send_gain(uint8_t gain_type, float gain)
 {
     uint8_t data[5];
@@ -139,4 +106,37 @@ void MDController::send_gain(uint8_t gain_type, float gain)
     memcpy(data + 1, &gain, sizeof(float));
     // 送信
     this->send(can_id, data, sizeof(data));
+}
+
+bool MDController::get_init(md_config_t *md_config)
+{
+    if (this->init_flag)
+    {
+        this->init_flag = false;
+        memcpy(md_config, this->init_buffer, sizeof(md_config_t));
+        return true;
+    }
+    return false;
+}
+
+bool MDController::get_target(int16_t *target)
+{
+    if (this->target_flag)
+    {
+        this->target_flag = false;
+        memcpy(target, this->target_buffer, sizeof(int16_t));
+        return true;
+    }
+    return false;
+}
+
+bool MDController::get_gain(uint8_t gain_type, float *gain)
+{
+    if (this->gain_flag[gain_type])
+    {
+        this->gain_flag[gain_type] = false;
+        memcpy(gain, this->gain_buffer[gain_type], sizeof(float));
+        return true;
+    }
+    return false;
 }
