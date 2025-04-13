@@ -29,9 +29,9 @@ App::App()
     loop_count_max = 100;                // ループカウントの最大値
     last_tick = 0;                       // 最後のティック
     initialized = false;                 // 初期化フラグ
-    pid_gains[0] = 0.0f;                 // PIDゲインの初期値
-    pid_gains[1] = 0.0f;                 // PIDゲインの初期値
-    pid_gains[2] = 0.0f;                 // PIDゲインの初期値
+    pid_gain[0] = 0.0f;                  // PIDゲインの初期値
+    pid_gain[1] = 0.0f;                  // PIDゲインの初期値
+    pid_gain[2] = 0.0f;                  // PIDゲインの初期値
     pid_gains_updated = false;           // PIDゲインの更新フラグ
 }
 
@@ -49,6 +49,7 @@ void App::main_loop()
 {
     if (initialized)
     {
+        // 目標値の更新
         if (can_driver.get_target(&target))
         {
             update_target_count = 0;
@@ -58,81 +59,16 @@ void App::main_loop()
         {
             update_target_count++;
         }
-
-        if (update_target_count < update_target_count_max)
-        {
-            if (pid_gains[0] != 0.0f && target != 0)
-            {
-                output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_output;
-            }
-            else
-            {
-                motor_controller.reset_pid();
-                output = target;
-            }
-
-            output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
-        }
-        else
-        {
-            output = 0;
-            motor_controller.reset_pid();
-        }
-
-        if (output != 0)
-        {
-            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-        }
-        else
-        {
-            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-        }
-        if (output < 0)
-        {
-            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-        }
-        else
-        {
-            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-        }
-        motor_controller.run(output, md_config.max_output);
+        control_motor(); // モーター制御
     }
 
-    if (can_driver.get_init(&md_config))
-    {
-        log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
-        log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
-        motor_controller.init(md_config.control_period);
-        motor_controller.set_brake(true);
-        motor_controller.get_count();
-        motor_controller.reset_pid();
-        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
-        initialized = true;
-        log_printf(LOG_INFO, "MD initialized.\n");
-    }
+    update_md_config(); // MDの設定を更新(init)
 
-    if (can_driver.get_gain(0, pid_gains))
-    {
-        log_printf(LOG_INFO, "p_gain:%f\n", pid_gains[0]);
-        can_driver.send_gain(0, pid_gains[0]);
-        pid_gains_updated = true;
-    }
-    if (can_driver.get_gain(1, pid_gains + 1))
-    {
-        log_printf(LOG_INFO, "i_gain:%f\n", pid_gains[1]);
-        can_driver.send_gain(1, pid_gains[1]);
-    }
-    if (can_driver.get_gain(2, pid_gains + 2))
-    {
-        log_printf(LOG_INFO, "d_gain:%f\n", pid_gains[2]);
-        can_driver.send_gain(2, pid_gains[2]);
-    }
+    update_gain(0); // Pゲイン
+    update_gain(1); // Iゲイン
+    update_gain(2); // Dゲイン
 
-    {
-        motor_controller.set_pid_gain(pid_gains[0], pid_gains[1], pid_gains[2]);
-        motor_controller.reset_pid();
-    }
-
+    // リミットスイッチの状態を取得し、CANで送信
     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
     {
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
@@ -147,6 +83,7 @@ void App::main_loop()
         }
         else
         {
+            // 初期化されていない場合、initパケット（MDの情報）を送信
             can_driver.send_init(BOARD_KIND);
         }
         loop_count = 0;
@@ -156,7 +93,7 @@ void App::main_loop()
         loop_count++;
     }
 
-    wait_for_next_period();
+    wait_for_next_period(); // 制御周期に合わせる
 }
 
 void App::timer_task()
@@ -170,6 +107,86 @@ void App::timer_task()
     else
     {
         timer_count++;
+    }
+}
+
+void App::control_motor()
+{
+    if (update_target_count < update_target_count_max)
+    {
+        // 出力値の更新
+        if (pid_gain[0] != 0.0f && target != 0)
+        {
+            // PID制御を行う
+            output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_output;
+        }
+        else
+        {
+            // 目標値をそのまま出力値とする
+            motor_controller.reset_pid();
+            output = target;
+        }
+
+        output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+    }
+    else // 長時間、目標値が更新されない場合、出力を0にする
+    {
+        output = 0;
+        motor_controller.reset_pid();
+    }
+
+    // LEDの点灯制御
+    if (output != 0)
+    {
+        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+    }
+    if (output < 0)
+    {
+        HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+    }
+
+    // モーターを回す
+    motor_controller.run(output, md_config.max_output);
+}
+
+void App::update_gain(uint8_t gain_type)
+{
+    if (can_driver.get_gain(gain_type, &pid_gain[gain_type]))
+    {
+        can_driver.send_gain(gain_type, pid_gain[gain_type]);
+        motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
+        motor_controller.reset_pid();
+        pid_gains_updated = true;
+        log_printf(LOG_INFO, "Gain %d updated: %f\n", gain_type, pid_gain[gain_type]);
+    }
+}
+
+void App::update_md_config()
+{
+    if (can_driver.get_init(&md_config))
+    {
+        log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
+        log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
+        log_printf(LOG_INFO, "md_config.control_period:%d\n", md_config.control_period);
+        log_printf(LOG_INFO, "md_config.encoder_period:%d\n", md_config.encoder_period);
+        log_printf(LOG_INFO, "md_config.encoder_type:%d\n", md_config.encoder_type);
+        log_printf(LOG_INFO, "md_config.limit_switch_behavior:%d\n", md_config.limit_switch_behavior);
+        log_printf(LOG_INFO, "md_config.option:%d\n", md_config.option);
+        motor_controller.init(md_config.control_period);
+        motor_controller.set_brake(true);
+        motor_controller.get_count();
+        motor_controller.reset_pid();
+        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+        initialized = true;
+        log_printf(LOG_INFO, "MD initialized.\n");
     }
 }
 

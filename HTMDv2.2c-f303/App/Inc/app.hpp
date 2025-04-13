@@ -12,7 +12,7 @@ private:
     int16_t output;
     int16_t encoder;
     uint8_t limit_switch;
-    float pid_gains[3];
+    float pid_gain[3];
     bool pid_gains_updated;
     uint16_t update_target_count;
     uint16_t update_target_count_max;
@@ -25,6 +25,9 @@ private:
 private:
     void update_md_id();
     void wait_for_next_period();
+    void control_motor();
+    void update_gain(uint8_t gain_type);
+    void update_md_config();
 
 public:
     App();

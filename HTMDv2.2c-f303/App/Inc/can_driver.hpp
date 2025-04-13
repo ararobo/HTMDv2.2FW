@@ -1,7 +1,7 @@
-#include "md_manager.hpp"
+#include "md_controller.hpp"
 #include "can.h"
 
-class CANDriver : public MDManager
+class CANDriver : public MDController
 {
 private:
     CAN_FilterTypeDef RxFilter;
@@ -28,7 +28,7 @@ private:
     }
 
 public:
-    CANDriver(uint8_t board_id, uint8_t board_kind, uint8_t fw_version) : MDManager(board_id, board_kind, fw_version) {}
+    CANDriver(uint8_t board_id, uint8_t board_kind, uint8_t fw_version) : MDController(board_id, board_kind, fw_version) {}
 
     void init()
     {

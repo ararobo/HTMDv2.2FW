@@ -1,44 +1,57 @@
-#include "md_manager.hpp"
+#include "md_controller.hpp"
 #include <cstring>
 
-MDManager::MDManager(uint8_t board_id, uint8_t board_kind, uint8_t fw_version) : board_id(board_id), board_kind(board_kind), fw_version(fw_version)
+MDController::MDController(uint8_t board_id, uint8_t board_kind, uint8_t fw_version)
+    : board_id(board_id), board_kind(board_kind), fw_version(fw_version)
 {
 }
 
-void MDManager::receive(uint16_t id, uint8_t *data, uint8_t len)
+void MDController::receive(uint16_t id, uint8_t *data, uint8_t len)
 {
-    can_config::decode_id(id, this->packet_direction, this->packet_board_type, this->packet_board_id, this->packet_data_type);
-    if (this->packet_direction == can_config::direction::slave && this->packet_board_type == can_config::board_type::md && this->packet_board_id == this->board_id)
+    // 受信パケットのCAN-IDからパケットの情報を取得
+    can_config::decode_id(id, this->packet_direction, this->packet_board_type,
+                          this->packet_board_id, this->packet_data_type);
+
+    // 受信データのフィルタリング
+    if (this->packet_direction == can_config::direction::slave &&
+        this->packet_board_type == can_config::board_type::md &&
+        this->packet_board_id == this->board_id)
     {
+        // 受信フラグを立て、受信データをバッファに格納
         switch (this->packet_data_type)
         {
         case can_config::data_type::md::init:
             this->init_flag = true;
             memcpy(this->init_buffer, data, len);
             break;
+
         case can_config::data_type::md::target:
             this->target_flag = true;
             memcpy(this->target_buffer, data, len);
             break;
+
         case can_config::data_type::md::limit_switch:
             this->limit_switch_flag = true;
             memcpy(this->rx_buffer, data, len);
             break;
+
         case can_config::data_type::md::gain:
-            this->gain_flag = true;
-            memcpy(this->gain_buffer, data, len);
+            this->gain_flag[data[0]] = true;                   // gain_type別にフラグを立てる
+            memcpy(this->gain_buffer[data[0]], data + 1, len); // gain_typeを除いたデータを該当するバッファにコピー
             break;
+
         case can_config::data_type::md::multi_target:
             this->multi_target_flag = true;
             memcpy(this->multi_target_buffer, data, len);
             break;
+
         default:
             break;
         }
     }
 }
 
-bool MDManager::get_init(md_config_t *md_config)
+bool MDController::get_init(md_config_t *md_config)
 {
     if (this->init_flag)
     {
@@ -49,14 +62,20 @@ bool MDManager::get_init(md_config_t *md_config)
     return false;
 }
 
-void MDManager::send_init(uint8_t md_kind)
+void MDController::send_init(uint8_t md_kind)
 {
-    uint8_t data[1];
-    memcpy(data, &md_kind, sizeof(uint8_t));
-    this->send(can_config::encode_id(can_config::direction::master, can_config::board_type::md, this->board_id, can_config::data_type::md::init), data, sizeof(uint8_t));
+    // CAN-IDの生成
+    uint16_t can_id = can_config::encode_id(
+        can_config::direction::master,
+        can_config::board_type::md,
+        this->board_id,
+        can_config::data_type::md::init);
+
+    // 送信
+    this->send(can_id, &md_kind, sizeof(uint8_t));
 }
 
-bool MDManager::get_target(int16_t *target)
+bool MDController::get_target(int16_t *target)
 {
     if (this->target_flag)
     {
@@ -67,34 +86,57 @@ bool MDManager::get_target(int16_t *target)
     return false;
 }
 
-void MDManager::send_encoder(int16_t encoder)
+void MDController::send_encoder(int16_t encoder)
 {
     uint8_t data[2];
+    // CAN-IDの生成
+    uint16_t can_id = can_config::encode_id(
+        can_config::direction::master,
+        can_config::board_type::md,
+        this->board_id,
+        can_config::data_type::md::target);
+    // エンコーダーの値をコピー
     memcpy(data, &encoder, sizeof(int16_t));
-    this->send(can_config::encode_id(can_config::direction::master, can_config::board_type::md, this->board_id, can_config::data_type::md::target), data, sizeof(int16_t));
+    // 送信
+    this->send(can_id, data, sizeof(int16_t));
 }
 
-void MDManager::send_limit_switch(uint8_t limit_switch)
+void MDController::send_limit_switch(uint8_t limit_switch)
 {
-    uint8_t data[1];
-    memcpy(data, &limit_switch, sizeof(uint8_t));
-    this->send(can_config::encode_id(can_config::direction::master, can_config::board_type::md, this->board_id, can_config::data_type::md::limit_switch), data, sizeof(uint8_t));
+    // CAN-IDの生成
+    uint16_t can_id = can_config::encode_id(
+        can_config::direction::master,
+        can_config::board_type::md,
+        this->board_id,
+        can_config::data_type::md::limit_switch);
+    // 送信
+    this->send(can_id, &limit_switch, sizeof(uint8_t));
 }
 
-bool MDManager::get_gain(uint8_t gain_kind, float *gain)
+bool MDController::get_gain(uint8_t gain_type, float *gain)
 {
-    if (this->gain_flag)
+    if (this->gain_flag[gain_type])
     {
-        this->gain_flag = false;
-        memcpy(gain, this->gain_buffer, sizeof(float));
+        this->gain_flag[gain_type] = false;
+        memcpy(gain, this->gain_buffer[gain_type], sizeof(float));
         return true;
     }
     return false;
 }
 
-void MDManager::send_gain(uint8_t gain_kind, float gain)
+void MDController::send_gain(uint8_t gain_type, float gain)
 {
     uint8_t data[5];
-    memcpy(data, &gain, sizeof(float));
-    this->send(can_config::encode_id(can_config::direction::master, can_config::board_type::md, this->board_id, can_config::data_type::md::gain), data, sizeof(float));
+    // CAN-IDの生成
+    uint16_t can_id = can_config::encode_id(
+        can_config::direction::master,
+        can_config::board_type::md,
+        this->board_id,
+        can_config::data_type::md::gain);
+    // gain_typeをコピー
+    data[0] = gain_type;
+    // gain_typeを除いたデータを該当するバッファにコピー
+    memcpy(data + 1, &gain, sizeof(float));
+    // 送信
+    this->send(can_id, data, sizeof(data));
 }

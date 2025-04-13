@@ -24,7 +24,7 @@ public:
     void init(uint8_t control_cycle);
 
     /**
-     * @brief モーターを制御する
+     * @brief モーターを回す
      *
      * @param output 出力
      * @param max_output 最大出力
