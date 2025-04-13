@@ -1,71 +1,62 @@
 #pragma once
 #include <stdint.h>
-#include <stdbool.h>
-#include "can_data_manager.hpp"
-#include <string>
-#include <vector>
+#include "fdcan.h"
+#include "can_driver.hpp"
+
 class App
 {
 private:
-    uint8_t md_id = 0;                      // MDのID
-    uint8_t control_cycle = 5;              // 制御周期
-    float Kp = 0.0f;                        // PID制御の比例ゲイン
-    float Ki = 0.0f;                        // PID制御の積分ゲイン
-    float Kd = 0.0f;                        // PID制御の微分ゲイン
-    uint64_t no_update_max = 100;           // CANで目標値が更新されない回数の最大（CANが死んで何回制御周期が回ったら出力をゼロにするか）
-    float motor_transfer_cofficient = 1.0f; // モーターの伝達関数
-
-public:
-    /**
-     * @brief MDの初期化
-     *
-     */
-    void init();
-
-    /**
-     * @brief メインループで実行する関数
-     *
-     */
-    void mainLoop();
-
-    /**
-     * @brief CAN通信のコールバック関数
-     *
-     * @param hcan_ CANのハンドラ
-     */
-    void CANCallbackProcess(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
-
-    /**
-     * @brief タイマー処理のコールバック関数
-     *
-     */
-    void timerTask();
-
-    /**
-     * @brief DIPスイッチからMD_IDを計算して代入する
-     *
-     * @param md_id_ MD_IDのポインタ
-     */
-    void getMDIdFromDispSW(uint8_t *md_id_);
-
-    /**
-     * @brief 自作printf関数(UART)
-     *
-     * @tparam Args
-     * @param fmt
-     * @param args
-     */
-    template <typename... Args>
-    void serial_printf(const std::string &fmt, Args... args);
-
-    void resetControlVal();
+    uint8_t md_id;                    // 基板のID
+    bool initialized;                 // 初期化フラグ
+    md_config_t md_config;            // モータードライバの設定
+    int16_t target;                   // 目標値
+    int16_t output;                   // 出力値
+    int16_t encoder;                  // エンコーダのカウント
+    uint8_t limit_switch;             // リミットスイッチの状態
+    float pid_gain[3];                // PIDゲインの値
+    uint16_t update_target_count;     // 目標位置の更新カウント
+    uint16_t update_target_count_max; // 目標位置の更新カウントの最大値
+    uint16_t timer_count;             // エンコーダー用のタイマーカウント
+    uint16_t loop_count;              // 定期的な処理のカウント
+    uint16_t loop_count_max;          // 定期的な処理のカウントの最大値
+    uint32_t last_tick;               // 最後の制御周期のタイムスタンプ
 
 private:
-    int16_t output;                  // 出力
-    int16_t encoder_value = 0;       // エンコーダーの値
-    bool limit_switch_state = false; // リミットスイッチの状態
-    int16_t target = 0;              // 目標値
-    uint64_t no_update_count = 0;    // 目標値が更新されないで何回制御したか
-    uint8_t control_count = 0;       // タイマーの回数をカウントして、制御周期に合わせる
-    bool initialized = false;        // 初期化されたかどうか
+    /// @brief モーターを制御する
+    void control_motor();
+
+    /// @brief リミットスイッチの状態でモーターを制御する
+    void limit_switch_control();
+
+    /// @brief MDの設定を更新し、初期化処理を行う
+    void update_md_config();
+
+    /**
+     * @brief ゲインの更新を行う
+     *
+     * @param gain_type PIDゲインの種類
+     * 0: Pゲイン、1: Iゲイン、2: Dゲイン
+     */
+    void update_gain(uint8_t gain_type);
+
+    /// @brief 制御周期に合わせて待機する
+    void wait_for_next_period();
+
+    /// @brief DIPスイッチの状態を読み取り、md_idを更新する
+    void update_md_id();
+
+public:
+    App();
+
+    /// @brief プログラムの始めに一回だけ呼び出す
+    void init();
+
+    /// @brief ループ処理
+    void main_loop();
+
+    /// @brief タイマーの割り込み処理（1ms毎）
+    void timer_task();
+
+    /// @brief CANのコールバック処理
+    void can_callback_process(FDCAN_HandleTypeDef *hcan, uint32_t RxFifo0ITs);
 };

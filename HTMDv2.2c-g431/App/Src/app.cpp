@@ -1,20 +1,237 @@
-#include <cstdio>
-#include <cstring>
 #include "app.hpp"
-#include "motor_controller.hpp"
-#include "indicator.hpp"
-#include "main.h"
-#include "fdcan.h"
 #include "tim.h"
-#include "usart.h"
-#include "gpio.h"
-#include "htmd_mode.hpp"
+#include "motor_controller.hpp"
+#include "serial_printf.hpp"
+#define FW_VERSION 0x00
+#define BOARD_TYPE 0x00
 
-CANDataManager myCAN;
-MotorController motor;
-md_mode_t md_mode;
+CANDriver can_driver(0, BOARD_TYPE, FW_VERSION);
+MotorController motor_controller;
 
-void App::getMDIdFromDispSW(uint8_t *md_id_)
+void App::init()
+{
+    HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
+    // MDのIDを更新
+    update_md_id();
+
+    // CAN通信の初期化
+    can_driver.set_board_id(md_id);
+    can_driver.init();
+    // エンコーダー用タイマー開始
+    HAL_TIM_Base_Start_IT(&htim6);
+
+    log_printf(LOG_INFO, "App initialized.\n");
+}
+
+void App::main_loop()
+{
+    if (initialized)
+    {
+        // 目標値の更新
+        if (can_driver.get_target(&target))
+        {
+            update_target_count = 0;
+            log_printf(LOG_DEBUG, "Target: %d\n", target);
+        }
+        else
+        {
+            update_target_count++;
+        }
+        control_motor(); // モーター制御
+    }
+
+    update_md_config(); // MDの設定を更新(init)
+
+    update_gain(0); // Pゲイン
+    update_gain(1); // Iゲイン
+    update_gain(2); // Dゲイン
+
+    // リミットスイッチの状態を取得し、CANで送信
+    if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+    {
+        limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
+        can_driver.send_limit_switch(limit_switch);
+    }
+
+    if (loop_count > loop_count_max)
+    {
+        if (initialized)
+        {
+            HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        }
+        else
+        {
+            // 初期化されていない場合、initパケット（MDの情報）を送信
+            can_driver.send_init(BOARD_TYPE);
+        }
+        loop_count = 0;
+    }
+    else
+    {
+        loop_count++;
+    }
+
+    wait_for_next_period(); // 制御周期に合わせる
+}
+
+void App::timer_task()
+{
+    // encoder_periodの周期でエンコーダをサンプリングし、CANで送信
+    if (timer_count > md_config.encoder_period)
+    {
+        encoder = motor_controller.get_count();
+        can_driver.send_encoder(encoder);
+        timer_count = 0;
+    }
+    else
+    {
+        timer_count++;
+    }
+}
+
+void App::can_callback_process(FDCAN_HandleTypeDef *hcan, uint32_t RxFifo0ITs)
+{
+    can_driver.can_callback_process(hcan, RxFifo0ITs);
+}
+
+void App::control_motor()
+{
+    if (update_target_count < update_target_count_max)
+    {
+        // 出力値の更新
+        if (pid_gain[0] != 0.0f && target != 0)
+        {
+            // PID制御を行う
+            output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_output;
+        }
+        else
+        {
+            // 目標値をそのまま出力値とする
+            output = target;
+        }
+
+        output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
+    }
+    else // 長時間、目標値が更新されない場合、出力を0にする
+    {
+        output = 0;
+        motor_controller.reset_pid();
+    }
+
+    // LEDの点灯制御
+    if (output != 0)
+    {
+        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+    }
+    if (output < 0)
+    {
+        HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+    }
+
+    limit_switch_control(); // リミットスイッチによる制御
+
+    // モーターを回す
+    motor_controller.run(output, md_config.max_output);
+}
+
+void App::limit_switch_control()
+{
+    switch (md_config.limit_switch_behavior)
+    {
+    case 0:
+        // 何もしない
+        break;
+    case 1:
+        // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
+        if (limit_switch && target != 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+    case 2:
+        // リミットスイッチが押されたら、正回転のみ停止する
+        if (limit_switch && target > 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+    case 3:
+        // リミットスイッチが押されたら、負回転のみ停止する
+        if (limit_switch && target < 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+    case 4:
+        // リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する
+        if (limit_switch & 0b1 && target > 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        if (limit_switch & 0b10 && target < 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+void App::update_md_config()
+{
+    // MDの設定を取得
+    if (can_driver.get_init(&md_config))
+    {
+        log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
+        log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
+        log_printf(LOG_INFO, "md_config.control_period:%d\n", md_config.control_period);
+        log_printf(LOG_INFO, "md_config.encoder_period:%d\n", md_config.encoder_period);
+        log_printf(LOG_INFO, "md_config.encoder_type:%d\n", md_config.encoder_type);
+        log_printf(LOG_INFO, "md_config.limit_switch_behavior:%d\n", md_config.limit_switch_behavior);
+        log_printf(LOG_INFO, "md_config.option:%d\n", md_config.option);
+
+        // モーター制御の初期化
+        motor_controller.init(md_config.control_period);
+
+        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+        initialized = true;
+        log_printf(LOG_INFO, "MD initialized.\n");
+    }
+}
+
+void App::update_gain(uint8_t gain_type)
+{
+    // ゲインの取得
+    if (can_driver.get_gain(gain_type, &pid_gain[gain_type]))
+    {
+        // 確認のためゲインを送り返す
+        can_driver.send_gain(gain_type, pid_gain[gain_type]);
+        // PIDゲインを更新
+        motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
+
+        log_printf(LOG_INFO, "Gain %d updated: %f\n", gain_type, pid_gain[gain_type]);
+    }
+}
+
+void App::wait_for_next_period()
+{
+    // 制御周期に合わせて待機する
+    while ((HAL_GetTick() - last_tick) < md_config.control_period)
+    {
+    }
+    last_tick = HAL_GetTick();
+}
+
+void App::update_md_id()
 {
     uint8_t id = 0;
     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin))
@@ -25,200 +242,31 @@ void App::getMDIdFromDispSW(uint8_t *md_id_)
         id |= 0b100;
     if (HAL_GPIO_ReadPin(DIP1_GPIO_Port, DIP1_Pin))
         id |= 0b1000;
-    *md_id_ = id; // ディップスイッチの値をMDのIDに設定
+    md_id = id;
 }
 
-void App::init()
+App::App()
 {
-    getMDIdFromDispSW(&md_id); // ディップスイッチの値をMDのIDに設定
-    serial_printf("md_id: %d\n", md_id);
-    // peripheral init
-    myCAN.init(md_id);         // CAN通信の初期化
-    motor.init(control_cycle); // モーターの初期化
-    indicateStanby(true);
-    indicateError(false);
-    // main timer start
-    HAL_TIM_Base_Start_IT(&htim6);
-}
-
-void App::mainLoop()
-{
-    if (myCAN.getPIDGain(&Kp, &Ki, &Kd)) // PIDゲインが更新されていたら
-    {
-        motor.setPIDGain(Kp, Ki, Kd);    // PIDゲインを更新
-        myCAN.sendReInitPID(Kp, Ki, Kd); // レスポンス
-        // print
-        serial_printf("updated md pid gains\n");
-        serial_printf("Kp: %f\n", Kp);
-        serial_printf("Ki: %f\n", Ki);
-        serial_printf("Kd: %f\n", Kd);
-        resetControlVal(); // 制御値をリセット
-    }
-    if (myCAN.getMDMode(md_mode.code)) // モードが更新されていたら
-    {
-        myCAN.sendReInitMode(md_mode.code); // レスポンス
-        // モードを更新
-        motor_transfer_cofficient = float(md_mode.values.motor_transfer_coefficient) / 100.0f; // 100倍されているので100で割る
-        if (md_mode.values.max_output > 3199)                                                  // 最大出力が3199を超えていたら
-        {
-            md_mode.values.max_output = 3199;
-        }
-        motor.setBrake(md_mode.flags.brake); // ブレーキを設定
-        // print
-        serial_printf("updated md mode\n");
-        serial_printf("incremental_encoder: %d\n", md_mode.flags.incremental_encoder);
-        serial_printf("absolute_encoder: %d\n", md_mode.flags.absolute_encoder);
-        serial_printf("reverse_encoder: %d\n", md_mode.flags.reverse_encoder);
-        serial_printf("brake: %d\n", md_mode.flags.brake);
-        serial_printf("pid: %d\n", md_mode.flags.pid);
-        serial_printf("stop_by_limit_switch: %d\n", md_mode.flags.stop_by_limit_switch);
-        serial_printf("torque_control: %d\n", md_mode.flags.torque_control);
-        serial_printf("state: %d\n", md_mode.flags.state);
-        serial_printf("max_acceleration: %d\n", md_mode.values.max_acceleration);
-        serial_printf("max_current: %d\n", md_mode.values.max_current);
-        serial_printf("report_rate: %d\n", md_mode.values.report_rate);
-        serial_printf("max_output: %d\n", md_mode.values.max_output);
-        serial_printf("motor_transfer_coefficient: %f\n", motor_transfer_cofficient);
-        resetControlVal(); // 制御値をリセット
-    }
-    // 初期化されていればMDの状態を送信する
-    if (initialized)
-    {
-        if (md_mode.values.report_rate != 0) // レポートレートが0でなければ
-        {
-            if (md_mode.flags.incremental_encoder || md_mode.flags.absolute_encoder) // エンコーダが有効なら
-            {
-                myCAN.sendSensorLimitAndEncoder(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false, encoder_value); // エンコーダの値とリミットスイッチの状態を送信
-            }
-            else
-            {
-                myCAN.sendSensorLimit(HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin), false); // リミットスイッチの状態を送信
-            }
-            if (md_mode.flags.state)
-            {
-                if (target != 0)
-                {
-                    indicateBusy(true);
-                    myCAN.sendStateMD(can_config::code::state::busy); // busy
-                }
-                else
-                {
-                    indicateBusy(false);
-                    myCAN.sendStateMD(can_config::code::state::ready); // ready
-                }
-            }
-        }
-        serial_printf("target: %d\n", target);
-        HAL_Delay(md_mode.values.report_rate); // レポートレート分待つ
-    }
-    else
-    {
-        if (myCAN.getMDInit()) // 初期化コマンドが送られてきたら
-        {
-            initialized = true; // 初期化されたら
-            indicateReady(true);
-            indicateStanby(false);
-            serial_printf("initialized\n");
-            resetControlVal(); // 制御値をリセット
-        }
-        // myCAN.sendStateMD(can_configure::state::state::init); // init
-        HAL_Delay(1);
-    }
-}
-
-void App::timerTask()
-{
-    // serial_printf("timer\n");
-    // 目標値（出力）を更新する
-    if (myCAN.getMotorTarget(&target))
-    {
-        no_update_count = 0; // 更新されたらカウントをリセット
-    }
-    else
-    {
-        no_update_count++; // 更新されていない回数をカウント
-    }
-    // エンコーダーを読む
-    if (md_mode.flags.pid || md_mode.flags.incremental_encoder) // PID制御が有効 or インクリメンタルエンコーダが有効なら
-    {
-        if (md_mode.flags.reverse_encoder) // reverse_encoderが有効なら
-        {
-            encoder_value = -motor.getCount(); // エンコーダのカウントを取得 (反転)
-        }
-        else
-        {
-            encoder_value = motor.getCount(); // エンコーダのカウントを取得
-        }
-    }
-    // PID制御をする
-    if (md_mode.flags.pid)
-    {
-        output += motor.calculatePID(target, encoder_value);          // PID制御
-        if ((target < 0 && output > 0) || (target > 0 && output < 0)) // 目標値の符号と出力の符号が異なる場合
-        {
-            output = 0;
-        }
-        // 出力を最大出力に制限
-        if (abs(output) > abs(target) * motor_transfer_cofficient)
-        {
-            output = target * motor_transfer_cofficient;
-            serial_printf("Warn: output adjusted\n");
-        }
-    }
-    else
-    {
-        output = target;
-    }
-    // 安全装置
-    output = motor.trapezoidalControl(output, md_mode.values.max_acceleration);                            // 台形制御
-    output = motor.saturate(int(output), -int(md_mode.values.max_output), int(md_mode.values.max_output)); // 出力を最大出力に制限
-
-    if (no_update_count > no_update_max || !initialized) // 値が長い間更新されていなければ or 初期化されていなければ
-    {
-        resetControlVal();                            // 制御値をリセット
-        motor.run(output, md_mode.values.max_output); // モーターを制御
-    }
-    else
-    {
-        if (target == 0) // 目標値が0なら
-        {
-            resetControlVal(); // 制御値をリセット
-            indicateBusy(false);
-        }
-        else
-        {
-            indicateBusy(true);
-        }
-        motor.run(output, md_mode.values.max_output); // モーターを制御
-    }
-}
-void App::CANCallbackProcess(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
-{
-    if (myCAN.onReceiveTask(hfdcan, RxFifo0ITs))
-    {
-        // serial_printf("CAN receive\n");
-    }
-    else
-    {
-        serial_printf("CAN receive error\n");
-    }
-}
-
-template <typename... Args>
-void App::serial_printf(const std::string &fmt, Args... args)
-{
-    // フォーマットされた文字列の長さを取得
-    size_t len = std::snprintf(nullptr, 0, fmt.c_str(), args...);
-    // バッファを作成してフォーマットされた文字列を格納
-    std::vector<char> buf(len + 1);
-    std::snprintf(&buf[0], len + 1, fmt.c_str(), args...);
-    // ヌル終端された文字列をUARTに送信
-    HAL_UART_Transmit(&huart1, (uint8_t *)&buf[0], len, 0xFFF);
-}
-
-void App::resetControlVal()
-{
+    md_config.control_period = 5;
+    md_config.encoder_period = 5;
+    md_config.max_output = 0;
+    md_config.max_acceleration = 0;
+    md_config.encoder_type = 0;
+    md_config.limit_switch_behavior = 0;
+    md_config.option = 0;
+    md_id = 0;
     target = 0;
     output = 0;
-    motor.resetPID();
+    encoder = 0;
+    limit_switch = 0;
+    update_target_count = 0;
+    update_target_count_max = 100;
+    timer_count = 0;
+    loop_count = 0;
+    loop_count_max = 100;
+    last_tick = 0;
+    initialized = false;
+    pid_gain[0] = 0.0f;
+    pid_gain[1] = 0.0f;
+    pid_gain[2] = 0.0f;
 }

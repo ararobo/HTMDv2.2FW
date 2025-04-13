@@ -105,7 +105,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    app.mainLoop();
+    app.main_loop();
   }
   /* USER CODE END 3 */
 }
@@ -158,14 +158,14 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
-  app.CANCallbackProcess(hfdcan, RxFifo0ITs);
+  app.can_callback_process(hfdcan, RxFifo0ITs);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM6)
   {
-    app.timerTask();
+    app.timer_task();
   }
 }
 /* USER CODE END 4 */

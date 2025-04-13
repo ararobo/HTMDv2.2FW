@@ -35,7 +35,7 @@ void MotorController::run(int16_t output, uint16_t max_output)
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 3200);
 }
 
-int16_t MotorController::getCount()
+int16_t MotorController::get_count()
 {
     // エンコーダのカウントを取得
     uint16_t enc_buff = TIM1->CNT;
@@ -43,7 +43,7 @@ int16_t MotorController::getCount()
     return static_cast<int16_t>(enc_buff); // カウントをint16_tに変換
 }
 
-int16_t MotorController::trapezoidalControl(int16_t output, uint8_t max_acceleration)
+int16_t MotorController::trapezoidal_control(int16_t output, uint8_t max_acceleration)
 {
     if (output == 0)
     {
@@ -53,21 +53,20 @@ int16_t MotorController::trapezoidalControl(int16_t output, uint8_t max_accelera
     else
     {
         int16_t acceleration = output - prev_out; // 加速度を計算
-        // 加速度が最大加速度を超えた場合は最大加速度に制限
-        if (acceleration < -max_acceleration * 10)
+        if (acceleration < -max_acceleration)
         {
-            output = prev_out - max_acceleration * 10;
+            output = prev_out - max_acceleration;
         }
-        else if (acceleration > max_acceleration * 10)
+        else if (acceleration > max_acceleration)
         {
-            output = prev_out + max_acceleration * 10;
+            output = prev_out + max_acceleration;
         }
-        prev_out = output; // 前回の出力を保存
+        prev_out = output;
         return output;
     }
 }
 
-float MotorController::calculatePID(float target, float now_value)
+float MotorController::calculate_pid(float target, float now_value)
 {
     // ターゲットが0の場合は出力を0にする
     if (target == 0.0f)
@@ -76,23 +75,23 @@ float MotorController::calculatePID(float target, float now_value)
         prev_error = 0.0f;
         return 0.0f;
     }
-    i_out = saturate(i_out, -100.0f, 100.0f);                  // I制御の出力を制限
-    float error = target - now_value;                          // エラーを計算
-    float p_out = error;                                       // P制御
-    i_out += error * (float)control_cycle;                     // I制御
-    float d_out = (error - prev_error) / (float)control_cycle; // D制御
-    prev_error = error;                                        // 前回のエラーを保存
-    return p_out * Kp + i_out * Ki + d_out * Kd;               // PID制御
+    i_out = saturate(i_out, -(float)max_output, (float)max_output); // I制御の出力を制限
+    float error = target - now_value;                               // エラーを計算
+    float p_out = error;                                            // P制御
+    i_out += error * (float)control_cycle;                          // I制御
+    float d_out = (error - prev_error) / (float)control_cycle;      // D制御
+    prev_error = error;                                             // 前回のエラーを保存
+    return p_out * Kp + i_out * Ki + d_out * Kd;                    // PID制御
 }
 
-void MotorController::setPIDGain(float p_gain, float i_gain, float d_gain)
+void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
 {
     Kp = p_gain;
     Ki = i_gain;
     Kd = d_gain;
 }
 
-void MotorController::resetPID()
+void MotorController::reset_pid()
 {
     i_out = 0.0f;
     prev_error = 0.0f;
@@ -115,7 +114,7 @@ T MotorController::saturate(T value, T min_value, T max_value)
     }
 }
 
-void MotorController::setBrake(bool brake)
+void MotorController::set_brake(bool brake)
 {
     if (brake)
     {
