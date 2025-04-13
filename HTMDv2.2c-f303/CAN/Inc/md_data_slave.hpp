@@ -2,12 +2,12 @@
 #include "can_config.hpp"
 #include "md_config.hpp"
 
-class MDController
+class MDDataSlave
 {
 private:
     /* 固有値 */
     uint8_t board_id;   // 基板のID
-    uint8_t board_type; // 基板の種類
+    uint8_t board_kind; // 基板の種類
     uint8_t fw_version; // ファームウェアのバージョン
     /* 受信バッファ */
     uint8_t rx_buffer[8];           // 受信バッファ
@@ -47,7 +47,7 @@ protected:
     void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
-    MDController(uint8_t board_id, uint8_t board_type, uint8_t fw_version);
+    MDDataSlave(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
     /**
      * @brief 基板のIDを設定する
      *

@@ -25,6 +25,9 @@ private:
     /// @brief モーターを制御する
     void control_motor();
 
+    /// @brief リミットスイッチの状態でモーターを制御する
+    void limit_switch_control();
+
     /// @brief MDの設定を更新し、初期化処理を行う
     void update_md_config();
 
@@ -44,12 +47,16 @@ private:
 
 public:
     App();
+
     /// @brief プログラムの始めに一回だけ呼び出す
     void init();
+
     /// @brief ループ処理
     void main_loop();
+
     /// @brief タイマーの割り込み処理（1ms毎）
     void timer_task();
+
     /// @brief CANのコールバック処理
-    void can_callback_process(CAN_HandleTypeDef *hcan);
+    void can_callback_process(FDCAN_HandleTypeDef *hcan, uint32_t RxFifo0ITs);
 };

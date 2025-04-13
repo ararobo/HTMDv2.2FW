@@ -2,7 +2,7 @@
 #include "md_data_slave.hpp"
 #include "can.h"
 
-class CANDriver : public MDController
+class CANDriver : public MDDataSlave
 {
 private:
     CAN_FilterTypeDef RxFilter;

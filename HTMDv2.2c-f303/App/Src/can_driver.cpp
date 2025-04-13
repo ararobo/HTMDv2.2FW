@@ -1,7 +1,7 @@
 #include "can_driver.hpp"
 
 CANDriver::CANDriver(uint8_t board_id, uint8_t board_type, uint8_t fw_version)
-    : MDController(board_id, board_type, fw_version)
+    : MDDataSlave(board_id, board_type, fw_version)
 {
     filter_mask = (0b11110000000 << 21) | 0x4; // フィルタマスク
     filter_id = 0b00010000000 << 21;           // フィルタID

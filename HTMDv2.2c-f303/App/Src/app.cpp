@@ -49,7 +49,7 @@ void App::main_loop()
     // リミットスイッチの状態を取得し、CANで送信
     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
     {
-        limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin);
+        limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
         can_driver.send_limit_switch(limit_switch);
     }
 
@@ -136,10 +136,56 @@ void App::control_motor()
         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
     }
 
+    limit_switch_control(); // リミットスイッチによる制御
+
     // モーターを回す
     motor_controller.run(output, md_config.max_output);
 }
 
+void App::limit_switch_control()
+{
+    switch (md_config.limit_switch_behavior)
+    {
+    case 0:
+        // 何もしない
+        break;
+    case 1:
+        // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
+        if (limit_switch && target != 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+    case 2:
+        // リミットスイッチが押されたら、正回転のみ停止する
+        if (limit_switch && target > 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+    case 3:
+        // リミットスイッチが押されたら、負回転のみ停止する
+        if (limit_switch && target < 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+    case 4:
+        // リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する
+        if (limit_switch & 0b1 && target > 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        if (limit_switch & 0b10 && target < 0)
+        {
+            motor_controller.run(0, md_config.max_output);
+        }
+        break;
+
+    default:
+        break;
+    }
+}
 void App::update_md_config()
 {
     // MDの設定を取得

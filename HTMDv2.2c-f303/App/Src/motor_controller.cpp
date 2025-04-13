@@ -47,25 +47,17 @@ int16_t MotorController::get_count()
 
 int16_t MotorController::trapezoidal_control(int16_t output, uint8_t max_acceleration)
 {
-    if (output == 0)
+    int16_t acceleration = output - prev_out; // 加速度を計算
+    if (acceleration < -max_acceleration)
     {
-        prev_out = 0;
-        return 0;
+        output = prev_out - max_acceleration;
     }
-    else
+    else if (acceleration > max_acceleration)
     {
-        int16_t acceleration = output - prev_out; // 加速度を計算
-        if (acceleration < -max_acceleration)
-        {
-            output = prev_out - max_acceleration;
-        }
-        else if (acceleration > max_acceleration)
-        {
-            output = prev_out + max_acceleration;
-        }
-        prev_out = output;
-        return output;
+        output = prev_out + max_acceleration;
     }
+    prev_out = output;
+    return output;
 }
 
 float MotorController::calculate_pid(float target, float now_value)
