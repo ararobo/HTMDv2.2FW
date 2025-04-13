@@ -1,7 +1,7 @@
-#include "md_data_manager.hpp"
+#include "md_data_slave.hpp"
 #include "fdcan.h"
 
-class CANDriver : public MDDataManager<false>
+class CANDriver : public MDDataSlave
 {
 private:
     FDCAN_RxHeaderTypeDef RxHeader;
@@ -31,7 +31,7 @@ private:
     }
 
 public:
-    CANDriver(uint8_t md_id) : MDDataManager(md_id) {}
+    CANDriver(uint8_t md_id, uint8_t md_type) : MDDataSlave(md_id) {}
 
     void init()
     {

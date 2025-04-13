@@ -2,7 +2,7 @@
 #include "can_config.hpp"
 #include "md_config.hpp"
 
-class MDController
+class MDDataSlave
 {
 private:
     /* 固有値 */
@@ -47,7 +47,7 @@ protected:
     void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
-    MDController(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
+    MDDataSlave(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
     /**
      * @brief 基板のIDを設定する
      *

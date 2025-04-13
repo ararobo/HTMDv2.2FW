@@ -2,10 +2,10 @@
 #include "tim.h"
 #include "motor_controller.hpp"
 #include "serial_printf.hpp"
-#define FW_VERSION 0x01
-#define BOARD_KIND 0x01
+#define FW_VERSION 0x00
+#define BOARD_TYPE 0x00
 
-CANDriver can_driver(0, BOARD_KIND, FW_VERSION);
+CANDriver can_driver(0, BOARD_TYPE, FW_VERSION);
 MotorController motor_controller;
 
 void App::init()
@@ -62,7 +62,7 @@ void App::main_loop()
         else
         {
             // 初期化されていない場合、initパケット（MDの情報）を送信
-            can_driver.send_init(BOARD_KIND);
+            can_driver.send_init(BOARD_TYPE);
         }
         loop_count = 0;
     }

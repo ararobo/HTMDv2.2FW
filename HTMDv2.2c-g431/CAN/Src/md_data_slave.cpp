@@ -1,12 +1,12 @@
-#include "md_controller.hpp"
+#include "md_data_slave.hpp"
 #include <cstring>
 
-MDController::MDController(uint8_t board_id, uint8_t board_kind, uint8_t fw_version)
+MDDataSlave::MDDataSlave(uint8_t board_id, uint8_t board_kind, uint8_t fw_version)
     : board_id(board_id), board_kind(board_kind), fw_version(fw_version)
 {
 }
 
-void MDController::receive(uint16_t id, uint8_t *data, uint8_t len)
+void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
 {
     // 受信パケットのCAN-IDからパケットの情報を取得
     can_config::decode_id(id, this->packet_direction, this->packet_board_type,
@@ -51,7 +51,7 @@ void MDController::receive(uint16_t id, uint8_t *data, uint8_t len)
     }
 }
 
-void MDController::send_init(uint8_t md_type)
+void MDDataSlave::send_init(uint8_t md_type)
 {
     // CAN-IDの生成
     uint16_t can_id = can_config::encode_id(
@@ -64,7 +64,7 @@ void MDController::send_init(uint8_t md_type)
     this->send(can_id, &md_type, sizeof(uint8_t));
 }
 
-void MDController::send_encoder(int16_t encoder)
+void MDDataSlave::send_encoder(int16_t encoder)
 {
     uint8_t data[2];
     // CAN-IDの生成
@@ -79,7 +79,7 @@ void MDController::send_encoder(int16_t encoder)
     this->send(can_id, data, sizeof(int16_t));
 }
 
-void MDController::send_limit_switch(uint8_t limit_switch)
+void MDDataSlave::send_limit_switch(uint8_t limit_switch)
 {
     // CAN-IDの生成
     uint16_t can_id = can_config::encode_id(
@@ -91,7 +91,7 @@ void MDController::send_limit_switch(uint8_t limit_switch)
     this->send(can_id, &limit_switch, sizeof(uint8_t));
 }
 
-void MDController::send_gain(uint8_t gain_type, float gain)
+void MDDataSlave::send_gain(uint8_t gain_type, float gain)
 {
     uint8_t data[5];
     // CAN-IDの生成
@@ -108,7 +108,7 @@ void MDController::send_gain(uint8_t gain_type, float gain)
     this->send(can_id, data, sizeof(data));
 }
 
-bool MDController::get_init(md_config_t *md_config)
+bool MDDataSlave::get_init(md_config_t *md_config)
 {
     if (this->init_flag)
     {
@@ -119,7 +119,7 @@ bool MDController::get_init(md_config_t *md_config)
     return false;
 }
 
-bool MDController::get_target(int16_t *target)
+bool MDDataSlave::get_target(int16_t *target)
 {
     if (this->target_flag)
     {
@@ -130,7 +130,7 @@ bool MDController::get_target(int16_t *target)
     return false;
 }
 
-bool MDController::get_gain(uint8_t gain_type, float *gain)
+bool MDDataSlave::get_gain(uint8_t gain_type, float *gain)
 {
     if (this->gain_flag[gain_type])
     {

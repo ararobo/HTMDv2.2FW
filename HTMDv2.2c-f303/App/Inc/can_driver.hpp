@@ -1,5 +1,5 @@
 #pragma once
-#include "md_controller.hpp"
+#include "md_data_slave.hpp"
 #include "can.h"
 
 class CANDriver : public MDController
@@ -23,7 +23,7 @@ private:
     void send(uint16_t id, uint8_t *data, uint8_t len) override;
 
 public:
-    CANDriver(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
+    CANDriver(uint8_t board_id, uint8_t board_type, uint8_t fw_version);
     /// @brief プログラムの始めに一回だけ呼び出す
     void init();
     /// @brief CANのコールバック処理
