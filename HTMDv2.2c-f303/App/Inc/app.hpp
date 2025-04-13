@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 #include "can.h"
 #include "can_driver.hpp"
