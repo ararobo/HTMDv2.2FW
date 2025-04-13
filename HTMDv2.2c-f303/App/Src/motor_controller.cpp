@@ -11,9 +11,11 @@ void MotorController::init(uint8_t control_cycle_)
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
     HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET); // ブレーキ有効
     // エンコーダーの初期化
     HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
+    reset_pid(); // PID制御の初期化
+    get_count();
 }
 
 void MotorController::run(int16_t output, uint16_t max_output)
@@ -89,6 +91,7 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
     Kp = p_gain;
     Ki = i_gain;
     Kd = d_gain;
+    reset_pid(); // PID制御の初期化
 }
 
 void MotorController::reset_pid()

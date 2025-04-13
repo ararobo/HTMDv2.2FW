@@ -14,6 +14,18 @@ private:
     uint16_t max_output = 3199;                          // 最大出力
     uint8_t control_cycle = 5;                           // 制御周期
 
+    /**
+     * @brief 値を指定された範囲内に制限する汎用関数
+     *
+     * @tparam T 値の型
+     * @param value 制限する値
+     * @param min_value 最小値
+     * @param max_value 最大値
+     * @return T 制限された値
+     */
+    template <typename T>
+    T saturate(T value, T min_value, T max_value);
+
 public:
     /**
      * @brief モーターの初期化
@@ -65,23 +77,11 @@ public:
      */
     void set_pid_gain(float p_gain, float i_gain, float d_gain);
 
+    void set_brake(bool brake);
+
     /**
      * @brief 過去のPIDをリセットする
      *
      */
     void reset_pid();
-
-    /**
-     * @brief 値を指定された範囲内に制限する汎用関数
-     *
-     * @tparam T 値の型
-     * @param value 制限する値
-     * @param min_value 最小値
-     * @param max_value 最大値
-     * @return T 制限された値
-     */
-    template <typename T>
-    T saturate(T value, T min_value, T max_value);
-
-    void set_brake(bool brake);
 };
