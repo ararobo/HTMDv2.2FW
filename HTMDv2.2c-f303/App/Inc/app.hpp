@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "can_driver.hpp"
+#include "md_data_slave.hpp"
 
 class App
 {

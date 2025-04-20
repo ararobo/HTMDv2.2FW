@@ -1,8 +1,7 @@
 #pragma once
-#include "md_data_slave.hpp"
 #include "can.h"
 
-class CANDriver : public MDDataSlave
+class CANDriver
 {
 private:
     CAN_FilterTypeDef RxFilter;
@@ -10,22 +9,39 @@ private:
     CAN_TxHeaderTypeDef TxHeader;
     uint32_t TxMailbox;
     uint8_t RxData[8];
-    uint32_t filter_mask; // フィルタマスク
-    uint32_t filter_id;   // フィルタID
+
+protected:
+    /**
+     * @brief CANの受信処理(オーバーライドしてください)
+     *
+     * @param id CANのID
+     * @param data 受信データ
+     * @param len データの長さ
+     */
+    virtual void receive(uint16_t id, uint8_t *data, uint8_t len) = 0;
+
+public:
+    /**
+     * @brief CANの初期化
+     *
+     * @param filter_id
+     * @param filter_mask
+     */
+    void init(uint32_t filter_id, uint32_t filter_mask);
 
     /**
-     * @brief CANの送信処理(オーバーライド)
+     * @brief CANの送信処理
      *
      * @param id CANのID
      * @param data 送信するデータ
      * @param len データの長さ
      */
-    void send(uint16_t id, uint8_t *data, uint8_t len) override;
+    void send(uint16_t id, uint8_t *data, uint8_t len);
 
-public:
-    CANDriver(uint8_t board_id, uint8_t board_type, uint8_t fw_version);
-    /// @brief プログラムの始めに一回だけ呼び出す
-    void init();
-    /// @brief CANのコールバック処理
+    /**
+     * @brief CANのコールバック処理
+     *
+     * @param hcan CANのハンドル
+     */
     void can_callback_process(CAN_HandleTypeDef *hcan);
 };

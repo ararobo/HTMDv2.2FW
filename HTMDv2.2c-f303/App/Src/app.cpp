@@ -5,7 +5,7 @@
 #define FW_VERSION 0x00
 #define BOARD_TYPE 0x00
 
-CANDriver can_driver(0, BOARD_TYPE, FW_VERSION);
+MDDataSlave can(0, BOARD_TYPE, FW_VERSION);
 MotorController motor_controller;
 
 void App::setup()
@@ -15,8 +15,8 @@ void App::setup()
     update_md_id();
 
     // CAN通信の初期化
-    can_driver.set_board_id(md_id);
-    can_driver.init();
+    can.set_board_id(md_id);
+    can.init(0, 0); // フィルタIDとマスクを設定
 
     // モーターの初期化
     motor_controller.init();
@@ -32,7 +32,7 @@ void App::loop()
     if (initialized)
     {
         // 目標値の更新
-        if (can_driver.get_target(&target))
+        if (can.get_target(&target))
         {
             update_target_count = 0;
             log_printf(LOG_DEBUG, "Target: %d\n", target);
@@ -54,12 +54,12 @@ void App::loop()
     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
     {
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
-        can_driver.send_limit_switch(limit_switch);
+        can.send_limit_switch(limit_switch);
     }
     else if (loop_count % 10 == 0) // 10msごとにリミットスイッチの状態を送信
     {
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
-        can_driver.send_limit_switch(limit_switch);
+        can.send_limit_switch(limit_switch);
     }
 
     if (loop_count > loop_count_max)
@@ -71,7 +71,7 @@ void App::loop()
         else
         {
             // 初期化されていない場合、initパケット（MDの情報）を送信
-            can_driver.send_init(BOARD_TYPE);
+            can.send_init(BOARD_TYPE);
         }
         loop_count = 0;
     }
@@ -91,7 +91,7 @@ void App::timer_callback()
 
 void App::can_callback_process(CAN_HandleTypeDef *hcan)
 {
-    can_driver.can_callback_process(hcan);
+    can.can_callback_process(hcan);
 }
 
 void App::control_motor()
@@ -190,7 +190,7 @@ bool App::limit_switch_control()
 void App::update_md_config()
 {
     // MDの設定を取得
-    if (can_driver.get_init(&md_config))
+    if (can.get_init(&md_config))
     {
         motor_controller.set_config(md_config);
         motor_controller.reset();
@@ -210,10 +210,10 @@ void App::update_md_config()
 void App::update_gain(uint8_t gain_type)
 {
     // ゲインの取得
-    if (can_driver.get_gain(gain_type, &pid_gain[gain_type]))
+    if (can.get_gain(gain_type, &pid_gain[gain_type]))
     {
         // 確認のためゲインを送り返す
-        can_driver.send_gain(gain_type, pid_gain[gain_type]);
+        can.send_gain(gain_type, pid_gain[gain_type]);
         // PIDゲインを更新
         motor_controller.set_pid_gain(pid_gain[0], pid_gain[1], pid_gain[2]);
 

@@ -1,8 +1,9 @@
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"
+#include "can_driver.hpp"
 
-class MDDataSlave
+class MDDataSlave : public CANDriver
 {
 private:
     /* 固有値 */
@@ -29,22 +30,13 @@ private:
 
 protected:
     /**
-     * @brief CANの送信処理(オーバーライドしてください)
-     *
-     * @param id CANのID
-     * @param data 送信するデータ
-     * @param len データの長さ
-     */
-    virtual void send(uint16_t id, uint8_t *data, uint8_t len) = 0;
-
-    /**
      * @brief 受信データの処理を行う
      *
      * @param id CANのID
      * @param data 受信データ
      * @param len データの長さ
      */
-    void receive(uint16_t id, uint8_t *data, uint8_t len);
+    void receive(uint16_t id, uint8_t *data, uint8_t len) override;
 
 public:
     MDDataSlave(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
