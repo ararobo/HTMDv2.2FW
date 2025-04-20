@@ -1,12 +1,12 @@
 #include "app.hpp"
 #include "tim.h"
-#include "motor_controller.hpp"
+#include "gate_driver.hpp"
 #include "serial_printf.hpp"
 #define FW_VERSION 0x00
 #define BOARD_TYPE 0x00
 
 CANDriver can_driver(0, BOARD_TYPE, FW_VERSION);
-MotorController motor_controller;
+GateDriver motor_controller;
 
 void App::init()
 {

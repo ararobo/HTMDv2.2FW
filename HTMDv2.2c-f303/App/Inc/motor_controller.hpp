@@ -11,26 +11,28 @@ private:
     float i_out = 0.0f;                                  // I制御の出力
     float prev_error = 0.0f;                             // 前回のエラー
     int16_t prev_out = 0;                                // 前回の出力
-    uint16_t max_output = 3199;                          // 最大出力
     uint8_t control_cycle = 5;                           // 制御周期
 
-    /**
-     * @brief 値を指定された範囲内に制限する汎用関数
-     *
-     * @tparam T 値の型
-     * @param value 制限する値
-     * @param min_value 最小値
-     * @param max_value 最大値
-     * @return T 制限された値
-     */
-    template <typename T>
-    T saturate(T value, T min_value, T max_value);
+protected:
+    uint16_t max_output = 3199; // 最大出力
 
-    /// @brief PID制御の初期化
+    /**
+     * @brief PID制御の初期化
+     *
+     */
     void reset_pid();
 
-    /// @brief 台形制御の初期化
+    /**
+     * @brief 台形制御の初期化
+     *
+     */
     void reset_trapezoidal_control();
+
+    /**
+     * @brief ハードウェアの初期化
+     *
+     */
+    virtual void hardware_init() = 0;
 
 public:
     /**
@@ -47,7 +49,21 @@ public:
      * @param output 出力
      * @param max_output 最大出力
      */
-    void run(int16_t output, uint16_t max_output);
+    virtual void run(int16_t output, uint16_t max_output) = 0;
+
+    /**
+     * @brief エンコーダのカウントを取得する
+     *
+     * @return int16_t エンコーダのカウント
+     */
+    virtual int16_t get_count() = 0;
+
+    /**
+     * @brief ブレーキを設定する
+     *
+     * @param brake ブレーキの有効/無効
+     */
+    virtual void set_brake(bool brake) = 0;
 
     /**
      * @brief 台形制御を行う
@@ -68,13 +84,6 @@ public:
     float calculate_pid(float target, float now_value);
 
     /**
-     * @brief エンコーダのカウントを取得する
-     *
-     * @return int16_t エンコーダのカウント
-     */
-    int16_t get_count();
-
-    /**
      * @brief PIDゲインを設定する
      *
      * @param p_gain 比例ゲイン
@@ -83,9 +92,9 @@ public:
      */
     void set_pid_gain(float p_gain, float i_gain, float d_gain);
 
-    /// @brief モーターのブレーキを設定する
-    void set_brake(bool brake);
-
-    /// @brief PID制御と台形制御をリセットする
+    /**
+     * @brief PID制御と台形制御をリセットする
+     *
+     */
     void reset();
 };
