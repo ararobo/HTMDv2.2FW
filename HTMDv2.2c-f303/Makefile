@@ -67,6 +67,8 @@ CXX_SOURCES = \
 Core/Src/main.cpp \
 $(wildcard App/Src/*.cpp) \
 $(wildcard CAN/Src/*.cpp) \
+$(wildcard Motor/Src/*.cpp) \
+$(wildcard Peripheral/Src/*.cpp) \
 
 
 # ASM sources
@@ -140,6 +142,8 @@ CXX_INCLUDES = \
 $(C_INCLUDES) \
 -IApp/Inc \
 -ICAN/Inc \
+-IMotor/Inc \
+-IPeripheral/Inc \
 
 
 # compile gcc flags
