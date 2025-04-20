@@ -160,13 +160,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
   app.can_callback_process(hcan);
 }
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim->Instance == TIM6)
-  {
-    app.timer_task();
-  }
-}
 /* USER CODE END 4 */
 
 /**
