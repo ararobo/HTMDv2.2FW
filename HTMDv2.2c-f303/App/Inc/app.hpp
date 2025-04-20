@@ -31,7 +31,10 @@ private:
      */
     bool limit_switch_control();
 
-    /// @brief MDの設定を更新し、初期化処理を行う
+    /**
+     * @brief モータードライバの設定を更新する
+     *
+     */
     void update_md_config();
 
     /**
@@ -42,21 +45,43 @@ private:
      */
     void update_gain(uint8_t gain_type);
 
-    /// @brief 制御周期に合わせて待機する
+    /**
+     * @brief 制御周期に合わせて待機する
+     *
+     */
     void wait_for_next_period();
 
-    /// @brief DIPスイッチの状態を読み取り、md_idを更新する
+    /**
+     * @brief DIPスイッチの状態を取得し、MDのIDを更新する
+     *
+     */
     void update_md_id();
 
 public:
     App();
 
-    /// @brief プログラムの始めに一回だけ呼び出す
-    void init();
+    /**
+     * @brief プログラムのはじめに1回だけ呼び出す
+     *
+     */
+    void setup();
 
-    /// @brief ループ処理
-    void main_loop();
+    /**
+     * @brief プログラムのメインループ
+     *
+     */
+    void loop();
 
-    /// @brief CANのコールバック処理
+    /**
+     * @brief エンコーダー用のタイマー
+     *
+     */
+    void timer_callback();
+
+    /**
+     * @brief CANのコールバック処理
+     *
+     * @param hcan CANハンドル
+     */
     void can_callback_process(CAN_HandleTypeDef *hcan);
 };

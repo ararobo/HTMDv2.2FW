@@ -35,15 +35,12 @@ void MotorController::reset()
 
 void MotorController::run(int16_t output)
 {
-    // エンコーダーのカウントを取得
-    encoder_count = encoder.get_count();
-
     // PID制御ゲインを取得
     float p_gain, _gain;
     pid_calculator.get_pid_gain(&p_gain, &_gain, &_gain);
 
     // Pゲインが0でない場合、PID制御を行う
-    if (p_gain != 0.0f && output != 0)
+    if (p_gain != 0.0f && output != 0 && md_config.encoder_type != 0)
     {
         // PID制御を行う
         output = static_cast<int16_t>(pid_calculator.calculate_pid(output, encoder_count) * md_config.max_output);
@@ -76,4 +73,10 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
 {
     // PIDゲインを設定する
     pid_calculator.set_pid_gain(p_gain, i_gain, d_gain);
+}
+
+void MotorController::sample_encoder()
+{
+    // エンコーダーのカウントを取得
+    encoder_count = encoder.get_count();
 }

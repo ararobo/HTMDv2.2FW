@@ -8,7 +8,7 @@
 CANDriver can_driver(0, BOARD_TYPE, FW_VERSION);
 MotorController motor_controller;
 
-void App::init()
+void App::setup()
 {
     HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
     // MDのIDを更新
@@ -20,10 +20,14 @@ void App::init()
 
     // モーターの初期化
     motor_controller.init();
+
+    // エンコーダーサンプリング用のタイマーを開始
+    HAL_TIM_Base_Start_IT(&htim6);
+
     log_printf(LOG_INFO, "App initialized.\n");
 }
 
-void App::main_loop()
+void App::loop()
 {
     if (initialized)
     {
@@ -77,6 +81,12 @@ void App::main_loop()
     }
 
     wait_for_next_period(); // 制御周期に合わせる
+}
+
+void App::timer_callback()
+{
+    // エンコーダーのサンプリング
+    motor_controller.sample_encoder();
 }
 
 void App::can_callback_process(CAN_HandleTypeDef *hcan)

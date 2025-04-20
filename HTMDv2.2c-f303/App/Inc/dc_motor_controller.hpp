@@ -21,4 +21,6 @@ public:
     void stop();
 
     void set_pid_gain(float p_gain, float i_gain, float d_gain);
+
+    void sample_encoder();
 };
