@@ -166,51 +166,52 @@ bool App::limit_switch_control()
 
     switch (md_config.limit_switch_behavior)
     {
-    case 0:
-        // 何もしない
+    case 0: // 何もしない
         break;
+
     case 1: // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
-        // 制御値がゼロになったら、モーター制御を再開する
         if (limit_switch && target == 0)
         {
             limit_stop = false;
         }
-        // リミットスイッチが押され、limit_stopが立っている場合、モーターを停止する
         if (limit_switch && limit_stop)
         {
             return true;
         }
         break;
-    case 2:
-        // リミットスイッチが押されたら、正回転のみ停止する
+
+    case 2: // リミットスイッチが押されたら、正回転のみ停止する
         if (limit_switch && target > 0)
         {
-            motor_controller.run(0, md_config.max_output);
+            return true;
         }
         break;
+
     case 3:
         // リミットスイッチが押されたら、負回転のみ停止する
         if (limit_switch && target < 0)
         {
-            motor_controller.run(0, md_config.max_output);
+            return true;
         }
         break;
-    case 4:
-        // リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する
+
+    case 4: // リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する
         if (limit_switch & 0b1 && target > 0)
         {
-            motor_controller.run(0, md_config.max_output);
+            return true;
         }
         if (limit_switch & 0b10 && target < 0)
         {
-            motor_controller.run(0, md_config.max_output);
+            return true;
         }
         break;
 
     default:
         break;
     }
+    return false;
 }
+
 void App::update_md_config()
 {
     // MDの設定を取得

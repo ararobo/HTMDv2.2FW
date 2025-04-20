@@ -20,7 +20,7 @@ private:
     uint16_t loop_count;              // 定期的な処理のカウント
     uint16_t loop_count_max;          // 定期的な処理のカウントの最大値
     uint32_t last_tick;               // 最後の制御周期のタイムスタンプ
-    bool limit_stop;                  // 前回のリミットスイッチによる停止フラグ
+    bool limit_stop;                  // リミットスイッチによる停止フラグ
 
 private:
     /// @brief モーターを制御する
