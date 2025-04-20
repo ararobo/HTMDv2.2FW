@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include "can.h"
 #include "can_driver.hpp"
 
 class App
@@ -10,8 +9,6 @@ private:
     bool initialized;                 // 初期化フラグ
     md_config_t md_config;            // モータードライバの設定
     int16_t target;                   // 目標値
-    int16_t output;                   // 出力値
-    int16_t encoder;                  // エンコーダのカウント
     uint8_t limit_switch;             // リミットスイッチの状態
     float pid_gain[3];                // PIDゲインの値
     uint16_t update_target_count;     // 目標位置の更新カウント

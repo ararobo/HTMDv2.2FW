@@ -1,12 +1,12 @@
 #include "app.hpp"
 #include "tim.h"
-#include "gate_driver.hpp"
+#include "dc_motor_controller.hpp"
 #include "serial_printf.hpp"
 #define FW_VERSION 0x00
 #define BOARD_TYPE 0x00
 
 CANDriver can_driver(0, BOARD_TYPE, FW_VERSION);
-GateDriver motor_controller;
+MotorController motor_controller;
 
 void App::init()
 {
@@ -17,9 +17,9 @@ void App::init()
     // CAN通信の初期化
     can_driver.set_board_id(md_id);
     can_driver.init();
-    // エンコーダー用タイマー開始
-    HAL_TIM_Base_Start_IT(&htim6);
 
+    // モーターの初期化
+    motor_controller.init();
     log_printf(LOG_INFO, "App initialized.\n");
 }
 
@@ -79,21 +79,6 @@ void App::main_loop()
     wait_for_next_period(); // 制御周期に合わせる
 }
 
-void App::timer_task()
-{
-    // encoder_periodの周期でエンコーダをサンプリングし、CANで送信
-    if (timer_count > md_config.encoder_period)
-    {
-        encoder = motor_controller.get_count();
-        can_driver.send_encoder(encoder);
-        timer_count = 0;
-    }
-    else
-    {
-        timer_count++;
-    }
-}
-
 void App::can_callback_process(CAN_HandleTypeDef *hcan)
 {
     can_driver.can_callback_process(hcan);
@@ -103,28 +88,23 @@ void App::control_motor()
 {
     if (update_target_count < update_target_count_max)
     {
-        // 出力値の更新
-        if (pid_gain[0] != 0.0f && target != 0)
+        // リミットスイッチによる制御
+        if (limit_switch_control())
         {
-            // PID制御を行う
-            output = motor_controller.calculate_pid(target, encoder) * (float)md_config.max_output;
+            motor_controller.stop();
         }
         else
         {
-            // 目標値をそのまま出力値とする
-            output = target;
+            motor_controller.run(target);
         }
-
-        output = motor_controller.trapezoidal_control(output, md_config.max_acceleration);
     }
     else // 長時間、目標値が更新されない場合、出力を0にする
     {
-        output = 0;
         motor_controller.reset();
     }
 
     // LEDの点灯制御
-    if (output != 0)
+    if (target != 0)
     {
         HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
     }
@@ -132,7 +112,7 @@ void App::control_motor()
     {
         HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
     }
-    if (output < 0)
+    if (target < 0)
     {
         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
     }
@@ -140,21 +120,6 @@ void App::control_motor()
     {
         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
     }
-
-    // リミットスイッチによる制御
-    if (limit_switch_control())
-    {
-        output = 0;
-        motor_controller.reset();
-    }
-    else
-    {
-        // モーターを回す
-        motor_controller.run(output, md_config.max_output);
-    }
-
-    // モーターを回す
-    motor_controller.run(output, md_config.max_output);
 }
 
 bool App::limit_switch_control()
@@ -217,6 +182,8 @@ void App::update_md_config()
     // MDの設定を取得
     if (can_driver.get_init(&md_config))
     {
+        motor_controller.set_config(md_config);
+        motor_controller.reset();
         log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
         log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
         log_printf(LOG_INFO, "md_config.control_period:%d\n", md_config.control_period);
@@ -224,10 +191,6 @@ void App::update_md_config()
         log_printf(LOG_INFO, "md_config.encoder_type:%d\n", md_config.encoder_type);
         log_printf(LOG_INFO, "md_config.limit_switch_behavior:%d\n", md_config.limit_switch_behavior);
         log_printf(LOG_INFO, "md_config.option:%d\n", md_config.option);
-
-        // モーター制御の初期化
-        motor_controller.init(md_config.control_period);
-
         HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
         initialized = true;
         log_printf(LOG_INFO, "MD initialized.\n");
@@ -282,8 +245,6 @@ App::App()
     md_config.option = 0;
     md_id = 0;
     target = 0;
-    output = 0;
-    encoder = 0;
     limit_switch = 0;
     update_target_count = 0;
     update_target_count_max = 100;
