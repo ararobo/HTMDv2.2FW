@@ -57,9 +57,6 @@ public:
     /// @brief ループ処理
     void main_loop();
 
-    /// @brief タイマーの割り込み処理（1ms毎）
-    void timer_task();
-
     /// @brief CANのコールバック処理
     void can_callback_process(CAN_HandleTypeDef *hcan);
 };
