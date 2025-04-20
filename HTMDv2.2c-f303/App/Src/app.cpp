@@ -2,15 +2,15 @@
 #include "tim.h"
 #include "dc_motor_controller.hpp"
 #include "serial_printf.hpp"
-#define FW_VERSION 0x00
 #define BOARD_TYPE 0x00
 
-MDDataSlave can(0, BOARD_TYPE, FW_VERSION);
+MDDataSlave can(0, BOARD_TYPE);
 MotorController motor_controller;
 
 void App::setup()
 {
     HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
+
     // MDのIDを更新
     update_md_id();
 
@@ -45,10 +45,9 @@ void App::loop()
     }
 
     update_md_config(); // MDの設定を更新(init)
-
-    update_gain(0); // Pゲイン
-    update_gain(1); // Iゲイン
-    update_gain(2); // Dゲイン
+    update_gain(0);     // Pゲイン
+    update_gain(1);     // Iゲイン
+    update_gain(2);     // Dゲイン
 
     // リミットスイッチ等の状態を取得し、CANで送信
     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
@@ -110,11 +109,11 @@ void App::control_motor()
     }
     else // 長時間、目標値が更新されない場合、出力を0にする
     {
-        motor_controller.reset();
+        motor_controller.stop();
     }
 
     // LEDの点灯制御
-    if (target != 0)
+    if (target != 0) // 目標値が0出ない場合はLED3を点灯
     {
         HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
     }
@@ -122,7 +121,7 @@ void App::control_motor()
     {
         HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
     }
-    if (target < 0)
+    if (target < 0) // 目標値が負の場合はLED2を点灯
     {
         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
     }
@@ -192,8 +191,9 @@ void App::update_md_config()
     // MDの設定を取得
     if (can.get_init(&md_config))
     {
-        motor_controller.set_config(md_config);
+        motor_controller.set_config(md_config); // モータードライバの設定を更新
         motor_controller.reset();
+
         log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
         log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
         log_printf(LOG_INFO, "md_config.control_period:%d\n", md_config.control_period);
@@ -201,8 +201,10 @@ void App::update_md_config()
         log_printf(LOG_INFO, "md_config.encoder_type:%d\n", md_config.encoder_type);
         log_printf(LOG_INFO, "md_config.limit_switch_behavior:%d\n", md_config.limit_switch_behavior);
         log_printf(LOG_INFO, "md_config.option:%d\n", md_config.option);
+
         HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
-        initialized = true;
+        initialized = true; // 初期化フラグを立てる
+
         log_printf(LOG_INFO, "MD initialized.\n");
     }
 }

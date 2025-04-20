@@ -9,7 +9,6 @@ private:
     /* 固有値 */
     uint8_t board_id;   // 基板のID
     uint8_t board_kind; // 基板の種類
-    uint8_t fw_version; // ファームウェアのバージョン
     /* 受信バッファ */
     uint8_t rx_buffer[8];           // 受信バッファ
     uint8_t init_buffer[8];         // 初期化バッファ
@@ -39,7 +38,7 @@ protected:
     void receive(uint16_t id, uint8_t *data, uint8_t len) override;
 
 public:
-    MDDataSlave(uint8_t board_id, uint8_t board_kind, uint8_t fw_version);
+    MDDataSlave(uint8_t board_id, uint8_t board_kind);
     /**
      * @brief 基板のIDを設定する
      *
