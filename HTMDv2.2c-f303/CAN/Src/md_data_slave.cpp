@@ -4,6 +4,15 @@
 MDDataSlave::MDDataSlave(uint8_t board_id, uint8_t board_kind)
     : board_id(board_id), board_kind(board_kind)
 {
+    // 受信フラグの初期化
+    this->init_flag = false;
+    this->target_flag = false;
+    this->limit_switch_flag = false;
+    this->multi_target_flag = false;
+    for (int i = 0; i < 3; i++)
+    {
+        this->gain_flag[i] = false;
+    }
 }
 
 void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
@@ -38,11 +47,6 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
         case can_config::data_type::md::gain:
             this->gain_flag[data[0]] = true;                   // gain_type別にフラグを立てる
             memcpy(this->gain_buffer[data[0]], data + 1, len); // gain_typeを除いたデータを該当するバッファにコピー
-            break;
-
-        case can_config::data_type::md::multi_target:
-            this->multi_target_flag = true;
-            memcpy(this->multi_target_buffer, data, len);
             break;
 
         default:
