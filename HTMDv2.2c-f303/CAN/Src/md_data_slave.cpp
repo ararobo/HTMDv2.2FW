@@ -1,14 +1,13 @@
 #include "md_data_slave.hpp"
 #include <cstring>
 
-MDDataSlave::MDDataSlave(uint8_t board_id, uint8_t board_kind)
-    : board_id(board_id), board_kind(board_kind)
+MDDataSlave::MDDataSlave(uint8_t board_id)
+    : board_id(board_id)
 {
     // 受信フラグの初期化
     this->init_flag = false;
     this->target_flag = false;
     this->limit_switch_flag = false;
-    this->multi_target_flag = false;
     for (int i = 0; i < 3; i++)
     {
         this->gain_flag[i] = false;

@@ -7,20 +7,17 @@ class MDDataSlave : public CANDriver
 {
 private:
     /* 固有値 */
-    uint8_t board_id;   // 基板のID
-    uint8_t board_kind; // 基板の種類
+    uint8_t board_id; // 基板のID
     /* 受信バッファ */
-    uint8_t rx_buffer[8];           // 受信バッファ
-    uint8_t init_buffer[8];         // 初期化バッファ
-    uint8_t target_buffer[2];       // 目標位置バッファ
-    uint8_t gain_buffer[3][4];      // ゲインバッファ
-    uint8_t multi_target_buffer[8]; // 複数の目標値バッファ
+    uint8_t rx_buffer[8];      // 受信バッファ
+    uint8_t init_buffer[8];    // 初期化バッファ
+    uint8_t target_buffer[2];  // 目標値バッファ
+    uint8_t gain_buffer[3][4]; // ゲインバッファ
     /* 受信フラグ */
     bool init_flag;         // 初期化フラグ
-    bool target_flag;       // 目標位置フラグ
+    bool target_flag;       // 目標値フラグ
     bool limit_switch_flag; // リミットスイッチフラグ
     bool gain_flag[3];      // ゲインフラグ
-    bool multi_target_flag; // 複数の目標値フラグ
     /* 一時処理用変数 */
     uint8_t packet_direction;  // 進行方向
     uint8_t packet_board_type; // 基板の種類
@@ -38,7 +35,7 @@ protected:
     void receive(uint16_t id, uint8_t *data, uint8_t len) override;
 
 public:
-    MDDataSlave(uint8_t board_id, uint8_t board_kind);
+    MDDataSlave(uint8_t board_id);
     /**
      * @brief 基板のIDを設定する
      *
