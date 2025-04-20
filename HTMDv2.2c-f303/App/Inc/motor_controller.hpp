@@ -26,6 +26,12 @@ private:
     template <typename T>
     T saturate(T value, T min_value, T max_value);
 
+    /// @brief PID制御の初期化
+    void reset_pid();
+
+    /// @brief 台形制御の初期化
+    void reset_trapezoidal_control();
+
 public:
     /**
      * @brief モーターの初期化
@@ -77,11 +83,9 @@ public:
      */
     void set_pid_gain(float p_gain, float i_gain, float d_gain);
 
+    /// @brief モーターのブレーキを設定する
     void set_brake(bool brake);
 
-    /**
-     * @brief 過去のPIDをリセットする
-     *
-     */
-    void reset_pid();
+    /// @brief PID制御と台形制御をリセットする
+    void reset();
 };

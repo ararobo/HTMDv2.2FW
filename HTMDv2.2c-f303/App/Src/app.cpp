@@ -46,8 +46,13 @@ void App::main_loop()
     update_gain(1); // Iゲイン
     update_gain(2); // Dゲイン
 
-    // リミットスイッチの状態を取得し、CANで送信
+    // リミットスイッチ等の状態を取得し、CANで送信
     if (limit_switch != HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin))
+    {
+        limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
+        can_driver.send_limit_switch(limit_switch);
+    }
+    else if (loop_count % 10 == 0) // 10msごとにリミットスイッチの状態を送信
     {
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
         can_driver.send_limit_switch(limit_switch);
@@ -115,7 +120,7 @@ void App::control_motor()
     else // 長時間、目標値が更新されない場合、出力を0にする
     {
         output = 0;
-        motor_controller.reset_pid();
+        motor_controller.reset();
     }
 
     // LEDの点灯制御
@@ -136,24 +141,44 @@ void App::control_motor()
         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
     }
 
-    limit_switch_control(); // リミットスイッチによる制御
+    // リミットスイッチによる制御
+    if (limit_switch_control())
+    {
+        output = 0;
+        motor_controller.reset();
+    }
+    else
+    {
+        // モーターを回す
+        motor_controller.run(output, md_config.max_output);
+    }
 
     // モーターを回す
     motor_controller.run(output, md_config.max_output);
 }
 
-void App::limit_switch_control()
+bool App::limit_switch_control()
 {
+    if (!limit_switch)
+    {
+        limit_stop = true;
+    }
+
     switch (md_config.limit_switch_behavior)
     {
     case 0:
         // 何もしない
         break;
-    case 1:
-        // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
-        if (limit_switch && target != 0)
+    case 1: // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
+        // 制御値がゼロになったら、モーター制御を再開する
+        if (limit_switch && target == 0)
         {
-            motor_controller.run(0, md_config.max_output);
+            limit_stop = false;
+        }
+        // リミットスイッチが押され、limit_stopが立っている場合、モーターを停止する
+        if (limit_switch && limit_stop)
+        {
+            return true;
         }
         break;
     case 2:
@@ -269,4 +294,5 @@ App::App()
     pid_gain[0] = 0.0f;
     pid_gain[1] = 0.0f;
     pid_gain[2] = 0.0f;
+    limit_stop = false;
 }

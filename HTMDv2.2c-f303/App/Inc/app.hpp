@@ -20,13 +20,19 @@ private:
     uint16_t loop_count;              // 定期的な処理のカウント
     uint16_t loop_count_max;          // 定期的な処理のカウントの最大値
     uint32_t last_tick;               // 最後の制御周期のタイムスタンプ
+    bool limit_stop;                  // 前回のリミットスイッチによる停止フラグ
 
 private:
     /// @brief モーターを制御する
     void control_motor();
 
-    /// @brief リミットスイッチの状態でモーターを制御する
-    void limit_switch_control();
+    /**
+     * @brief リミットスイッチによるモーターの制御
+     *
+     * @return true モーターを停止する
+     * @return false モーターを停止しない
+     */
+    bool limit_switch_control();
 
     /// @brief MDの設定を更新し、初期化処理を行う
     void update_md_config();

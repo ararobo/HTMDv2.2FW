@@ -86,10 +86,10 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
     reset_pid(); // PID制御の初期化
 }
 
-void MotorController::reset_pid()
+void MotorController::reset()
 {
-    i_out = 0.0f;
-    prev_error = 0.0f;
+    reset_pid();                 // PID制御の初期化
+    reset_trapezoidal_control(); // 台形制御の初期化
 }
 
 template <typename T>
@@ -119,4 +119,15 @@ void MotorController::set_brake(bool brake)
     {
         HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_RESET);
     }
+}
+
+void MotorController::reset_pid()
+{
+    i_out = 0.0f;
+    prev_error = 0.0f;
+}
+
+void MotorController::reset_trapezoidal_control()
+{
+    prev_out = 0;
 }
