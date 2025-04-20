@@ -29,21 +29,29 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
         switch (this->packet_data_type)
         {
         case can_config::data_type::md::init:
+            if (len != 8)
+                return;
             this->init_flag = true;
             memcpy(this->init_buffer, data, len);
             break;
 
         case can_config::data_type::md::target:
+            if (len != 2)
+                return;
             this->target_flag = true;
             memcpy(this->target_buffer, data, len);
             break;
 
         case can_config::data_type::md::limit_switch:
+            if (len != 1)
+                return;
             this->limit_switch_flag = true;
             memcpy(this->rx_buffer, data, len);
             break;
 
         case can_config::data_type::md::gain:
+            if (len != 5)
+                return;
             this->gain_flag[data[0]] = true;                   // gain_type別にフラグを立てる
             memcpy(this->gain_buffer[data[0]], data + 1, len); // gain_typeを除いたデータを該当するバッファにコピー
             break;
