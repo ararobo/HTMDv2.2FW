@@ -17,6 +17,8 @@ MDのCANv2.0のデータを管理するクラスです。
 
 [CAN通信のデータを管理するクラス](lib\Common)
 
+説明：[MDDataManagerの説明](lib/Common/MDDataMaster.md)
+
 自分の使いたい環境に対応するクラスを用いてCAN通信しましょう。
 
 [ESP32でCAN通信をするときに継承するクラス](lib\ESP32CAN)
