@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "fdcan.h"
-#include "can_driver.hpp"
+#include "md_data_slave.hpp"
 
 class App
 {
@@ -10,8 +9,6 @@ private:
     bool initialized;                 // 初期化フラグ
     md_config_t md_config;            // モータードライバの設定
     int16_t target;                   // 目標値
-    int16_t output;                   // 出力値
-    int16_t encoder;                  // エンコーダのカウント
     uint8_t limit_switch;             // リミットスイッチの状態
     float pid_gain[3];                // PIDゲインの値
     uint16_t update_target_count;     // 目標位置の更新カウント
@@ -20,15 +17,24 @@ private:
     uint16_t loop_count;              // 定期的な処理のカウント
     uint16_t loop_count_max;          // 定期的な処理のカウントの最大値
     uint32_t last_tick;               // 最後の制御周期のタイムスタンプ
+    bool limit_stop;                  // リミットスイッチによる停止フラグ
 
 private:
     /// @brief モーターを制御する
     void control_motor();
 
-    /// @brief リミットスイッチの状態でモーターを制御する
-    void limit_switch_control();
+    /**
+     * @brief リミットスイッチによるモーターの制御
+     *
+     * @return true モーターを停止する
+     * @return false モーターを停止しない
+     */
+    bool limit_switch_control();
 
-    /// @brief MDの設定を更新し、初期化処理を行う
+    /**
+     * @brief モータードライバの設定を更新する
+     *
+     */
     void update_md_config();
 
     /**
@@ -39,24 +45,43 @@ private:
      */
     void update_gain(uint8_t gain_type);
 
-    /// @brief 制御周期に合わせて待機する
+    /**
+     * @brief 制御周期に合わせて待機する
+     *
+     */
     void wait_for_next_period();
 
-    /// @brief DIPスイッチの状態を読み取り、md_idを更新する
+    /**
+     * @brief DIPスイッチの状態を取得し、MDのIDを更新する
+     *
+     */
     void update_md_id();
 
 public:
     App();
 
-    /// @brief プログラムの始めに一回だけ呼び出す
-    void init();
+    /**
+     * @brief プログラムのはじめに1回だけ呼び出す
+     *
+     */
+    void setup();
 
-    /// @brief ループ処理
-    void main_loop();
+    /**
+     * @brief プログラムのメインループ
+     *
+     */
+    void loop();
 
-    /// @brief タイマーの割り込み処理（1ms毎）
-    void timer_task();
+    /**
+     * @brief エンコーダー用のタイマー
+     *
+     */
+    void timer_callback();
 
-    /// @brief CANのコールバック処理
-    void can_callback_process(FDCAN_HandleTypeDef *hcan, uint32_t RxFifo0ITs);
+    /**
+     * @brief CANのコールバック処理
+     *
+     * @param hcan CANハンドル
+     */
+    void can_callback_process(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 };

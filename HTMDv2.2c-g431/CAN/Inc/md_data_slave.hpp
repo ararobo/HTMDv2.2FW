@@ -11,9 +11,9 @@
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"
-#include "can_driver.hpp"
+#include "stm32_fdcan1_driver.hpp"
 
-class MDDataSlave : public CANDriver
+class MDDataSlave : public STM32FDCAN1Driver
 {
 private:
     /* 固有値 */
