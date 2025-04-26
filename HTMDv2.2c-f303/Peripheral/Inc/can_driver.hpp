@@ -1,4 +1,16 @@
+/**
+ * @file can_driver.hpp
+ * @author gn10g (8gn24gn25@gmail.com)
+ * @brief STM32のCAN通信用クラス
+ * @version 0.1
+ * @date 2025-04-22
+ * @note hcanのところをhcan1やhcan2に変更することで、複数のCANを扱えるようなります
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
+#include <stdint.h>
 #include "can.h"
 
 class CANDriver
@@ -18,7 +30,7 @@ protected:
      * @param data 受信データ
      * @param len データの長さ
      */
-    virtual void receive(uint16_t id, uint8_t *data, uint8_t len) = 0;
+    virtual void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
     /**

@@ -1,3 +1,14 @@
+/**
+ * @file can_driver.cpp
+ * @author gn10g (8gn24gn25@gmail.com)
+ * @brief STM32のCAN通信用クラス
+ * @version 0.1
+ * @date 2025-04-22
+ * @note hcanのところをhcan1やhcan2に変更することで、複数のCANを扱えるようなります
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #include "can_driver.hpp"
 
 void CANDriver::init(uint32_t filter_id, uint32_t filter_mask)
@@ -49,4 +60,9 @@ void CANDriver::send(uint16_t id, uint8_t *data, uint8_t len)
     {
         Error_Handler();
     }
+}
+
+void CANDriver::receive(uint16_t id, uint8_t *data, uint8_t len)
+{
+    // 受信処理をオーバーライドしてください
 }
