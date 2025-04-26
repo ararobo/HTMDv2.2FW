@@ -10,6 +10,7 @@
  *
  */
 #pragma once
+#include <stdint.h>
 #include "can.h"
 
 class CANDriver
@@ -29,7 +30,7 @@ protected:
      * @param data 受信データ
      * @param len データの長さ
      */
-    virtual void receive(uint16_t id, uint8_t *data, uint8_t len) = 0;
+    virtual void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
     /**

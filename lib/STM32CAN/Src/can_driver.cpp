@@ -61,3 +61,8 @@ void CANDriver::send(uint16_t id, uint8_t *data, uint8_t len)
         Error_Handler();
     }
 }
+
+void CANDriver::receive(uint16_t id, uint8_t *data, uint8_t len)
+{
+    // 受信処理をオーバーライドしてください
+}
