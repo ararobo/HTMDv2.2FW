@@ -1,25 +1,23 @@
 /**
- * @file can_driver.hpp
+ * @file stm32_fdcan1_driver.hpp
  * @author gn10g (8gn24gn25@gmail.com)
- * @brief STM32のCAN通信用クラス
+ * @brief STM32のFDCAN1通信用クラス
  * @version 0.1
  * @date 2025-04-22
- * @note hcanのところをhcan1やhcan2に変更することで、複数のCANを扱えるようなります
  *
  * @copyright Copyright (c) 2025
  *
  */
 #pragma once
 #include <stdint.h>
-#include "can.h"
+#include "fdcan.h"
 
-class CANDriver
+class STM32FDCAN1Driver
 {
 private:
-    CAN_FilterTypeDef RxFilter;
-    CAN_RxHeaderTypeDef RxHeader;
-    CAN_TxHeaderTypeDef TxHeader;
-    uint32_t TxMailbox;
+    FDCAN_RxHeaderTypeDef RxHeader;
+    FDCAN_FilterTypeDef RxFilter;
+    FDCAN_TxHeaderTypeDef TxHeader;
     uint8_t RxData[8];
 
 protected:
@@ -55,5 +53,5 @@ public:
      *
      * @param hcan CANのハンドル
      */
-    void can_callback_process(CAN_HandleTypeDef *hcan);
+    void can_callback_process(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs);
 };

@@ -1,9 +1,27 @@
+/**
+ * @file md_data_slave.cpp
+ * @author gn10g (8gn24gn25@gmail.com)
+ * @brief MDのデータを扱うクラス
+ * @version 2.0
+ * @date 2025-04-26
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #include "md_data_slave.hpp"
 #include <cstring>
 
-MDDataSlave::MDDataSlave(uint8_t board_id, uint8_t board_kind, uint8_t fw_version)
-    : board_id(board_id), board_kind(board_kind), fw_version(fw_version)
+MDDataSlave::MDDataSlave(uint8_t board_id)
+    : board_id(board_id)
 {
+    // 受信フラグの初期化
+    this->init_flag = false;
+    this->target_flag = false;
+    this->limit_switch_flag = false;
+    for (int i = 0; i < 3; i++)
+    {
+        this->gain_flag[i] = false;
+    }
 }
 
 void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
@@ -21,28 +39,31 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
         switch (this->packet_data_type)
         {
         case can_config::data_type::md::init:
+            if (len != 8)
+                return;
             this->init_flag = true;
             memcpy(this->init_buffer, data, len);
             break;
 
         case can_config::data_type::md::target:
+            if (len != 2)
+                return;
             this->target_flag = true;
             memcpy(this->target_buffer, data, len);
             break;
 
         case can_config::data_type::md::limit_switch:
+            if (len != 1)
+                return;
             this->limit_switch_flag = true;
             memcpy(this->rx_buffer, data, len);
             break;
 
         case can_config::data_type::md::gain:
+            if (len != 5)
+                return;
             this->gain_flag[data[0]] = true;                   // gain_type別にフラグを立てる
             memcpy(this->gain_buffer[data[0]], data + 1, len); // gain_typeを除いたデータを該当するバッファにコピー
-            break;
-
-        case can_config::data_type::md::multi_target:
-            this->multi_target_flag = true;
-            memcpy(this->multi_target_buffer, data, len);
             break;
 
         default:
