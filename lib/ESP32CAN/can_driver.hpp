@@ -1,3 +1,13 @@
+/**
+ * @file can_driver.hpp
+ * @author gn10g (8gn24gn25@gmail.com)
+ * @brief ESP32のCAN通信クラス
+ * @version 0.1
+ * @date 2025-04-26
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 #include <stdint.h>
 
@@ -24,7 +34,7 @@ protected:
      * @param data 受信データ
      * @param len データの長さ
      */
-    virtual void receive(uint16_t id, uint8_t *data, uint8_t len) = 0;
+    virtual void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
     /**

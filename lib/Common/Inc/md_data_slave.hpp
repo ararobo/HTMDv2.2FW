@@ -1,3 +1,13 @@
+/**
+ * @file md_data_slave.hpp
+ * @author gn10g (8gn24gn25@gmail.com)
+ * @brief MDのデータを扱うクラス
+ * @version 2.0
+ * @date 2025-04-26
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"

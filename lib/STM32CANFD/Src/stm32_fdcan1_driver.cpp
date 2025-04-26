@@ -67,3 +67,8 @@ void STM32FDCAN1Driver::send(uint16_t id, uint8_t *data, uint8_t len)
         Error_Handler();
     }
 }
+
+void STM32FDCAN1Driver::receive(uint16_t id, uint8_t *data, uint8_t len)
+{
+    // 受信処理をオーバーライドしてください
+}
