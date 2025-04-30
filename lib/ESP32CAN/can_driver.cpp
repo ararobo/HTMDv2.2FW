@@ -26,6 +26,8 @@ void CANDriver::init(uint32_t filter_id, uint32_t filter_mask)
 {
     CAN.setPins(can_rx_pin, can_tx_pin); // RX/TXピンの設定
     CAN.begin(1000E3);                   // ボーレートの設定
+    volatile uint32_t *pREG_IER = (volatile uint32_t *)0x3ff6b010;
+    *pREG_IER &= ~(uint8_t)0x10;
     CAN.onReceive(can_clallback_static); // 受信コールバックの設定
 }
 
