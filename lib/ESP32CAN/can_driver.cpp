@@ -11,10 +11,15 @@
 #include "CAN.h"
 #include "can_driver.hpp"
 
-CANDriver::CANDriver(uint8_t rx_pin, uint8_t tx_pin)
-    : can_rx_pin(rx_pin), can_tx_pin(tx_pin)
+CANDriver::CANDriver()
 {
     instance = this;
+}
+
+void CANDriver::set_pins(uint8_t rx_pin, uint8_t tx_pin)
+{
+    can_rx_pin = rx_pin; // RXピンの設定
+    can_tx_pin = tx_pin; // TXピンの設定
 }
 
 void CANDriver::init(uint32_t filter_id, uint32_t filter_mask)

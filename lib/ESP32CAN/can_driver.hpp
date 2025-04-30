@@ -40,10 +40,17 @@ public:
     /**
      * @brief コンストラクタ
      *
-     * @param rx_pin CANのRXピン
-     * @param tx_pin CANのTXピン
      */
-    CANDriver(uint8_t rx_pin, uint8_t tx_pin);
+    CANDriver();
+
+    /**
+     * @brief CANのRX/TXピンを設定する
+     *
+     * @param rx_pin RXピン
+     * @param tx_pin TXピン
+     */
+    void set_pins(uint8_t rx_pin, uint8_t tx_pin);
+
     /**
      * @brief CANの初期化
      *
