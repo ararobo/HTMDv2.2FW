@@ -1,3 +1,13 @@
+/**
+ * @file dc_motor_controller.hpp
+ * @author  (8gn24gn25@gmail.com)
+ * @brief DCモーターの制御クラス
+ * @version 0.1
+ * @date 2025-05-06
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 #include "md_config.hpp"
 

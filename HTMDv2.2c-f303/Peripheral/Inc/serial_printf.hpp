@@ -1,3 +1,13 @@
+/**
+ * @file serial_printf.hpp
+ * @author  (8gn24gn25@gmail.com)
+ * @brief UARTを使用したフォーマットされた文字列の送信
+ * @version 0.1
+ * @date 2025-05-06
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 #include <string>
 #include <vector>

@@ -1,3 +1,13 @@
+/**
+ * @file a3921.cpp
+ * @author  (8gn24gn25@gmail.com)
+ * @brief A3921ゲートドライバのクラス
+ * @version 0.1
+ * @date 2025-05-06
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #include "a3921.hpp"
 #include "tim.h"
 #include "gpio.h"
