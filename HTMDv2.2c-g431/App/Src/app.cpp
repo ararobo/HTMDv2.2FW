@@ -1,3 +1,13 @@
+/**
+ * @file app.cpp
+ * @author  (8gn24gn25@gmail.com)
+ * @brief MDのファームウェアのメインクラス
+ * @version 0.1
+ * @date 2025-05-06
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #include "app.hpp"
 #include "tim.h"
 #include "dc_motor_controller.hpp"
