@@ -2,8 +2,8 @@
  * @file can_config.hpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief CAN通信のID設定を行う
- * @version 2.0
- * @date 2025-04-22
+ * @version 2.1
+ * @date 2025-05-07
  *
  * @copyright Copyright (c) 2025
  *
@@ -24,6 +24,9 @@ namespace can_config
         static constexpr uint8_t md = 1;
         static constexpr uint8_t servo = 2;
         static constexpr uint8_t solenoid = 3;
+        static constexpr uint8_t pc = 4;
+        static constexpr uint8_t sensor = 5;
+        static constexpr uint8_t led = 6;
     }
     namespace data_type
     {
@@ -51,6 +54,19 @@ namespace can_config
         {
             static constexpr uint8_t init = 0;
             static constexpr uint8_t target = 1;
+        }
+        namespace pc
+        {
+            static constexpr uint8_t init = 0;
+        }
+        namespace sensor
+        {
+            static constexpr uint8_t init = 0;
+            static constexpr uint8_t tof = 1;
+        }
+        namespace led
+        {
+            static constexpr uint8_t init = 0;
         }
     }
     /**
