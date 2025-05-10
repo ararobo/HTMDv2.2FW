@@ -98,7 +98,7 @@ void MDDataMaster::send_multi_target(uint8_t id, int16_t target[4])
     std::memcpy(data, target, sizeof(int16_t) * 4);
     this->send(can_config::encode_id(can_config::direction::slave,
                                      can_config::board_type::md, id,
-                                     can_config::data_type::md::target),
+                                     can_config::data_type::md::multi_target),
                data, sizeof(int16_t) * 4);
 }
 
