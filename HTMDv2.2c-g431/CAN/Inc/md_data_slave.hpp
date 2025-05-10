@@ -46,13 +46,15 @@ protected:
     void receive(uint16_t id, uint8_t *data, uint8_t len) override;
 
 public:
-    MDDataSlave(uint8_t board_id);
+    MDDataSlave();
+
     /**
      * @brief 基板のIDを設定する
      *
-     * @param board_id
+     * @param board_id 基板のID
+     * @note 通信処理を行う前に必ず設定してください
      */
-    void set_board_id(uint8_t board_id) { this->board_id = board_id; }
+    void set_board_id(uint8_t board_id);
 
     /**
      * @brief 基板の種類を設定する

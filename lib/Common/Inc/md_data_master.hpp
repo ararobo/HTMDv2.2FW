@@ -12,9 +12,9 @@
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"
-#include "stm32_fdcan2_driver.hpp"
+#include "can_driver.hpp"
 
-class MDDataMaster : public STM32FDCAN2Driver
+class MDDataMaster : public CANDriver
 {
 private:
     struct md_data_t
