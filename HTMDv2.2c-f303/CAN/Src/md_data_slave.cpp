@@ -11,8 +11,7 @@
 #include "md_data_slave.hpp"
 #include <cstring>
 
-MDDataSlave::MDDataSlave(uint8_t board_id)
-    : board_id(board_id)
+MDDataSlave::MDDataSlave()
 {
     // 受信フラグの初期化
     this->init_flag = false;
@@ -22,6 +21,11 @@ MDDataSlave::MDDataSlave(uint8_t board_id)
     {
         this->gain_flag[i] = false;
     }
+}
+
+void MDDataSlave::set_board_id(uint8_t board_id)
+{
+    this->board_id = board_id;
     // multi_target受信用の計算
     this->multi_target_id = board_id / 4;
     this->multi_target_position = board_id % 4;
