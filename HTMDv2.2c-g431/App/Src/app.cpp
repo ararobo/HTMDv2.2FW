@@ -2,8 +2,8 @@
  * @file app.cpp
  * @author  (8gn24gn25@gmail.com)
  * @brief MDのファームウェアのメインクラス
- * @version 0.1
- * @date 2025-05-06
+ * @version 1.0
+ * @date 2025-05-10
  *
  * @copyright Copyright (c) 2025
  *
@@ -65,7 +65,7 @@ void App::loop()
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
         can.send_limit_switch(limit_switch);
     }
-    else if (loop_count % 10 == 0) // 10msごとにリミットスイッチの状態を送信
+    else if (loop_count % 10 == 0) // 10周期ごとにリミットスイッチの状態を送信
     {
         limit_switch = HAL_GPIO_ReadPin(LIM1_GPIO_Port, LIM1_Pin) & 0b1;
         can.send_limit_switch(limit_switch);
@@ -94,8 +94,19 @@ void App::loop()
 
 void App::timer_callback()
 {
-    // エンコーダーのサンプリング
-    motor_controller.sample_encoder();
+    if (md_config.encoder_type == 1 && md_config.encoder_period > 0)
+    {
+        if (timer_count > md_config.encoder_period)
+        {
+            motor_controller.sample_encoder();                      // エンコーダーのサンプリング
+            can.send_encoder(motor_controller.get_encoder_count()); // エンコーダーの値をCANで送信
+            timer_count = 0;
+        }
+        else
+        {
+            timer_count++;
+        }
+    }
 }
 
 void App::can_callback_process(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)

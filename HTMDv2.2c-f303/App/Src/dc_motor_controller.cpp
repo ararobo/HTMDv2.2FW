@@ -2,8 +2,8 @@
  * @file dc_motor_controller.cpp
  * @author  (8gn24gn25@gmail.com)
  * @brief DCモーターの制御クラス
- * @version 0.1
- * @date 2025-05-06
+ * @version 1.0
+ * @date 2025-05-10
  *
  * @copyright Copyright (c) 2025
  *
@@ -89,4 +89,10 @@ void MotorController::sample_encoder()
 {
     // エンコーダーのカウントを取得
     encoder_count = encoder.get_count();
+}
+
+int16_t MotorController::get_encoder_count()
+{
+    // エンコーダーのカウントを取得
+    return encoder_count;
 }
