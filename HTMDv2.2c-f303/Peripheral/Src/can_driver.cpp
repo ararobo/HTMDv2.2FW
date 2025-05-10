@@ -2,8 +2,8 @@
  * @file can_driver.cpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief STM32のCAN通信用クラス
- * @version 0.1
- * @date 2025-04-22
+ * @version 1.0
+ * @date 2025-05-10
  * @note hcanのところをhcan1やhcan2に変更することで、複数のCANを扱えるようなります
  *
  * @copyright Copyright (c) 2025
@@ -55,6 +55,9 @@ void CANDriver::send(uint16_t id, uint8_t *data, uint8_t len)
     TxHeader.IDE = CAN_ID_STD;
     TxHeader.DLC = len; // データ長
     TxHeader.TransmitGlobalTime = DISABLE;
+    // 送信FIFOが空になるまで待機
+    while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0)
+        ;
     // 送信
     if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK)
     {

@@ -2,8 +2,8 @@
  * @file stm32_fdcan3_driver.cpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief STM32のFDCAN3通信用クラス
- * @version 0.1
- * @date 2025-04-22
+ * @version 1.0
+ * @date 2025-05-10
  *
  * @copyright Copyright (c) 2025
  *
@@ -62,6 +62,10 @@ void STM32FDCAN3Driver::send(uint16_t id, uint8_t *data, uint8_t len)
     TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
     TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
     TxHeader.MessageMarker = 0;
+    // 送信FIFOが空になるまで待機
+    while (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan3) == 0)
+        ;
+    // 送信
     if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan3, &TxHeader, data) != HAL_OK)
     {
         Error_Handler();
