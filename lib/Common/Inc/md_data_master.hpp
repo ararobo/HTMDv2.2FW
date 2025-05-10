@@ -2,8 +2,8 @@
  * @file md_data_master.hpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.0
- * @date 2025-04-22
+ * @version 2.1
+ * @date 2025-05-10
  * @note 各ハードウェアに対応するCANDriverクラスを継承して使う
  *
  * @copyright Copyright (c) 2025
@@ -12,9 +12,9 @@
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"
-#include "can_driver.hpp"
+#include "stm32_fdcan2_driver.hpp"
 
-class MDDataMaster : public CANDriver
+class MDDataMaster : public STM32FDCAN2Driver
 {
 private:
     struct md_data_t
@@ -64,6 +64,15 @@ public:
      * @param target 目標値
      */
     void send_target(uint8_t id, int16_t target);
+
+    /**
+     * @brief 4つの基板に目標値を送信
+     *
+     * @param id 基板のIDのオフセット(0,4,8,12)
+     * @param target 目標値の配列
+     * @note 送信する基板のIDは id + 0, id + 1, id + 2, id + 3
+     */
+    void send_multi_target(uint8_t id, int16_t target[4]);
 
     /**
      * @brief ゲインの送信

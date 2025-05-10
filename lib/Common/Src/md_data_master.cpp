@@ -2,8 +2,8 @@
  * @file md_data_master.cpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.0
- * @date 2025-04-22
+ * @version 2.1
+ * @date 2025-05-10
  * @note 各ハードウェアに対応するCANDriverクラスを継承して使う
  *
  * @copyright Copyright (c) 2025
@@ -90,6 +90,16 @@ void MDDataMaster::send_target(uint8_t id, int16_t target)
                                      can_config::board_type::md, id,
                                      can_config::data_type::md::target),
                data, sizeof(int16_t));
+}
+
+void MDDataMaster::send_multi_target(uint8_t id, int16_t target[4])
+{
+    uint8_t data[8] = {0};
+    std::memcpy(data, target, sizeof(int16_t) * 4);
+    this->send(can_config::encode_id(can_config::direction::slave,
+                                     can_config::board_type::md, id,
+                                     can_config::data_type::md::target),
+               data, sizeof(int16_t) * 4);
 }
 
 void MDDataMaster::send_gain(uint8_t id, uint8_t gain_type, float gain)
