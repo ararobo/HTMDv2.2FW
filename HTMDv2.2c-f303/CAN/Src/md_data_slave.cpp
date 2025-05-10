@@ -28,7 +28,7 @@ void MDDataSlave::set_board_id(uint8_t board_id)
     this->board_id = board_id;
     // multi_target受信用の計算
     this->multi_target_id = board_id / 4;
-    this->multi_target_position = board_id % 4;
+    this->multi_target_position = (board_id % 4) * sizeof(int16_t);
 }
 
 void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
@@ -48,7 +48,7 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
             return;
         // 受信フラグを立て、受信データをバッファに格納
         this->target_flag = true;
-        memcpy(this->target_buffer + multi_target_position, data, len);
+        memcpy(this->target_buffer, data + multi_target_position, len);
     }
     // multi_target以外の処理
     else if (this->packet_board_id == this->board_id)
