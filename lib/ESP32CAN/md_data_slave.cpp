@@ -2,8 +2,8 @@
  * @file md_data_slave.cpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.0
- * @date 2025-04-26
+ * @version 2.1
+ * @date 2025-05-10
  *
  * @copyright Copyright (c) 2025
  *
@@ -11,8 +11,7 @@
 #include "md_data_slave.hpp"
 #include <cstring>
 
-MDDataSlave::MDDataSlave(uint8_t board_id)
-    : board_id(board_id)
+MDDataSlave::MDDataSlave()
 {
     // 受信フラグの初期化
     this->init_flag = false;
@@ -24,16 +23,35 @@ MDDataSlave::MDDataSlave(uint8_t board_id)
     }
 }
 
+void MDDataSlave::set_board_id(uint8_t board_id)
+{
+    this->board_id = board_id;
+    // multi_target受信用の計算
+    this->multi_target_id = board_id / 4;
+    this->multi_target_position = (board_id % 4) * sizeof(int16_t);
+}
+
 void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
 {
     // 受信パケットのCAN-IDからパケットの情報を取得
     can_config::decode_id(id, this->packet_direction, this->packet_board_type,
                           this->packet_board_id, this->packet_data_type);
-
     // 受信データのフィルタリング
-    if (this->packet_direction == can_config::direction::slave &&
-        this->packet_board_type == can_config::board_type::md &&
-        this->packet_board_id == this->board_id)
+    if (this->packet_direction != can_config::direction::slave ||
+        this->packet_board_type != can_config::board_type::md)
+        return;
+    // multi_target受信時の処理
+    if (this->packet_board_id == multi_target_id &&
+        this->packet_data_type == can_config::data_type::md::multi_target)
+    {
+        if (len != 8)
+            return;
+        // 受信フラグを立て、受信データをバッファに格納
+        this->target_flag = true;
+        memcpy(this->target_buffer, data + multi_target_position, len);
+    }
+    // multi_target以外の処理
+    else if (this->packet_board_id == this->board_id)
     {
         // 受信フラグを立て、受信データをバッファに格納
         switch (this->packet_data_type)
@@ -50,13 +68,6 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
                 return;
             this->target_flag = true;
             memcpy(this->target_buffer, data, len);
-            break;
-
-        case can_config::data_type::md::limit_switch:
-            if (len != 1)
-                return;
-            this->limit_switch_flag = true;
-            memcpy(this->rx_buffer, data, len);
             break;
 
         case can_config::data_type::md::gain:

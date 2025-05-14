@@ -2,8 +2,8 @@
  * @file md_data_slave.hpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.0
- * @date 2025-04-26
+ * @version 2.1
+ * @date 2025-05-10
  *
  * @copyright Copyright (c) 2025
  *
@@ -17,9 +17,10 @@ class MDDataSlave : public CANDriver
 {
 private:
     /* 固有値 */
-    uint8_t board_id; // 基板のID
+    uint8_t board_id;              // 基板のID
+    uint8_t multi_target_id;       // multi_target受信用の基板のID
+    uint8_t multi_target_position; // multi_target受信用のデータの位置
     /* 受信バッファ */
-    uint8_t rx_buffer[8];      // 受信バッファ
     uint8_t init_buffer[8];    // 初期化バッファ
     uint8_t target_buffer[2];  // 目標値バッファ
     uint8_t gain_buffer[3][4]; // ゲインバッファ
@@ -45,13 +46,15 @@ protected:
     void receive(uint16_t id, uint8_t *data, uint8_t len) override;
 
 public:
-    MDDataSlave(uint8_t board_id);
+    MDDataSlave();
+
     /**
      * @brief 基板のIDを設定する
      *
-     * @param board_id
+     * @param board_id 基板のID
+     * @note 通信処理を行う前に必ず設定してください
      */
-    void set_board_id(uint8_t board_id) { this->board_id = board_id; }
+    void set_board_id(uint8_t board_id);
 
     /**
      * @brief 基板の種類を設定する
