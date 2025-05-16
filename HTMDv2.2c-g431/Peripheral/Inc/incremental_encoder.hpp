@@ -2,8 +2,8 @@
  * @file incremantal_encoder.hpp
  * @author  (8gn24gn25@gmail.com)
  * @brief インクリメンタルエンコーダのクラス
- * @version 0.1
- * @date 2025-05-06
+ * @version 1.0
+ * @date 2025-05-16
  *
  * @copyright Copyright (c) 2025
  *
@@ -14,14 +14,11 @@
 class IncremantalEncoder
 {
 private:
-    uint16_t max_count = 65535; // エンコーダの最大カウント
 public:
     /**
      * @brief エンコーダのコンストラクタ
-     *
-     * @param max_count エンコーダの最大カウント
      */
-    IncremantalEncoder(uint16_t max_count);
+    IncremantalEncoder();
 
     /**
      * @brief エンコーダの初期化

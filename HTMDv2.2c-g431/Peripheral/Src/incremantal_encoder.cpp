@@ -2,8 +2,8 @@
  * @file incremantal_encoder.cpp
  * @author  (8gn24gn25@gmail.com)
  * @brief インクリメンタルエンコーダのクラス
- * @version 0.1
- * @date 2025-05-06
+ * @version 1.0
+ * @date 2025-05-16
  *
  * @copyright Copyright (c) 2025
  *
@@ -12,9 +12,8 @@
 #include "tim.h"
 #include <algorithm>
 
-IncremantalEncoder::IncremantalEncoder(uint16_t max_count)
+IncremantalEncoder::IncremantalEncoder()
 {
-    this->max_count = max_count;
 }
 
 void IncremantalEncoder::hardware_init()
@@ -29,7 +28,5 @@ int16_t IncremantalEncoder::get_count()
     uint16_t enc_buff = TIM1->CNT;
     TIM1->CNT = 0;
     int16_t count = static_cast<int16_t>(enc_buff);
-    // カウントを制限
-    count = std::clamp(count, int16_t(-max_count), int16_t(max_count));
     return count;
 }
