@@ -98,9 +98,9 @@ void App::timer_callback()
     {
         if (timer_count > md_config.encoder_period)
         {
-            motor_controller.sample_encoder();                                    // エンコーダーのサンプリング
-            serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
-            can.send_encoder(motor_controller.get_encoder_count());               // エンコーダーの値をCANで送信
+            motor_controller.sample_encoder(); // エンコーダーのサンプリング
+            // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
+            can.send_encoder(motor_controller.get_encoder_count()); // エンコーダーの値をCANで送信
             timer_count = 0;
         }
         else
