@@ -16,7 +16,7 @@
 #include <algorithm>
 
 GateDriver gate_driver(3199);              // 最大デューティ比を3200に設定
-IncremantalEncoder encoder(65535);         // エンコーダの初期化
+IncremantalEncoder encoder;                // エンコーダの初期化
 TrapezoidalController trapezoidal_control; // 台形制御の初期化
 PIDCalculator pid_calculator(0.001f);      // PID制御の初期化
 

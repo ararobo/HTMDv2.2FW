@@ -14,14 +14,11 @@
 class IncremantalEncoder
 {
 private:
-    uint16_t max_count = 65535; // エンコーダの最大カウント
 public:
     /**
      * @brief エンコーダのコンストラクタ
-     *
-     * @param max_count エンコーダの最大カウント
      */
-    IncremantalEncoder(uint16_t max_count);
+    IncremantalEncoder();
 
     /**
      * @brief エンコーダの初期化
