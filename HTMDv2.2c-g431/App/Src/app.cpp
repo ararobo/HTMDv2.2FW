@@ -14,7 +14,7 @@
 #include "serial_printf.hpp"
 #define BOARD_TYPE 0x00
 
-MDDataSlave can(0);
+MDDataSlave can;
 MotorController motor_controller;
 
 void App::setup()
@@ -98,7 +98,8 @@ void App::timer_callback()
     {
         if (timer_count > md_config.encoder_period)
         {
-            motor_controller.sample_encoder();                      // エンコーダーのサンプリング
+            motor_controller.sample_encoder(); // エンコーダーのサンプリング
+            // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
             can.send_encoder(motor_controller.get_encoder_count()); // エンコーダーの値をCANで送信
             timer_count = 0;
         }
