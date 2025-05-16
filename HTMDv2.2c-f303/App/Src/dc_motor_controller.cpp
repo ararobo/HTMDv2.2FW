@@ -2,8 +2,8 @@
  * @file dc_motor_controller.cpp
  * @author  (8gn24gn25@gmail.com)
  * @brief DCモーターの制御クラス
- * @version 1.0
- * @date 2025-05-10
+ * @version 1.1
+ * @date 2025-05-16
  *
  * @copyright Copyright (c) 2025
  *

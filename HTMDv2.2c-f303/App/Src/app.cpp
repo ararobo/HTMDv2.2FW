@@ -2,8 +2,8 @@
  * @file app.cpp
  * @author  (8gn24gn25@gmail.com)
  * @brief MDのファームウェアのメインクラス
- * @version 1.0
- * @date 2025-05-10
+ * @version 1.1
+ * @date 2025-05-16
  *
  * @copyright Copyright (c) 2025
  *
