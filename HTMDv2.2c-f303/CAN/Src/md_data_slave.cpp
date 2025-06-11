@@ -2,8 +2,8 @@
  * @file md_data_slave.cpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.1
- * @date 2025-05-10
+ * @version 2.2
+ * @date 2025-06-11
  *
  * @copyright Copyright (c) 2025
  *
@@ -17,6 +17,7 @@ MDDataSlave::MDDataSlave()
     this->init_flag = false;
     this->target_flag = false;
     this->limit_switch_flag = false;
+    this->float_target_flag = false;
     for (int i = 0; i < 3; i++)
     {
         this->gain_flag[i] = false;
@@ -76,6 +77,12 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
             this->gain_flag[data[0]] = true;                   // gain_type別にフラグを立てる
             memcpy(this->gain_buffer[data[0]], data + 1, len); // gain_typeを除いたデータを該当するバッファにコピー
             break;
+        case can_config::data_type::md::float_target:
+            if (len != 4)
+                return;
+            this->float_target_flag = true;
+            memcpy(this->float_target_buffer, data, len);
+            break;
 
         default:
             break;
@@ -109,6 +116,21 @@ void MDDataSlave::send_encoder(int16_t encoder)
     memcpy(data, &encoder, sizeof(int16_t));
     // 送信
     this->send(can_id, data, sizeof(int16_t));
+}
+
+void MDDataSlave::send_float_encoder(float encoder)
+{
+    uint8_t data[4];
+    // CAN-IDの生成
+    uint16_t can_id = can_config::encode_id(
+        can_config::direction::master,
+        can_config::board_type::md,
+        this->board_id,
+        can_config::data_type::md::float_target);
+    // エンコーダーの値をコピー
+    memcpy(data, &encoder, sizeof(float));
+    // 送信
+    this->send(can_id, data, sizeof(float));
 }
 
 void MDDataSlave::send_limit_switch(uint8_t limit_switch)
@@ -157,6 +179,17 @@ bool MDDataSlave::get_target(int16_t *target)
     {
         this->target_flag = false;
         memcpy(target, this->target_buffer, sizeof(int16_t));
+        return true;
+    }
+    return false;
+}
+
+bool MDDataSlave::get_float_target(float *target)
+{
+    if (this->float_target_flag)
+    {
+        this->float_target_flag = false;
+        memcpy(target, this->float_target_buffer, sizeof(float));
         return true;
     }
     return false;

@@ -2,8 +2,8 @@
  * @file can_config.hpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief CAN通信のID設定を行う
- * @version 2.2
- * @date 2025-05-07
+ * @version 2.3
+ * @date 2025-06-11
  *
  * @copyright Copyright (c) 2025
  *
@@ -43,6 +43,7 @@ namespace can_config
             static constexpr uint8_t limit_switch = 2;
             static constexpr uint8_t gain = 3;
             static constexpr uint8_t multi_target = 4;
+            static constexpr uint8_t float_target = 5;
         }
         namespace servo
         {
