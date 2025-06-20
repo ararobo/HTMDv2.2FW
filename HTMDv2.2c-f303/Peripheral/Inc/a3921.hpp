@@ -14,7 +14,7 @@
 class GateDriver
 {
 private:
-    uint16_t max_duty = 3200; // 最大デューティ比
+    float max_duty = 3200; // 最大デューティ比
 
 public:
     /**
@@ -35,7 +35,7 @@ public:
      *
      * @param output 出力(duty)
      */
-    void output(int16_t output);
+    void output(float output);
 
     /**
      * @brief ブレーキを設定する

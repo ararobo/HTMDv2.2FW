@@ -43,7 +43,7 @@ void MotorController::reset()
     pid_calculator.reset_pid();
 }
 
-void MotorController::run(int16_t output)
+void MotorController::run(float output)
 {
     // PID制御ゲインを取得
     float p_gain, _gain;
@@ -53,13 +53,17 @@ void MotorController::run(int16_t output)
     if (p_gain != 0.0f && output != 0 && md_config.encoder_type != 0)
     {
         // PID制御を行う
-        output = static_cast<int16_t>(pid_calculator.calculate_pid(output, encoder_count) * md_config.max_output);
+        output = static_cast<float>(pid_calculator.calculate_pid(output, encoder_count) * float(md_config.max_output));
+    }
+    else
+    {
+        output = output * md_config.max_output;
     }
 
     // 台形制御を行う
     output = trapezoidal_control.trapezoidal_control(output, md_config.max_acceleration);
     // 出力値を制限する
-    output = std::clamp(output, int16_t(-md_config.max_output), int16_t(md_config.max_output));
+    output = std::clamp(output, float(-md_config.max_output), float(md_config.max_output));
     // モーターの出力を設定する
     gate_driver.output(output);
 }
@@ -89,6 +93,7 @@ void MotorController::sample_encoder()
 {
     // エンコーダーのカウントを取得
     encoder_count = encoder.get_count();
+    encoder_total = encoder.total_encoder(encoder_count);
 }
 
 int16_t MotorController::get_encoder_count()

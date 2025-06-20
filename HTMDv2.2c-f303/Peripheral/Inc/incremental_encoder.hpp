@@ -15,6 +15,8 @@ class IncremantalEncoder
 {
 private:
 public:
+    float enc_total;
+
     /**
      * @brief エンコーダのコンストラクタ
      */
@@ -32,4 +34,6 @@ public:
      * @return int16_t エンコーダのカウント
      */
     int16_t get_count();
+
+    float total_encoder(uint16_t encoder);
 };

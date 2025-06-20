@@ -28,10 +28,10 @@ void GateDriver::hardware_init()
     HAL_GPIO_WritePin(SR_GPIO_Port, SR_Pin, GPIO_PIN_SET);       // ブレーキ有効
 }
 
-void GateDriver::output(int16_t output)
+void GateDriver::output(float output)
 {
     // 出力値を制限
-    output = std::clamp(output, int16_t(-max_duty), int16_t(max_duty));
+    output = std::clamp(output, float(-max_duty), float(max_duty));
 
     // 出力が負の場合は回転方向を反転
     if (output < 0)

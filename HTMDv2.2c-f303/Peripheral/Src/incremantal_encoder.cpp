@@ -30,3 +30,10 @@ int16_t IncremantalEncoder::get_count()
     int16_t count = static_cast<int16_t>(enc_buff);
     return count;
 }
+
+float IncremantalEncoder::total_encoder(uint16_t encoder)
+{
+    float enc_stor = enc_total + float(static_cast<int16_t>(encoder));
+    enc_total = enc_stor;
+    return enc_total;
+}

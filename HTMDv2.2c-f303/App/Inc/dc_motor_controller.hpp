@@ -20,6 +20,8 @@ private:
 public:
     MotorController();
 
+    float encoder_total;
+
     /**
      * @brief エンコーダーとゲートドライバの初期化
      *
@@ -38,7 +40,7 @@ public:
      * @param output 制御値
      * @note PID制御（Pゲイン設定時）と台形制御あり
      */
-    void run(int16_t output);
+    void run(float output);
 
     /**
      * @brief MDの設定

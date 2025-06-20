@@ -18,7 +18,7 @@ private:
     uint8_t md_id;                    // 基板のID
     bool initialized;                 // 初期化フラグ
     md_config_t md_config;            // モータードライバの設定
-    int16_t target;                   // 目標値
+    float target;                     // 目標値(float)
     uint8_t limit_switch;             // リミットスイッチの状態
     float pid_gain[3];                // PIDゲインの値
     uint16_t update_target_count;     // 目標位置の更新カウント
