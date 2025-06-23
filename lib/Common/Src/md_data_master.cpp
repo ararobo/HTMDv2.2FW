@@ -2,8 +2,8 @@
  * @file md_data_master.cpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.1
- * @date 2025-05-10
+ * @version 2.2
+ * @date 2025-06-11
  * @note 各ハードウェアに対応するCANDriverクラスを継承して使う
  *
  * @copyright Copyright (c) 2025
@@ -20,6 +20,7 @@ MDDataMaster::MDDataMaster()
         md_data[i].init_flag = false;
         md_data[i].target_flag = false;
         md_data[i].limit_switch_flag = false;
+        md_data[i].float_target_flag = false;
         for (int j = 0; j < 3; j++)
         {
             md_data[i].gain_flag[j] = false;
@@ -66,6 +67,13 @@ void MDDataMaster::receive(uint16_t id, uint8_t *data, uint8_t len)
             this->md_data[this->packet_board_id].limit_switch_flag = true;
             break;
 
+        case can_config::data_type::md::float_target:
+            if (len != 4)
+                return;
+            std::memcpy(this->md_data[this->packet_board_id].float_target_buffer, data, len);
+            this->md_data[this->packet_board_id].float_target_flag = true;
+            break;
+
         default:
             break;
         }
@@ -102,6 +110,16 @@ void MDDataMaster::send_multi_target(uint8_t id, int16_t target[4])
                data, sizeof(int16_t) * 4);
 }
 
+void MDDataMaster::send_float_target(uint8_t id, float target)
+{
+    uint8_t data[4] = {0};
+    std::memcpy(data, &target, sizeof(float));
+    this->send(can_config::encode_id(can_config::direction::slave,
+                                     can_config::board_type::md, id,
+                                     can_config::data_type::md::float_target),
+               data, sizeof(float));
+}
+
 void MDDataMaster::send_gain(uint8_t id, uint8_t gain_type, float gain)
 {
     uint8_t data[5] = {0};
@@ -130,6 +148,17 @@ bool MDDataMaster::get_encoder(uint8_t id, int16_t *encoder)
     {
         std::memcpy(encoder, this->md_data[id].target_buffer, sizeof(int16_t));
         this->md_data[id].target_flag = false;
+        return true;
+    }
+    return false;
+}
+
+bool MDDataMaster::get_float_encoder(uint8_t id, float *encoder)
+{
+    if (this->md_data[id].float_target_flag)
+    {
+        std::memcpy(encoder, this->md_data[id].float_target_buffer, sizeof(float));
+        this->md_data[id].float_target_flag = false;
         return true;
     }
     return false;

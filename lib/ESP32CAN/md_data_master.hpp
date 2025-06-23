@@ -2,8 +2,8 @@
  * @file md_data_master.hpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDのデータを扱うクラス
- * @version 2.1
- * @date 2025-05-10
+ * @version 2.2
+ * @date 2025-06-11
  * @note 各ハードウェアに対応するCANDriverクラスを継承して使う
  *
  * @copyright Copyright (c) 2025
@@ -19,15 +19,17 @@ class MDDataMaster : public CANDriver
 private:
     struct md_data_t
     {
-        uint8_t init_buffer[1];    // 初期化バッファ
-        uint8_t target_buffer[2];  // 目標値バッファ
-        uint8_t gain_buffer[3][4]; // ゲインバッファ
-        uint8_t limit_switch[1];   // リミットスイッチバッファ
+        uint8_t init_buffer[1];         // 初期化バッファ
+        uint8_t target_buffer[2];       // 目標値バッファ
+        uint8_t gain_buffer[3][4];      // ゲインバッファ
+        uint8_t limit_switch[1];        // リミットスイッチバッファ
+        uint8_t float_target_buffer[4]; // 浮動小数点目標値バッファ
         /* 受信フラグ */
         bool init_flag;         // 初期化フラグ
         bool target_flag;       // 目標値フラグ
         bool limit_switch_flag; // リミットスイッチフラグ
         bool gain_flag[3];      // ゲインフラグ
+        bool float_target_flag; // 浮動小数点目標値フラグ
     } md_data[16];              // 16基板分のデータを保持
 
     /* 一時処理用変数 */
@@ -75,6 +77,14 @@ public:
     void send_multi_target(uint8_t id, int16_t target[4]);
 
     /**
+     * @brief 浮動小数点の目標値の送信
+     *
+     * @param id 基板のID
+     * @param target 浮動小数点の目標値
+     */
+    void send_float_target(uint8_t id, float target);
+
+    /**
      * @brief ゲインの送信
      *
      * @param id 基板のID
@@ -102,6 +112,16 @@ public:
      * @return false エンコーダーの値が取得できなかった
      */
     bool get_encoder(uint8_t id, int16_t *encoder);
+
+    /**
+     * @brief 浮動小数点エンコーダーの取得
+     *
+     * @param id 基板のID
+     * @param encoder 浮動小数点エンコーダーの値
+     * @return true 浮動小数点エンコーダーの値が取得できた
+     * @return false 浮動小数点エンコーダーの値が取得できなかった
+     */
+    bool get_float_encoder(uint8_t id, float *encoder);
 
     /**
      * @brief リミットスイッチの取得
