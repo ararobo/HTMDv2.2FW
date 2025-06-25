@@ -14,11 +14,7 @@
 class IncremantalEncoder
 {
 private:
-    // PID
-    float Kp = 1.2;
-    float Ki = 0.0;
-    float Kd = 0.1;
-    float last_error;
+    float enc_stor;
 
 public:
     float enc_total;

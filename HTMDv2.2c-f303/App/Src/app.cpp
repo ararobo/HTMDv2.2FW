@@ -101,7 +101,7 @@ void App::timer_callback()
         {
             motor_controller.sample_encoder(); // エンコーダーのサンプリング
             // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
-            can.send_float_encoder(motor_controller.calculate_pid(target, motor_controller.encoder_total)); // エンコーダーの値をCANで送信
+            can.send_float_encoder(motor_controller.encoder_total); // エンコーダーの値をCANで送信
             timer_count = 0;
         }
         else
@@ -127,7 +127,7 @@ void App::control_motor()
         }
         else
         {
-            motor_controller.run(target);
+            motor_controller.run(motor_controller.encoder_total /*target*/);
         }
     }
     else // 長時間、目標値が更新されない場合、出力を0にする
