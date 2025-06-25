@@ -14,8 +14,16 @@
 class IncremantalEncoder
 {
 private:
+    // PID
+    float Kp = 1.2;
+    float Ki = 0.0;
+    float Kd = 0.1;
+    float last_error;
+
 public:
     float enc_total;
+    float max_encoder = 4096;
+    float control_period = 1;
 
     /**
      * @brief エンコーダのコンストラクタ

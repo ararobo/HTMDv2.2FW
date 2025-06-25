@@ -65,6 +65,8 @@ public:
      */
     void set_pid_gain(float p_gain, float i_gain, float d_gain);
 
+    float calculate_pid(float target, float now_value);
+
     /**
      * @brief エンコーダーのサンプリング
      *

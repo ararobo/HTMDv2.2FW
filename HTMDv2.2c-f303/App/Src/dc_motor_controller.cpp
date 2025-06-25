@@ -89,6 +89,11 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
     pid_calculator.set_pid_gain(p_gain, i_gain, d_gain);
 }
 
+float MotorController::calculate_pid(float target, float now_value)
+{
+    return pid_calculator.calculate_pid(target, now_value);
+}
+
 void MotorController::sample_encoder()
 {
     // エンコーダーのカウントを取得

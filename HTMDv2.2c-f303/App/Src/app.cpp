@@ -12,6 +12,7 @@
 #include "tim.h"
 #include "dc_motor_controller.hpp"
 #include "serial_printf.hpp"
+#include "pid_calculator.hpp"
 #define BOARD_TYPE 0x00
 
 MDDataSlave can;
@@ -100,7 +101,7 @@ void App::timer_callback()
         {
             motor_controller.sample_encoder(); // エンコーダーのサンプリング
             // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
-            can.send_float_encoder(motor_controller.encoder_total); // エンコーダーの値をCANで送信
+            can.send_float_encoder(motor_controller.calculate_pid(target, motor_controller.encoder_total)); // エンコーダーの値をCANで送信
             timer_count = 0;
         }
         else
