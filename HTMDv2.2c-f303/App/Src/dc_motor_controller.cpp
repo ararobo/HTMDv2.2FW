@@ -13,6 +13,7 @@
 #include "incremental_encoder.hpp"
 #include "trapezoidal_controller.hpp"
 #include "pid_calculator.hpp"
+#include "serial_printf.hpp"
 #include <algorithm>
 
 GateDriver gate_driver(3199);              // 最大デューティ比を3200に設定
@@ -48,24 +49,23 @@ void MotorController::run(float output)
     // PID制御ゲインを取得
     float p_gain, _gain;
     pid_calculator.get_pid_gain(&p_gain, &_gain, &_gain);
+    // serial_printf("P_gain : %f\n", p_gain);
 
     // Pゲインが0でない場合、PID制御を行う
     if (p_gain != 0.0f && output != 0 && md_config.encoder_type != 0)
     {
         // PID制御を行う
-        output = static_cast<float>(pid_calculator.calculate_pid(output, encoder_count) * float(md_config.max_output));
+        output = float(pid_calculator.calculate_pid(output, encoder_total));
     }
-    else
-    {
-        output = output * md_config.max_output;
-    }
+    int16_t duty = output * float(md_config.max_output);
+    // serial_printf("output : %f\n", output);
 
     // 台形制御を行う
-    output = trapezoidal_control.trapezoidal_control(output, md_config.max_acceleration);
+    duty = trapezoidal_control.trapezoidal_control(duty, md_config.max_acceleration);
     // 出力値を制限する
-    output = std::clamp(output, float(-md_config.max_output), float(md_config.max_output));
+    duty = std::clamp(duty, int16_t(-md_config.max_output), (int16_t)md_config.max_output);
     // モーターの出力を設定する
-    gate_driver.output(output);
+    gate_driver.output(duty);
 }
 
 void MotorController::set_config(md_config_t config)
