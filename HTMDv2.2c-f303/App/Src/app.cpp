@@ -12,7 +12,6 @@
 #include "tim.h"
 #include "dc_motor_controller.hpp"
 #include "serial_printf.hpp"
-#include "pid_calculator.hpp"
 #define BOARD_TYPE 0x00
 
 MDDataSlave can;
@@ -99,9 +98,8 @@ void App::timer_callback()
     {
         if (timer_count > md_config.encoder_period)
         {
-            motor_controller.sample_encoder(); // エンコーダーのサンプリング
-            // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
-            can.send_encoder(motor_controller.encoder_total); // エンコーダーの値をCANで送信
+            now_value = motor_controller.sample_encoder(); // エンコーダーのサンプリング
+            can.send_encoder(now_value);                   // エンコーダーの値をCANで送信
             timer_count = 0;
         }
         else
@@ -127,7 +125,7 @@ void App::control_motor()
         }
         else
         {
-            motor_controller.run(motor_controller.encoder_total /*target*/);
+            motor_controller.run(target, now_value); // モーターの制御を行う
         }
     }
     else // 長時間、目標値が更新されない場合、出力を0にする
@@ -215,7 +213,7 @@ void App::update_md_config()
     if (can.get_init(&md_config))
     {
         motor_controller.set_config(md_config); // モータードライバの設定を更新
-        motor_controller.reset();
+        motor_controller.reset();               // 台形制御とPID制御とエンコーダーの初期化
 
         log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
         log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);

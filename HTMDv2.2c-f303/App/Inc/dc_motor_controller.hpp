@@ -15,12 +15,9 @@ class MotorController
 {
 private:
     md_config_t md_config; // モータードライバの設定
-    int16_t encoder_count; // エンコーダのカウント
 
 public:
     MotorController();
-
-    float encoder_total;
 
     /**
      * @brief エンコーダーとゲートドライバの初期化
@@ -38,9 +35,10 @@ public:
      * @brief モーターの制御を行う
      *
      * @param output 制御値
+     * @param now_value 現在のエンコーダーの値
      * @note PID制御（Pゲイン設定時）と台形制御あり
      */
-    void run(float output);
+    void run(float output, float now_value);
 
     /**
      * @brief MDの設定
@@ -65,19 +63,9 @@ public:
      */
     void set_pid_gain(float p_gain, float i_gain, float d_gain);
 
-    float calculate_pid(float target, float now_value);
-
     /**
      * @brief エンコーダーのサンプリング
      *
      */
-    void sample_encoder();
-
-    /**
-     * @brief エンコーダーの値を取得する
-     *
-     * @return int16_t エンコーダーのカウント
-     * @note カウンタのリセットも行う
-     */
-    int16_t get_encoder_count();
+    int16_t sample_encoder();
 };

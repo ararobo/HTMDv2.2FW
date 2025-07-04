@@ -14,13 +14,12 @@
 class IncremantalEncoder
 {
 private:
-    float enc_stor;
+    float enc_total;
+    float max_count = 4096;
+
+    float count_to_radian(int16_t count);
 
 public:
-    float enc_total;
-    float max_encoder = 4096;
-    float control_period = 1;
-
     /**
      * @brief エンコーダのコンストラクタ
      */
@@ -39,5 +38,22 @@ public:
      */
     int16_t get_count();
 
-    float total_encoder(uint16_t encoder);
+    /**
+     * @brief エンコーダの値を角速度に変換する
+     *
+     * @param count エンコーダのカウント
+     * @param period 制御周期[s]
+     * @return float 角速度[rad/s]
+     */
+    float count_to_angular_velocity(int16_t count, float period);
+
+    /**
+     * @brief エンコーダの値をトータルで取得する
+     *
+     * @param encoder エンコーダのカウント
+     * @return float トータルエンコーダの値[rad]
+     */
+    float total_encoder(int16_t encoder);
+
+    void reset();
 };

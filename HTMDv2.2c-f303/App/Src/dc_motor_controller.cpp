@@ -23,8 +23,6 @@ PIDCalculator pid_calculator(0.001f);      // PID制御の初期化
 
 MotorController::MotorController()
 {
-    // コンストラクタの初期化
-    reset();
 }
 
 void MotorController::init()
@@ -33,7 +31,6 @@ void MotorController::init()
     gate_driver.hardware_init();
     encoder.hardware_init();
     gate_driver.set_brake(true); // ブレーキをかける
-
     reset();
 }
 
@@ -42,23 +39,23 @@ void MotorController::reset()
     // モーターのリセット
     trapezoidal_control.reset_trapezoidal_control();
     pid_calculator.reset_pid();
+    encoder.reset();       // エンコーダのリセット
+    gate_driver.output(0); // 出力を0にする
 }
 
-void MotorController::run(float output)
+void MotorController::run(float output, float now_value)
 {
     // PID制御ゲインを取得
     float p_gain, _gain;
     pid_calculator.get_pid_gain(&p_gain, &_gain, &_gain);
-    // serial_printf("P_gain : %f\n", p_gain);
 
     // Pゲインが0でない場合、PID制御を行う
     if (p_gain != 0.0f && output != 0 && md_config.encoder_type != 0)
     {
         // PID制御を行う
-        output = float(pid_calculator.calculate_pid(output, encoder_total));
+        output = float(pid_calculator.calculate_pid(output, now_value));
     }
     int16_t duty = output * float(md_config.max_output);
-    // serial_printf("output : %f\n", output);
 
     // 台形制御を行う
     duty = trapezoidal_control.trapezoidal_control(duty, md_config.max_acceleration);
@@ -77,10 +74,10 @@ void MotorController::set_config(md_config_t config)
 
 void MotorController::stop()
 {
-    // モーターを停止する
+    // モーターの出力を停止する
     gate_driver.output(0);
-    gate_driver.set_brake(true); // ブレーキをかける
-    reset();
+    trapezoidal_control.reset_trapezoidal_control(); // 台形制御のリセット
+    pid_calculator.reset_pid();                      // PID制御のリセット
 }
 
 void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
@@ -89,20 +86,15 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
     pid_calculator.set_pid_gain(p_gain, i_gain, d_gain);
 }
 
-float MotorController::calculate_pid(float target, float now_value)
+int16_t MotorController::sample_encoder()
 {
-    return pid_calculator.calculate_pid(target, now_value);
-}
-
-void MotorController::sample_encoder()
-{
-    // エンコーダーのカウントを取得
-    encoder_count = encoder.get_count();
-    encoder_total = encoder.total_encoder(encoder_count);
-}
-
-int16_t MotorController::get_encoder_count()
-{
-    // エンコーダーのカウントを取得
-    return encoder_count;
+    if (md_config.encoder_type == 1)
+    {
+        return encoder.count_to_angular_velocity(encoder.get_count(), md_config.encoder_period / 1000.0f);
+    }
+    if (md_config.encoder_type == 3)
+    {
+        return encoder.total_encoder(encoder.get_count());
+    }
+    return 0; // エンコーダーがない場合は0を返す
 }

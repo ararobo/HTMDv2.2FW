@@ -19,6 +19,7 @@ private:
     bool initialized;                 // 初期化フラグ
     md_config_t md_config;            // モータードライバの設定
     float target;                     // 目標値(float)
+    float now_value;                  // 現在の値(float)
     uint8_t limit_switch;             // リミットスイッチの状態
     float pid_gain[3];                // PIDゲインの値
     uint16_t update_target_count;     // 目標位置の更新カウント
