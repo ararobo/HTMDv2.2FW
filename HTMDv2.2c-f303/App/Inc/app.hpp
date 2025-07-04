@@ -1,9 +1,9 @@
 /**
  * @file app.hpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief MDのファームウェアのメインクラス
- * @version 0.1
- * @date 2025-05-06
+ * @version 1.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *

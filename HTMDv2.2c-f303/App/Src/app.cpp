@@ -1,9 +1,9 @@
 /**
  * @file app.cpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief MDのファームウェアのメインクラス
- * @version 1.1
- * @date 2025-05-16
+ * @version 1.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
@@ -277,7 +277,8 @@ App::App()
     md_config.limit_switch_behavior = 0;
     md_config.option = 0;
     md_id = 0;
-    target = 0;
+    target = 0.0f;
+    now_value = 0.0f;
     limit_switch = 0;
     update_target_count = 0;
     update_target_count_max = 100;

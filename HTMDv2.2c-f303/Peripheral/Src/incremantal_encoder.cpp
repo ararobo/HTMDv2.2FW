@@ -1,9 +1,9 @@
 /**
  * @file incremantal_encoder.cpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento, Watanabe-Koichiro
  * @brief インクリメンタルエンコーダのクラス
- * @version 1.0
- * @date 2025-05-16
+ * @version 2.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *

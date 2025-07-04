@@ -1,9 +1,9 @@
 /**
  * @file dc_motor_controller.cpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief DCモーターの制御クラス
- * @version 1.1
- * @date 2025-05-16
+ * @version 2.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
