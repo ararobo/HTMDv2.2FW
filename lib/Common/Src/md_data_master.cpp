@@ -1,9 +1,9 @@
 /**
  * @file md_data_master.cpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento, Watanabe-Koichiro
  * @brief MDのデータを扱うクラス
- * @version 2.2
- * @date 2025-06-11
+ * @version 3.0
+ * @date 2025-07-04
  * @note 各ハードウェアに対応するCANDriverクラスを継承して使う
  *
  * @copyright Copyright (c) 2025
@@ -90,24 +90,14 @@ void MDDataMaster::send_init(uint8_t id, md_config_t *config)
                data, sizeof(md_config_t));
 }
 
-void MDDataMaster::send_target(uint8_t id, int16_t target)
-{
-    uint8_t data[2] = {0};
-    std::memcpy(data, &target, sizeof(int16_t));
-    this->send(can_config::encode_id(can_config::direction::slave,
-                                     can_config::board_type::md, id,
-                                     can_config::data_type::md::target),
-               data, sizeof(int16_t));
-}
-
-void MDDataMaster::send_multi_target(uint8_t id, int16_t target[4])
+void MDDataMaster::send_multi_target(uint8_t id, float target[2])
 {
     uint8_t data[8] = {0};
-    std::memcpy(data, target, sizeof(int16_t) * 4);
+    std::memcpy(data, target, sizeof(float) * 2);
     this->send(can_config::encode_id(can_config::direction::slave,
                                      can_config::board_type::md, id,
                                      can_config::data_type::md::multi_target),
-               data, sizeof(int16_t) * 4);
+               data, sizeof(float) * 4);
 }
 
 void MDDataMaster::send_float_target(uint8_t id, float target)
@@ -137,17 +127,6 @@ bool MDDataMaster::get_init(uint8_t id, uint8_t *md_type)
     {
         std::memcpy(md_type, this->md_data[id].init_buffer, sizeof(uint8_t));
         this->md_data[id].init_flag = false;
-        return true;
-    }
-    return false;
-}
-
-bool MDDataMaster::get_encoder(uint8_t id, int16_t *encoder)
-{
-    if (this->md_data[id].target_flag)
-    {
-        std::memcpy(encoder, this->md_data[id].target_buffer, sizeof(int16_t));
-        this->md_data[id].target_flag = false;
         return true;
     }
     return false;

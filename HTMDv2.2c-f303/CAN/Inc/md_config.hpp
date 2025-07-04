@@ -2,8 +2,8 @@
  * @file md_config.hpp
  * @author gn10g (8gn24gn25@gmail.com)
  * @brief MDの設定を扱う型
- * @version 2.1
- * @date 2025-06-11
+ * @version 3.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
@@ -19,7 +19,7 @@ union md_config_t
         uint8_t max_acceleration;      // 台形制御の最大加速 duty/10ms
         uint8_t control_period;        // 制御周期 ms
         uint8_t encoder_period;        // エンコーダーのサンプリング周期 ms
-        uint8_t encoder_type;          // 0:無し、1:インクリメンタル、2:アブソリュート、3:ポジション(float限定)
+        uint8_t encoder_type;          // 0:無し、1:インクリメンタル（速度）、2:アブソリュート、3:インクリメンタル（トータル）
         uint8_t limit_switch_behavior; // リミットスイッチの動作設定
         uint8_t option;                // 基板の固有機能や使用用途に合わせて決定（未定義）
     } __attribute__((__packed__));

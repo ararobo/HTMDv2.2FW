@@ -43,7 +43,7 @@ void App::loop()
     if (initialized)
     {
         // 目標値の更新
-        if (can.get_float_target(&target))
+        if (can.get_target(&target))
         {
             update_target_count = 0;
             log_printf(LOG_DEBUG, "Target: %f\n", target);
@@ -101,7 +101,7 @@ void App::timer_callback()
         {
             motor_controller.sample_encoder(); // エンコーダーのサンプリング
             // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
-            can.send_float_encoder(motor_controller.encoder_total); // エンコーダーの値をCANで送信
+            can.send_encoder(motor_controller.encoder_total); // エンコーダーの値をCANで送信
             timer_count = 0;
         }
         else
