@@ -1,9 +1,9 @@
 /**
  * @file can_driver.hpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento
  * @brief STM32のCAN通信用クラス
- * @version 0.1
- * @date 2025-04-22
+ * @version 2.0
+ * @date 2025-07-05
  * @note hcanのところをhcan1やhcan2に変更することで、複数のCANを扱えるようなります
  *
  * @copyright Copyright (c) 2025

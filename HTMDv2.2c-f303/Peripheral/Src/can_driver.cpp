@@ -3,7 +3,7 @@
  * @author aiba-gento
  * @brief STM32のCAN通信用クラス
  * @version 2.0
- * @date 2025-05-10
+ * @date 2025-07-05
  * @note hcanのところをhcan1やhcan2に変更することで、複数のCANを扱えるようなります
  *
  * @copyright Copyright (c) 2025
