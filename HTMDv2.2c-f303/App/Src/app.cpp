@@ -77,11 +77,6 @@ void App::loop()
         {
             HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
         }
-        else
-        {
-            // 初期化されていない場合、initパケット（MDの情報）を送信
-            can.send_init(BOARD_TYPE);
-        }
         loop_count = 0;
     }
     else
