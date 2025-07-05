@@ -12,8 +12,9 @@
 #pragma once
 #include <stdint.h>
 #include "can.h"
+#include "md_data_slave.hpp"
 
-class CANDriver
+class CANDriver : public MDDataSlave
 {
 private:
     CAN_FilterTypeDef RxFilter;
@@ -22,17 +23,9 @@ private:
     uint32_t TxMailbox;
     uint8_t RxData[8];
 
-protected:
-    /**
-     * @brief CANの受信処理(オーバーライドしてください)
-     *
-     * @param id CANのID
-     * @param data 受信データ
-     * @param len データの長さ
-     */
-    virtual void receive(uint16_t id, uint8_t *data, uint8_t len);
-
 public:
+    CANDriver() : MDDataSlave() {}
+
     /**
      * @brief CANの初期化
      *
@@ -48,7 +41,7 @@ public:
      * @param data 送信するデータ
      * @param len データの長さ
      */
-    void send(uint16_t id, uint8_t *data, uint8_t len);
+    void send(uint16_t id, uint8_t *data, uint8_t len) override;
 
     /**
      * @brief CANのコールバック処理

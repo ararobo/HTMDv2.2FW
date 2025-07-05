@@ -10,7 +10,7 @@
  */
 #pragma once
 #include <stdint.h>
-#include "md_data_slave.hpp"
+#include "can_driver.hpp"
 
 class App
 {

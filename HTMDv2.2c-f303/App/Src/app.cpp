@@ -14,7 +14,7 @@
 #include "serial_printf.hpp"
 #define BOARD_TYPE 0x00
 
-MDDataSlave can;
+CANDriver can;
 MotorController motor_controller;
 
 void App::setup()
