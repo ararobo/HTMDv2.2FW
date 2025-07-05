@@ -14,7 +14,7 @@
 #include "md_config.hpp"
 #include "stm32_fdcan2_driver.hpp"
 
-class MDDataMaster : public STM32FDCAN2Driver
+class MDDataMaster : public /* Todo: CAN driver class*/
 {
 private:
     struct md_data_t

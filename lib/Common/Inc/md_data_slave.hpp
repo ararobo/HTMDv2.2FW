@@ -1,9 +1,9 @@
 /**
  * @file md_data_slave.hpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento
  * @brief MDのデータを扱うクラス
- * @version 2.2
- * @date 2025-06-11
+ * @version 3.0
+ * @date 2025-07-04
  *
  * @copyright Copyright (c) 2025
  *
@@ -13,7 +13,7 @@
 #include "md_config.hpp"
 #include "can_driver.hpp"
 
-class MDDataSlave : public CANDriver
+class MDDataSlave : public /* Todo: CAN driver class*/
 {
 private:
     /* 固有値 */
@@ -21,16 +21,14 @@ private:
     uint8_t multi_target_id;       // multi_target受信用の基板のID
     uint8_t multi_target_position; // multi_target受信用のデータの位置
     /* 受信バッファ */
-    uint8_t init_buffer[8];         // 初期化バッファ
-    uint8_t target_buffer[2];       // 目標値バッファ
-    uint8_t gain_buffer[3][4];      // ゲインバッファ
-    uint8_t float_target_buffer[4]; // float_targetバッファ
+    uint8_t init_buffer[8];    // 初期化バッファ
+    uint8_t target_buffer[4];  // 目標値バッファ
+    uint8_t gain_buffer[3][4]; // ゲインバッファ
     /* 受信フラグ */
     bool init_flag;         // 初期化フラグ
     bool target_flag;       // 目標値フラグ
     bool limit_switch_flag; // リミットスイッチフラグ
     bool gain_flag[3];      // ゲインフラグ
-    bool float_target_flag; // float_targetフラグ
     /* 一時処理用変数 */
     uint8_t packet_direction;  // 進行方向
     uint8_t packet_board_type; // 基板の種類
@@ -66,18 +64,11 @@ public:
     void send_init(uint8_t md_type);
 
     /**
-     * @brief エンコーダーの値を送信する
-     *
-     * @param encoder エンコーダーの値
-     */
-    void send_encoder(int16_t encoder);
-
-    /**
      * @brief エンコーダーの値を送信する（float型）
      *
      * @param encoder エンコーダーの値
      */
-    void send_float_encoder(float encoder);
+    void send_encoder(float encoder);
 
     /**
      * @brief リミットスイッチの状態を送信する
@@ -104,22 +95,13 @@ public:
     bool get_init(md_config_t *md_config);
 
     /**
-     * @brief 目標値を取得する
-     *
-     * @param target 目標値
-     * @return true 更新されている
-     * @return false 更新されていない
-     */
-    bool get_target(int16_t *target);
-
-    /**
      * @brief float型の目標値を取得する
      *
      * @param target 目標値
      * @return true 更新されている
      * @return false 更新されていない
      */
-    bool get_float_target(float *target);
+    bool get_target(float *target);
 
     /**
      * @brief ゲインを取得する
