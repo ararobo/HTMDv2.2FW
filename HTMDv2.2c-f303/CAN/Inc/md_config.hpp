@@ -2,8 +2,8 @@
  * @file md_config.hpp
  * @author aiba-gento
  * @brief MDの設定を扱う型
- * @version 3.0
- * @date 2025-07-05
+ * @version 3.1
+ * @date 2025-08-03
  *
  * @copyright Copyright (c) 2025
  *
@@ -16,7 +16,7 @@ union md_config_t
     struct
     {
         uint16_t max_output;           // 最大出力 duty
-        uint8_t max_acceleration;      // 台形制御の最大加速 duty/10ms
+        uint8_t max_acceleration;      // 台形制御の最大加速 duty/ms
         uint8_t control_period;        // 制御周期 ms
         uint8_t encoder_period;        // エンコーダーのサンプリング周期 ms
         uint8_t encoder_type;          // 0:無し、1:インクリメンタル（速度）、2:アブソリュート、3:インクリメンタル（トータル）
