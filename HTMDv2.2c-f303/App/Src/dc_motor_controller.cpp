@@ -16,10 +16,10 @@
 #include "serial_printf.hpp"
 #include <algorithm>
 
-GateDriver gate_driver(3199);              // 最大デューティ比を3200に設定
-IncremantalEncoder encoder;                // エンコーダの初期化
-TrapezoidalController trapezoidal_control; // 台形制御の初期化
-PIDCalculator pid_calculator(0.001f);      // PID制御の初期化
+GateDriver gate_driver(3199);                       // 最大デューティ比を3200に設定
+IncremantalEncoder encoder;                         // エンコーダの初期化
+TrapezoidalController<int16_t> trapezoidal_control; // 台形制御の初期化
+PIDCalculator pid_calculator(0.001f);               // PID制御の初期化
 
 MotorController::MotorController()
 {
@@ -37,8 +37,8 @@ void MotorController::init()
 void MotorController::reset()
 {
     // モーターのリセット
-    trapezoidal_control.reset_trapezoidal_control();
-    pid_calculator.reset_pid();
+    trapezoidal_control.reset();
+    pid_calculator.reset();
     encoder.reset();       // エンコーダのリセット
     gate_driver.output(0); // 出力を0にする
 }
@@ -76,8 +76,8 @@ void MotorController::stop()
 {
     // モーターの出力を停止する
     gate_driver.output(0);
-    trapezoidal_control.reset_trapezoidal_control(); // 台形制御のリセット
-    pid_calculator.reset_pid();                      // PID制御のリセット
+    trapezoidal_control.reset(); // 台形制御のリセット
+    pid_calculator.reset();      // PID制御のリセット
 }
 
 void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
