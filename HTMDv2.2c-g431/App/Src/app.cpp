@@ -242,8 +242,15 @@ void App::update_gain(uint8_t gain_type)
 void App::wait_for_next_period()
 {
     // 制御周期に合わせて待機する
-    while ((HAL_GetTick() - last_tick) < md_config.control_period)
+    uint32_t current_tick = HAL_GetTick();
+    uint32_t elapsed = current_tick - last_tick;
+
+    // オーバーフロー対策とタイムアウト対策
+    if (elapsed < md_config.control_period && elapsed < 1000) // 1秒以内の場合のみ待機
     {
+        while ((HAL_GetTick() - last_tick) < md_config.control_period)
+        {
+        }
     }
     last_tick = HAL_GetTick();
 }
