@@ -1,8 +1,7 @@
 #include "pid_calculator.hpp"
 
-PIDCalculator::PIDCalculator(float dt)
+PIDCalculator::PIDCalculator()
 {
-    this->dt = dt;
 }
 
 float PIDCalculator::calculate_pid(float target, float now_value)

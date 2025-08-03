@@ -19,7 +19,7 @@
 GateDriver gate_driver(3199);                       // 最大デューティ比を3200に設定
 IncremantalEncoder encoder;                         // エンコーダの初期化
 TrapezoidalController<int16_t> trapezoidal_control; // 台形制御の初期化
-PIDCalculator pid_calculator(0.001f);               // PID制御の初期化
+PIDCalculator pid_calculator;                       // PID制御の初期化
 
 MotorController::MotorController()
 {
@@ -69,7 +69,8 @@ void MotorController::set_config(md_config_t config)
 {
     // モータードライバの設定を更新する
     md_config = config;
-    pid_calculator.set_dt(config.encoder_period / 1000.0f); // 制御周期を設定
+    pid_calculator.set_dt(config.control_period / 1000.0f);       // 制御周期を設定
+    trapezoidal_control.set_control_cycle(config.control_period); // 台形制御の制御周期を設定
 }
 
 void MotorController::stop()

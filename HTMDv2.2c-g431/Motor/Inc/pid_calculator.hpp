@@ -6,7 +6,7 @@ class PIDCalculator
 private:
     float i_out = 0.0f;      // I制御の出力
     float prev_error = 0.0f; // 前回のエラー
-    float dt;                // 制御周期
+    float dt = 0.010f;       // 制御周期
 
 public:
     float Kp = 0.0f; // PID制御の比例ゲイン
@@ -16,9 +16,8 @@ public:
     /**
      * @brief PID制御のコンストラクタ
      *
-     * @param dt 制御周期[s]
      */
-    PIDCalculator(float dt);
+    PIDCalculator();
 
     /**
      * @brief PID制御を行う
