@@ -1,16 +1,16 @@
 /**
  * @file app.hpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief MDのファームウェアのメインクラス
- * @version 0.1
- * @date 2025-05-06
+ * @version 1.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
  */
 #pragma once
 #include <stdint.h>
-#include "md_data_slave.hpp"
+#include "stm32_fdcan1_driver.hpp"
 
 class App
 {
@@ -18,7 +18,8 @@ private:
     uint8_t md_id;                    // 基板のID
     bool initialized;                 // 初期化フラグ
     md_config_t md_config;            // モータードライバの設定
-    int16_t target;                   // 目標値
+    float target;                     // 目標値(float)
+    float now_value;                  // 現在の値(float)
     uint8_t limit_switch;             // リミットスイッチの状態
     float pid_gain[3];                // PIDゲインの値
     uint16_t update_target_count;     // 目標位置の更新カウント

@@ -4,14 +4,15 @@
 class PIDCalculator
 {
 private:
-    float Kp = 0.0f;         // PID制御の比例ゲイン
-    float Ki = 0.0f;         // PID制御の積分ゲイン
-    float Kd = 0.0f;         // PID制御の微分ゲイン
     float i_out = 0.0f;      // I制御の出力
     float prev_error = 0.0f; // 前回のエラー
     float dt;                // 制御周期
 
 public:
+    float Kp = 0.0f; // PID制御の比例ゲイン
+    float Ki = 0.0f; // PID制御の積分ゲイン
+    float Kd = 0.0f; // PID制御の微分ゲイン
+
     /**
      * @brief PID制御のコンストラクタ
      *
@@ -57,5 +58,5 @@ public:
      * @brief PID制御の初期化
      *
      */
-    void reset_pid();
+    void reset();
 };

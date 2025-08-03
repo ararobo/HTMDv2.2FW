@@ -1,9 +1,9 @@
 /**
  * @file app.cpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief MDのファームウェアのメインクラス
- * @version 1.1
- * @date 2025-05-16
+ * @version 1.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
@@ -14,7 +14,7 @@
 #include "serial_printf.hpp"
 #define BOARD_TYPE 0x00
 
-MDDataSlave can;
+STM32FDCAN1Driver can;
 MotorController motor_controller;
 
 void App::setup()
@@ -45,7 +45,7 @@ void App::loop()
         if (can.get_target(&target))
         {
             update_target_count = 0;
-            log_printf(LOG_DEBUG, "Target: %d\n", target);
+            log_printf(LOG_DEBUG, "Target: %f\n", target);
         }
         else
         {
@@ -77,11 +77,6 @@ void App::loop()
         {
             HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
         }
-        else
-        {
-            // 初期化されていない場合、initパケット（MDの情報）を送信
-            can.send_init(BOARD_TYPE);
-        }
         loop_count = 0;
     }
     else
@@ -98,9 +93,8 @@ void App::timer_callback()
     {
         if (timer_count > md_config.encoder_period)
         {
-            motor_controller.sample_encoder(); // エンコーダーのサンプリング
-            // serial_printf("Encoder: %d\n", motor_controller.get_encoder_count()); // エンコーダーの値をUARTで送信
-            can.send_encoder(motor_controller.get_encoder_count()); // エンコーダーの値をCANで送信
+            now_value = motor_controller.sample_encoder(); // エンコーダーのサンプリング
+            can.send_encoder(now_value);                   // エンコーダーの値をCANで送信
             timer_count = 0;
         }
         else
@@ -126,7 +120,7 @@ void App::control_motor()
         }
         else
         {
-            motor_controller.run(target);
+            motor_controller.run(target, now_value); // モーターの制御を行う
         }
     }
     else // 長時間、目標値が更新されない場合、出力を0にする
@@ -214,7 +208,7 @@ void App::update_md_config()
     if (can.get_init(&md_config))
     {
         motor_controller.set_config(md_config); // モータードライバの設定を更新
-        motor_controller.reset();
+        motor_controller.reset();               // 台形制御とPID制御とエンコーダーの初期化
 
         log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
         log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
@@ -278,7 +272,8 @@ App::App()
     md_config.limit_switch_behavior = 0;
     md_config.option = 0;
     md_id = 0;
-    target = 0;
+    target = 0.0f;
+    now_value = 0.0f;
     limit_switch = 0;
     update_target_count = 0;
     update_target_count_max = 100;

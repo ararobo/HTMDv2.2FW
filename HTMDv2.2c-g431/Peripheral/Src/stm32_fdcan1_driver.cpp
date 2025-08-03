@@ -1,9 +1,9 @@
 /**
  * @file stm32_fdcan1_driver.cpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento
  * @brief STM32のFDCAN1通信用クラス
- * @version 1.0
- * @date 2025-05-10
+ * @version 2.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
@@ -70,9 +70,4 @@ void STM32FDCAN1Driver::send(uint16_t id, uint8_t *data, uint8_t len)
     {
         Error_Handler();
     }
-}
-
-void STM32FDCAN1Driver::receive(uint16_t id, uint8_t *data, uint8_t len)
-{
-    // 受信処理をオーバーライドしてください
 }

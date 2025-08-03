@@ -21,7 +21,7 @@ void PIDCalculator::set_pid_gain(float p_gain, float i_gain, float d_gain)
     Kp = p_gain;
     Ki = i_gain;
     Kd = d_gain;
-    reset_pid();
+    reset();
 }
 
 void PIDCalculator::get_pid_gain(float *p_gain, float *i_gain, float *d_gain)
@@ -36,7 +36,7 @@ void PIDCalculator::set_dt(float dt)
     this->dt = dt;
 }
 
-void PIDCalculator::reset_pid()
+void PIDCalculator::reset()
 {
     i_out = 0.0f;
     prev_error = 0.0f;

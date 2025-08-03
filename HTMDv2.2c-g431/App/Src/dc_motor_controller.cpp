@@ -1,9 +1,9 @@
 /**
  * @file dc_motor_controller.cpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief DCモーターの制御クラス
- * @version 1.1
- * @date 2025-05-16
+ * @version 2.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
@@ -13,17 +13,16 @@
 #include "incremental_encoder.hpp"
 #include "trapezoidal_controller.hpp"
 #include "pid_calculator.hpp"
+#include "serial_printf.hpp"
 #include <algorithm>
 
-GateDriver gate_driver(3199);              // 最大デューティ比を3200に設定
-IncremantalEncoder encoder;                // エンコーダの初期化
-TrapezoidalController trapezoidal_control; // 台形制御の初期化
-PIDCalculator pid_calculator(0.001f);      // PID制御の初期化
+GateDriver gate_driver(3199);                       // 最大デューティ比を3200に設定
+IncremantalEncoder encoder;                         // エンコーダの初期化
+TrapezoidalController<int16_t> trapezoidal_control; // 台形制御の初期化
+PIDCalculator pid_calculator(0.001f);               // PID制御の初期化
 
 MotorController::MotorController()
 {
-    // コンストラクタの初期化
-    reset();
 }
 
 void MotorController::init()
@@ -32,18 +31,19 @@ void MotorController::init()
     gate_driver.hardware_init();
     encoder.hardware_init();
     gate_driver.set_brake(true); // ブレーキをかける
-
     reset();
 }
 
 void MotorController::reset()
 {
     // モーターのリセット
-    trapezoidal_control.reset_trapezoidal_control();
-    pid_calculator.reset_pid();
+    trapezoidal_control.reset();
+    pid_calculator.reset();
+    encoder.reset();       // エンコーダのリセット
+    gate_driver.output(0); // 出力を0にする
 }
 
-void MotorController::run(int16_t output)
+void MotorController::run(float output, float now_value)
 {
     // PID制御ゲインを取得
     float p_gain, _gain;
@@ -53,15 +53,16 @@ void MotorController::run(int16_t output)
     if (p_gain != 0.0f && output != 0 && md_config.encoder_type != 0)
     {
         // PID制御を行う
-        output = static_cast<int16_t>(pid_calculator.calculate_pid(output, encoder_count) * md_config.max_output);
+        output = float(pid_calculator.calculate_pid(output, now_value));
     }
+    int16_t duty = output * float(md_config.max_output);
 
     // 台形制御を行う
-    output = trapezoidal_control.trapezoidal_control(output, md_config.max_acceleration);
+    duty = trapezoidal_control.trapezoidal_control(duty, md_config.max_acceleration);
     // 出力値を制限する
-    output = std::clamp(output, int16_t(-md_config.max_output), int16_t(md_config.max_output));
+    duty = std::clamp(duty, int16_t(-md_config.max_output), (int16_t)md_config.max_output);
     // モーターの出力を設定する
-    gate_driver.output(output);
+    gate_driver.output(duty);
 }
 
 void MotorController::set_config(md_config_t config)
@@ -73,10 +74,10 @@ void MotorController::set_config(md_config_t config)
 
 void MotorController::stop()
 {
-    // モーターを停止する
+    // モーターの出力を停止する
     gate_driver.output(0);
-    gate_driver.set_brake(true); // ブレーキをかける
-    reset();
+    trapezoidal_control.reset(); // 台形制御のリセット
+    pid_calculator.reset();      // PID制御のリセット
 }
 
 void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
@@ -85,14 +86,15 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
     pid_calculator.set_pid_gain(p_gain, i_gain, d_gain);
 }
 
-void MotorController::sample_encoder()
+int16_t MotorController::sample_encoder()
 {
-    // エンコーダーのカウントを取得
-    encoder_count = encoder.get_count();
-}
-
-int16_t MotorController::get_encoder_count()
-{
-    // エンコーダーのカウントを取得
-    return encoder_count;
+    if (md_config.encoder_type == 1)
+    {
+        return encoder.count_to_angular_velocity(encoder.get_count(), md_config.encoder_period / 1000.0f);
+    }
+    if (md_config.encoder_type == 3)
+    {
+        return encoder.total_encoder(encoder.get_count());
+    }
+    return 0; // エンコーダーがない場合は0を返す
 }

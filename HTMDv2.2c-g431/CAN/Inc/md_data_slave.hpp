@@ -1,9 +1,9 @@
 /**
  * @file md_data_slave.hpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento
  * @brief MDのデータを扱うクラス
- * @version 2.1
- * @date 2025-05-10
+ * @version 3.0
+ * @date 2025-07-04
  *
  * @copyright Copyright (c) 2025
  *
@@ -11,9 +11,8 @@
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"
-#include "stm32_fdcan1_driver.hpp"
 
-class MDDataSlave : public STM32FDCAN1Driver
+class MDDataSlave
 {
 private:
     /* 固有値 */
@@ -22,7 +21,7 @@ private:
     uint8_t multi_target_position; // multi_target受信用のデータの位置
     /* 受信バッファ */
     uint8_t init_buffer[8];    // 初期化バッファ
-    uint8_t target_buffer[2];  // 目標値バッファ
+    uint8_t target_buffer[4];  // 目標値バッファ
     uint8_t gain_buffer[3][4]; // ゲインバッファ
     /* 受信フラグ */
     bool init_flag;         // 初期化フラグ
@@ -37,13 +36,22 @@ private:
 
 protected:
     /**
+     * @brief CAN通信の送信関数
+     *
+     * @param id CANのID
+     * @param data データ
+     * @param len データ長
+     */
+    virtual void send(uint16_t id, uint8_t *data, uint8_t len) = 0;
+
+    /**
      * @brief 受信データの処理を行う
      *
      * @param id CANのID
      * @param data 受信データ
-     * @param len データの長さ
+     * @param len データ長
      */
-    void receive(uint16_t id, uint8_t *data, uint8_t len) override;
+    void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
     MDDataSlave();
@@ -64,11 +72,11 @@ public:
     void send_init(uint8_t md_type);
 
     /**
-     * @brief エンコーダーの値を送信する
+     * @brief エンコーダーの値を送信する（float型）
      *
      * @param encoder エンコーダーの値
      */
-    void send_encoder(int16_t encoder);
+    void send_encoder(float encoder);
 
     /**
      * @brief リミットスイッチの状態を送信する
@@ -95,13 +103,13 @@ public:
     bool get_init(md_config_t *md_config);
 
     /**
-     * @brief 目標値を取得する
+     * @brief float型の目標値を取得する
      *
      * @param target 目標値
      * @return true 更新されている
      * @return false 更新されていない
      */
-    bool get_target(int16_t *target);
+    bool get_target(float *target);
 
     /**
      * @brief ゲインを取得する

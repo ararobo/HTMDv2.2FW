@@ -1,9 +1,9 @@
 /**
  * @file dc_motor_controller.hpp
- * @author  (8gn24gn25@gmail.com)
+ * @author aiba-gento Watanabe-Koichiro
  * @brief DCモーターの制御クラス
- * @version 1.0
- * @date 2025-05-10
+ * @version 2.0
+ * @date 2025-07-05
  *
  * @copyright Copyright (c) 2025
  *
@@ -15,7 +15,6 @@ class MotorController
 {
 private:
     md_config_t md_config; // モータードライバの設定
-    int16_t encoder_count; // エンコーダのカウント
 
 public:
     MotorController();
@@ -36,9 +35,10 @@ public:
      * @brief モーターの制御を行う
      *
      * @param output 制御値
+     * @param now_value 現在のエンコーダーの値
      * @note PID制御（Pゲイン設定時）と台形制御あり
      */
-    void run(int16_t output);
+    void run(float output, float now_value);
 
     /**
      * @brief MDの設定
@@ -67,13 +67,5 @@ public:
      * @brief エンコーダーのサンプリング
      *
      */
-    void sample_encoder();
-
-    /**
-     * @brief エンコーダーの値を取得する
-     *
-     * @return int16_t エンコーダーのカウント
-     * @note カウンタのリセットも行う
-     */
-    int16_t get_encoder_count();
+    int16_t sample_encoder();
 };
