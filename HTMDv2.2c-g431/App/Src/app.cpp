@@ -210,7 +210,7 @@ void App::update_md_config()
         motor_controller.set_config(md_config); // モータードライバの設定を更新
         motor_controller.reset();               // 台形制御とPID制御とエンコーダーの初期化
 
-        log_printf(LOG_INFO, "md_canfig.max_output:%d\\n", md_config.max_output);
+        log_printf(LOG_INFO, "md_config.max_output:%d\n", md_config.max_output);
         log_printf(LOG_INFO, "md_config.max_acceleration:%d\n", md_config.max_acceleration);
         log_printf(LOG_INFO, "md_config.control_period:%d\n", md_config.control_period);
         log_printf(LOG_INFO, "md_config.encoder_period:%d\n", md_config.encoder_period);
