@@ -12,7 +12,6 @@
 #include "tim.h"
 #include "dc_motor_controller.hpp"
 #include "serial_printf.hpp"
-#define BOARD_TYPE 0x00
 
 CANDriver can;
 MotorController motor_controller;
@@ -91,7 +90,7 @@ void App::timer_callback()
 {
     if (md_config.encoder_type == 1 && md_config.encoder_period > 0)
     {
-        if (timer_count > md_config.encoder_period)
+        if (timer_count >= md_config.encoder_period)
         {
             now_value = motor_controller.sample_encoder(); // エンコーダーのサンプリング
             can.send_encoder(now_value);                   // エンコーダーの値をCANで送信
