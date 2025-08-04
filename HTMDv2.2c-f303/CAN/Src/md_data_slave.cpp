@@ -73,8 +73,8 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
         case can_config::data_type::md::gain:
             if (len != sizeof(gain_buffer[0]) + 1)
                 return;
-            this->gain_flag[data[0]] = true;                   // gain_type別にフラグを立てる
-            memcpy(this->gain_buffer[data[0]], data + 1, len); // gain_typeを除いたデータを該当するバッファにコピー
+            this->gain_flag[data[0]] = true;                             // gain_type別にフラグを立てる
+            memcpy(this->gain_buffer[data[0]], data + 1, sizeof(float)); // gain_typeを除いたデータを該当するバッファにコピー
             break;
 
         default:
