@@ -19,7 +19,7 @@
 #define LOG_ERROR "[ERROR] "
 #define LOG_WARNING "[WARN]  "
 
-#define DEBUG_MODE true
+#define DEBUG_MODE false
 
 template <typename... Args>
 void serial_printf(const std::string &fmt, Args... args)

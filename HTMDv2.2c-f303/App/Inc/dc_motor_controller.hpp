@@ -67,5 +67,5 @@ public:
      * @brief エンコーダーのサンプリング
      *
      */
-    int16_t sample_encoder();
+    float sample_encoder();
 };

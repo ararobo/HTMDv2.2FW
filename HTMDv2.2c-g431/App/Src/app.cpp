@@ -88,12 +88,13 @@ void App::loop()
 
 void App::timer_callback()
 {
-    if (md_config.encoder_type == 1 && md_config.encoder_period > 0)
+    if (md_config.encoder_type > 0 && md_config.encoder_period > 0)
     {
         if (timer_count >= md_config.encoder_period)
         {
             now_value = motor_controller.sample_encoder(); // エンコーダーのサンプリング
             can.send_encoder(now_value);                   // エンコーダーの値をCANで送信
+            log_printf(LOG_DEBUG, "enc:%f\n", now_value);
             timer_count = 0;
         }
         else

@@ -87,7 +87,7 @@ void MotorController::set_pid_gain(float p_gain, float i_gain, float d_gain)
     pid_calculator.set_pid_gain(p_gain, i_gain, d_gain);
 }
 
-int16_t MotorController::sample_encoder()
+float MotorController::sample_encoder()
 {
     if (md_config.encoder_type == 1)
     {
