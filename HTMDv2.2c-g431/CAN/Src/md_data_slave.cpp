@@ -48,7 +48,7 @@ void MDDataSlave::receive(uint16_t id, uint8_t *data, uint8_t len)
             return;
         // 受信フラグを立て、受信データをバッファに格納
         this->target_flag = true;
-        memcpy(this->target_buffer, data + multi_target_position, len);
+        memcpy(this->target_buffer, data + multi_target_position, sizeof(target_buffer));
     }
     // multi_target以外の処理
     else if (this->packet_board_id == this->board_id)
