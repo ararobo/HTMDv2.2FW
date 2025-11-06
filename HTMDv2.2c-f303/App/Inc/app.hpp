@@ -35,14 +35,6 @@ private:
     void control_motor();
 
     /**
-     * @brief リミットスイッチによるモーターの制御
-     *
-     * @return true モーターを停止する
-     * @return false モーターを停止しない
-     */
-    bool limit_switch_control();
-
-    /**
      * @brief モータードライバの設定を更新する
      *
      */
