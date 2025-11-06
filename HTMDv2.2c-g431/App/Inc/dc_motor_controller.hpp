@@ -15,6 +15,7 @@ class MotorController
 {
 private:
     md_config_t md_config; // モータードライバの設定
+    bool limit_stop = false;
 
 public:
     MotorController();
@@ -38,7 +39,7 @@ public:
      * @param now_value 現在のエンコーダーの値
      * @note PID制御（Pゲイン設定時）と台形制御あり
      */
-    void run(float output, float now_value);
+    void run(float output, float now_value, uint8_t limit_sw_status);
 
     /**
      * @brief MDの設定
@@ -68,4 +69,12 @@ public:
      *
      */
     float sample_encoder();
+
+    /**
+     * @brief リミットスイッチによるモーターの制御
+     *
+     * @return true モーターを停止する
+     * @return false モーターを停止しない
+     */
+    int16_t limit_switch_control(int16_t duty, uint8_t limit_sw_status);
 };

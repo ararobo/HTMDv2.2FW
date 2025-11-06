@@ -43,7 +43,7 @@ void MotorController::reset()
     gate_driver.output(0); // 出力を0にする
 }
 
-void MotorController::run(float output, float now_value)
+void MotorController::run(float output, float now_value, uint8_t limit_sw_status)
 {
     // PID制御ゲインを取得
     float p_gain, _gain;
@@ -59,6 +59,7 @@ void MotorController::run(float output, float now_value)
 
     // 台形制御を行う
     duty = trapezoidal_control.trapezoidal_control(duty, md_config.max_acceleration);
+    duty = limit_switch_control(duty, limit_sw_status);
     // 出力値を制限する
     duty = std::clamp(duty, int16_t(-md_config.max_output), (int16_t)md_config.max_output);
     // モーターの出力を設定する
@@ -98,4 +99,59 @@ float MotorController::sample_encoder()
         return encoder.total_encoder(encoder.get_count());
     }
     return 0; // エンコーダーがない場合は0を返す
+}
+
+int16_t MotorController::limit_switch_control(int16_t duty, uint8_t limit_sw_status)
+{
+    if (!limit_sw_status)
+    {
+        limit_stop = true;
+    }
+
+    switch (md_config.limit_switch_behavior)
+    {
+    case 0: // 何もしない
+        break;
+
+    case 1: // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
+        if (limit_sw_status && duty == 0)
+        {
+            limit_stop = false;
+        }
+        if (limit_sw_status && limit_stop)
+        {
+            return 0;
+        }
+        break;
+
+    case 2: // リミットスイッチが押されたら、正回転のみ停止する
+        if (limit_sw_status && duty > 0)
+        {
+            return 0;
+        }
+        break;
+
+    case 3:
+        // リミットスイッチが押されたら、負回転のみ停止する
+        if (limit_sw_status && duty < 0)
+        {
+            return 0;
+        }
+        break;
+
+    case 4: // リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する
+        if (limit_sw_status & 0b1 && duty > 0)
+        {
+            return 0;
+        }
+        if (limit_sw_status & 0b10 && duty < 0)
+        {
+            return 0;
+        }
+        break;
+
+    default:
+        break;
+    }
+    return duty;
 }

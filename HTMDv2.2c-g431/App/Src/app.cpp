@@ -113,15 +113,7 @@ void App::control_motor()
 {
     if (update_target_count < update_target_count_max)
     {
-        // リミットスイッチによる制御
-        if (limit_switch_control())
-        {
-            motor_controller.stop();
-        }
-        else
-        {
-            motor_controller.run(target, now_value); // モーターの制御を行う
-        }
+        motor_controller.run(target, now_value, limit_switch); // モーターの制御を行う
     }
     else // 長時間、目標値が更新されない場合、出力を0にする
     {
@@ -145,61 +137,6 @@ void App::control_motor()
     {
         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
     }
-}
-
-bool App::limit_switch_control()
-{
-    if (!limit_switch)
-    {
-        limit_stop = true;
-    }
-
-    switch (md_config.limit_switch_behavior)
-    {
-    case 0: // 何もしない
-        break;
-
-    case 1: // リミットスイッチが押されたら、制御値がゼロになるまでモーターを回さない
-        if (limit_switch && target == 0)
-        {
-            limit_stop = false;
-        }
-        if (limit_switch && limit_stop)
-        {
-            return true;
-        }
-        break;
-
-    case 2: // リミットスイッチが押されたら、正回転のみ停止する
-        if (limit_switch && target > 0)
-        {
-            return true;
-        }
-        break;
-
-    case 3:
-        // リミットスイッチが押されたら、負回転のみ停止する
-        if (limit_switch && target < 0)
-        {
-            return true;
-        }
-        break;
-
-    case 4: // リミットスイッチ１で正回転を停止し、リミットスイッチ２で逆回転を停止する
-        if (limit_switch & 0b1 && target > 0)
-        {
-            return true;
-        }
-        if (limit_switch & 0b10 && target < 0)
-        {
-            return true;
-        }
-        break;
-
-    default:
-        break;
-    }
-    return false;
 }
 
 void App::update_md_config()
