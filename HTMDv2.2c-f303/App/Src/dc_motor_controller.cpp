@@ -55,6 +55,7 @@ void MotorController::run(float output, float now_value, uint8_t limit_sw_status
         // PID制御を行う
         output = float(pid_calculator.calculate_pid(output, now_value));
     }
+    output = std::clamp(output, -1.0f, 1.0f);
     int16_t duty = output * float(md_config.max_output);
 
     // 台形制御を行う
