@@ -69,6 +69,27 @@ namespace can_config
         namespace led
         {
             static constexpr uint8_t init = 0;
+            static constexpr uint8_t wireless = 1;
+            static constexpr uint8_t ethernet = 2;
+
+            namespace signal_error
+            {
+                static constexpr uint8_t can2 = 0;
+                static constexpr uint8_t can3 = 1;
+                static constexpr uint8_t robomas = 2;
+            }
+
+            namespace mode
+            {
+                static constexpr uint8_t manual = 0;
+                static constexpr uint8_t low_speed = 1;
+                static constexpr uint8_t low_acceleration = 2;
+
+                namespace manual_mode
+                {
+                }
+            }
+            static constexpr uint8_t all = 3;
         }
     }
     /**

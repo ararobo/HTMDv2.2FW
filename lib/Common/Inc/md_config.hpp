@@ -2,8 +2,8 @@
  * @file md_config.hpp
  * @author aiba-gento
  * @brief MDの設定を扱う型
- * @version 3.0
- * @date 2025-07-05
+ * @version 3.2
+ * @date 2025-08-03
  *
  * @copyright Copyright (c) 2025
  *
@@ -16,7 +16,7 @@ union md_config_t
     struct
     {
         uint16_t max_output;           // 最大出力 duty
-        uint8_t max_acceleration;      // 台形制御の最大加速 duty/10ms
+        uint8_t max_acceleration;      // 台形制御の最大加速 duty/ms
         uint8_t control_period;        // 制御周期 ms
         uint8_t encoder_period;        // エンコーダーのサンプリング周期 ms
         uint8_t encoder_type;          // 0:無し、1:インクリメンタル（速度）、2:アブソリュート、3:インクリメンタル（トータル）
@@ -25,3 +25,7 @@ union md_config_t
     } __attribute__((__packed__));
     uint8_t code[8]; // 送信バイト配列
 } __attribute__((__packed__));
+
+void get_limit_switch_behavior(uint8_t limit_switch_behavior, bool *stop_forward, uint8_t *forward_sw_id, bool *stop_backword, uint8_t *backword_sw_id);
+
+uint8_t set_limit_switch_behavior(bool stop_forward, uint8_t forward_sw_id, bool stop_backword, uint8_t backword_sw_id);
