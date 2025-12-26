@@ -1,6 +1,6 @@
 /**
  * @file can_config.cpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento
  * @brief CAN通信のID設定を行う
  * @version 2.0
  * @date 2025-04-22

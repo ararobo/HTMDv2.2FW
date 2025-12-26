@@ -1,10 +1,9 @@
 /**
  * @file md_data_master.hpp
- * @author gn10g (8gn24gn25@gmail.com)
+ * @author aiba-gento, Watanabe-Koichiro
  * @brief MDのデータを扱うクラス
- * @version 2.2
- * @date 2025-06-11
- * @note 各ハードウェアに対応するCANDriverクラスを継承して使う
+ * @version 3.0
+ * @date 2025-07-04
  *
  * @copyright Copyright (c) 2025
  *
@@ -12,24 +11,21 @@
 #pragma once
 #include "can_config.hpp"
 #include "md_config.hpp"
-#include "can_driver.hpp"
 
-class MDDataMaster : public CANDriver
+class MDDataMaster
 {
 private:
     struct md_data_t
     {
-        uint8_t init_buffer[1];         // 初期化バッファ
-        uint8_t target_buffer[2];       // 目標値バッファ
-        uint8_t gain_buffer[3][4];      // ゲインバッファ
-        uint8_t limit_switch[1];        // リミットスイッチバッファ
-        uint8_t float_target_buffer[4]; // 浮動小数点目標値バッファ
+        uint8_t init_buffer[8];    // 初期化バッファ
+        uint8_t target_buffer[4];  // 目標値バッファ
+        uint8_t gain_buffer[3][4]; // ゲインバッファ
+        uint8_t limit_switch[1];   // リミットスイッチバッファ
         /* 受信フラグ */
         bool init_flag;         // 初期化フラグ
         bool target_flag;       // 目標値フラグ
         bool limit_switch_flag; // リミットスイッチフラグ
         bool gain_flag[3];      // ゲインフラグ
-        bool float_target_flag; // 浮動小数点目標値フラグ
     } md_data[16];              // 16基板分のデータを保持
 
     /* 一時処理用変数 */
@@ -38,15 +34,41 @@ private:
     uint8_t packet_board_id;   // 基板のID
     uint8_t packet_data_type;  // データの種類
 
+    /**
+     * @brief 2つの基板に目標値を送信
+     *
+     * @param id 基板のIDのオフセット(0,2,4,6,8,10,12,14)
+     * @param target 目標値の配列
+     * @note 送信する基板のIDは id + 0, id + 1
+     */
+    void send_multi_target(uint8_t id, float target[2]);
+
+    /**
+     * @brief 浮動小数点の目標値の送信
+     *
+     * @param id 基板のID
+     * @param target 浮動小数点の目標値
+     */
+    void send_target(uint8_t id, float target);
+
 protected:
+    /**
+     * @brief CAN通信の送信関数
+     *
+     * @param id CANのID
+     * @param data データ
+     * @param len データ長
+     */
+    virtual void send(uint16_t id, uint8_t *data, uint8_t len) = 0;
+
     /**
      * @brief 受信データの処理を行う
      *
      * @param id CANのID
      * @param data 受信データ
-     * @param len データの長さ
+     * @param len データ長
      */
-    void receive(uint16_t id, uint8_t *data, uint8_t len) override;
+    void receive(uint16_t id, uint8_t *data, uint8_t len);
 
 public:
     MDDataMaster();
@@ -60,29 +82,29 @@ public:
     void send_init(uint8_t id, md_config_t *config);
 
     /**
-     * @brief 目標値の送信
+     * @brief
      *
-     * @param id 基板のID
-     * @param target 目標値
+     * @tparam Args
+     * @param data_num
+     * @param target
      */
-    void send_target(uint8_t id, int16_t target);
-
-    /**
-     * @brief 4つの基板に目標値を送信
-     *
-     * @param id 基板のIDのオフセット(0,4,8,12)
-     * @param target 目標値の配列
-     * @note 送信する基板のIDは id + 0, id + 1, id + 2, id + 3
-     */
-    void send_multi_target(uint8_t id, int16_t target[4]);
-
-    /**
-     * @brief 浮動小数点の目標値の送信
-     *
-     * @param id 基板のID
-     * @param target 浮動小数点の目標値
-     */
-    void send_float_target(uint8_t id, float target);
+    template <typename... Args>
+    void send_targets(uint8_t offset, Args... args_)
+    {
+        int length = sizeof...(args_);
+        float args[] = {args_...};
+        float target[2];
+        for (int i = 0; i < length / 2; i++)
+        {
+            target[0] = args[i * 2];
+            target[1] = args[i * 2 + 1];
+            send_multi_target(i * 2 + offset, target);
+        }
+        if (length % 2 == 1)
+        {
+            send_target(length - 1 + offset, args[length - 1]);
+        }
+    }
 
     /**
      * @brief ゲインの送信
@@ -92,6 +114,14 @@ public:
      * @param gain ゲイン
      */
     void send_gain(uint8_t id, uint8_t gain_type, float gain);
+
+    /**
+     * @brief 回転方向制限
+     *
+     * @param id 基板のID
+     * @param limit 回転方向制限 0:制限なし、1:正転禁止、2:逆転禁止、3:停止
+     */
+    void send_limit(uint8_t id, uint8_t limit);
 
     /**
      * @brief 初期化フラグの取得
@@ -104,16 +134,6 @@ public:
     bool get_init(uint8_t id, uint8_t *md_type);
 
     /**
-     * @brief エンコーダーの取得
-     *
-     * @param id 基板のID
-     * @param encoder エンコーダーの値
-     * @return true エンコーダーの値が取得できた
-     * @return false エンコーダーの値が取得できなかった
-     */
-    bool get_encoder(uint8_t id, int16_t *encoder);
-
-    /**
      * @brief 浮動小数点エンコーダーの取得
      *
      * @param id 基板のID
@@ -121,7 +141,7 @@ public:
      * @return true 浮動小数点エンコーダーの値が取得できた
      * @return false 浮動小数点エンコーダーの値が取得できなかった
      */
-    bool get_float_encoder(uint8_t id, float *encoder);
+    bool get_encoder(uint8_t id, float *encoder);
 
     /**
      * @brief リミットスイッチの取得
