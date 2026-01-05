@@ -1,4 +1,5 @@
 # HTMDv2.2FW
+![Platform](https://img.shields.io/badge/Platform-STM32%20)
 Gento Aiba(GN10)が開発しているモータードライバーのファームウェアです。
 
 HTMDとはHaruto Tanakaが作成したモータードライバーです。
