@@ -1,0 +1,114 @@
+@startuml class
+
+' --- スタイル設定 ---
+skinparam classAttributeIconSize 0
+skinparam componentStyle uml2
+skinparam linetype ortho
+
+' --- 外部ライブラリ ---
+package "External (git submodule)" {
+    class GN10_CAN_Manager {
+        + register_callback()
+        + send()
+    }
+}
+
+' --- 共通アプリケーション層 (Common) ---
+package "Common Layer" {
+    
+    package "Interfaces" {
+        interface PwmInterface {
+            + {abstract} set_duty(float)
+            + {abstract} start()
+            + {abstract} stop()
+        }
+        
+        interface EncoderInterface {
+            + {abstract} get_velocity() : float
+        }
+    }
+
+    package "Control (Math Logic)" {
+        class PidController {
+            - kp : float
+            - ki : float
+            - kd : float
+            + calculate(target, current, dt) : float
+            + reset()
+        }
+        
+        class AccelerationLimiter {
+            - max_accel : float
+            - current_velocity : float
+            + update(target, dt) : float
+            + reset(current)
+        }
+    }
+
+    package "Logic (Application Core)" {
+        enum SystemState {
+            INIT
+            IDLE
+            RUN
+            ERROR
+        }
+
+        class StateMachine {
+            - current_state : SystemState
+            + get_state() : SystemState
+            + set_state(SystemState)
+            + is_error() : bool
+        }
+
+        class MotorManager {
+            - target_velocity : float
+            + init()
+            + update(dt : float)
+            + set_target_velocity(float)
+        }
+
+        class CanProtocol {
+            + init()
+            + update_telemetry()
+            - handle_state_command()
+            - handle_velocity_command()
+        }
+    }
+}
+
+' --- マイコン依存部 (Target) ---
+package "Target Layer (STM32 F3/G4)" {
+    class Stm32PwmDriver {
+        - htim : TIM_HandleTypeDef*
+        + set_duty(float)
+        + start()
+        + stop()
+    }
+
+    class Stm32EncoderDriver {
+        - htim : TIM_HandleTypeDef*
+        + get_velocity() : float
+    }
+}
+
+' --- 関係性の定義 ---
+
+' 実装 (Realization)
+Stm32PwmDriver ..|> PwmInterface
+Stm32EncoderDriver ..|> EncoderInterface
+
+' 依存 (Dependency / Injection)
+MotorManager o-- PwmInterface : uses
+MotorManager o-- EncoderInterface : uses
+MotorManager o-- PidController : uses
+MotorManager o-- StateMachine : shared
+
+' 所有 (Composition) - MotorManagerが死ぬとLimiterも死ぬ
+MotorManager *-- AccelerationLimiter : owns
+
+' 関連 (Association)
+CanProtocol --> MotorManager : commands
+CanProtocol --> StateMachine : commands / reads
+CanProtocol o-- GN10_CAN_Manager : uses
+
+@enduml
