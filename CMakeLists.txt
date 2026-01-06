@@ -8,6 +8,8 @@ endif()
 
 message(STATUS "Build Target: ${TARGET_BOARD}")
 
+set(BUILD_FOR_ROS2 OFF CACHE BOOL "Force disable ROS2 build for embedded" FORCE)
+
 add_subdirectory(external/gn10_can)
 add_subdirectory(common)
 
