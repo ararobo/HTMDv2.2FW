@@ -7,6 +7,18 @@ HTMDとはHaruto Tanakaが作成したモータードライバーです。
 
 HTMDv2.2cはSTM32F303K8T6と、STM32G431K8T6の2つのMCUに対応しているので、それぞれのMCU用に計２つのファームウェアがあります。
 
+## Build
+
+```bash
+cmake -B build_f303 -DTARGET_BOARD=f303 -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-f303/cmake/gcc-arm-none-eabi.cmake
+cmake --build build_f303
+```
+
+```bash
+cmake -B build_f303 -DTARGET_BOARD=f303 -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-f303/cmake/gcc-arm-none-eabi.cmake
+cmake --build build_f303
+```
+
 ## Class Diagram
 
 ![Class Diagram](uml/class.png)
