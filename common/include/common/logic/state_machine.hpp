@@ -5,8 +5,7 @@ namespace common::logic {
 
 enum class SystemState : uint8_t {
     INITIALIZATION,
-    IDLE,
-    PROCESSING,
+    RUNNING,
     ERROR,
 };
 
