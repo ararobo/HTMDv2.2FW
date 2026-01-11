@@ -9,6 +9,7 @@ endif()
 message(STATUS "Build Target: ${TARGET_BOARD}")
 
 set(BUILD_FOR_ROS2 OFF CACHE BOOL "Force disable ROS2 build for embedded" FORCE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(external/gn10_can)
 add_subdirectory(common)
