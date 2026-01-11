@@ -3,17 +3,16 @@
 namespace gn10_can {
 namespace drivers {
 
-DriverSTM32FDCAN::DriverSTM32FDCAN(FDCAN_HandleTypeDef* hfdcan) : hfdcan_(hfdcan) {
-    filter_.IdType       = FDCAN_STANDARD_ID;
-    filter_.FilterIndex  = 0;
-    filter_.FilterType   = FDCAN_FILTER_MASK;
-    filter_.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-    filter_.FilterID1    = 0x000;
-    filter_.FilterID2    = 0x000;
-}
-
 bool DriverSTM32FDCAN::init() {
-    if (HAL_FDCAN_ConfigFilter(hfdcan_, &filter_) != HAL_OK) {
+    FDCAN_FilterTypeDef filter;
+    filter.IdType       = FDCAN_STANDARD_ID;
+    filter.FilterIndex  = 0;
+    filter.FilterType   = FDCAN_FILTER_MASK;
+    filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+    filter.FilterID1    = 0x000;
+    filter.FilterID2    = 0x000;
+
+    if (HAL_FDCAN_ConfigFilter(hfdcan_, &filter) != HAL_OK) {
         return false;
     }
     if (HAL_FDCAN_Start(hfdcan_) != HAL_OK) {

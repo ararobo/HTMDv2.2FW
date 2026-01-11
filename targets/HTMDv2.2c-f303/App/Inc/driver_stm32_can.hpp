@@ -12,8 +12,8 @@
 
 #include <cstdint>
 
-#include "can.h"
 #include "gn10_can/drivers/driver_interface.hpp"
+#include "main.h"
 
 namespace gn10_can {
 namespace drivers {
@@ -28,7 +28,6 @@ class DriverSTM32CAN : public DriverInterface {
 
   private:
     CAN_HandleTypeDef* hcan_;
-    CAN_FilterTypeDef filter_;
 };
 }  // namespace drivers
 }  // namespace gn10_can

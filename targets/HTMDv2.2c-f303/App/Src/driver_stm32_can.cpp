@@ -4,18 +4,19 @@ namespace gn10_can {
 namespace drivers {
 
 bool DriverSTM32CAN::init() {
-    filter_.FilterIdHigh         = 0;
-    filter_.FilterIdLow          = 0;
-    filter_.FilterMaskIdHigh     = 0;
-    filter_.FilterMaskIdLow      = 0;
-    filter_.FilterFIFOAssignment = CAN_RX_FIFO0;
-    filter_.FilterBank           = 0;
-    filter_.FilterMode           = CAN_FILTERMODE_IDMASK;
-    filter_.FilterScale          = CAN_FILTERSCALE_32BIT;
-    filter_.FilterActivation     = ENABLE;
-    filter_.SlaveStartFilterBank = 14;
+    CAN_FilterTypeDef filter;
+    filter.FilterIdHigh         = 0;
+    filter.FilterIdLow          = 0;
+    filter.FilterMaskIdHigh     = 0;
+    filter.FilterMaskIdLow      = 0;
+    filter.FilterFIFOAssignment = CAN_RX_FIFO0;
+    filter.FilterBank           = 0;
+    filter.FilterMode           = CAN_FILTERMODE_IDMASK;
+    filter.FilterScale          = CAN_FILTERSCALE_32BIT;
+    filter.FilterActivation     = ENABLE;
+    filter.SlaveStartFilterBank = 14;
 
-    if (HAL_CAN_ConfigFilter(hcan_, &filter_) != HAL_OK) {
+    if (HAL_CAN_ConfigFilter(hcan_, &filter) != HAL_OK) {
         return false;
     }
 

@@ -10,15 +10,15 @@
  */
 #pragma once
 
-#include "fdcan.h"
 #include "gn10_can/drivers/driver_interface.hpp"
+#include "main.h"
 
 namespace gn10_can {
 namespace drivers {
 
 class DriverSTM32FDCAN : public DriverInterface {
   public:
-    DriverSTM32FDCAN(FDCAN_HandleTypeDef* hfdcan);
+    DriverSTM32FDCAN(FDCAN_HandleTypeDef* hfdcan) : hfdcan_(hfdcan) {}
 
     bool init();
     bool send(const CANFrame& frame) override;
@@ -26,7 +26,6 @@ class DriverSTM32FDCAN : public DriverInterface {
 
   private:
     FDCAN_HandleTypeDef* hfdcan_;
-    FDCAN_FilterTypeDef filter_;
 
     uint32_t len_to_dlc(uint8_t len);
     uint8_t dlc_to_len(uint32_t dlc);
