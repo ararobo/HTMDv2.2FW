@@ -29,7 +29,7 @@ bool DriverSTM32FDCAN::send(const CANFrame& frame) {
     tx_header.IdType              = (frame.is_extended) ? FDCAN_EXTENDED_ID : FDCAN_STANDARD_ID;
     tx_header.Identifier          = frame.id;
     tx_header.TxFrameType         = FDCAN_DATA_FRAME;
-    tx_header.DataLength          = len_to_dlc(frame.dlc);
+    tx_header.DataLength          = frame.dlc;
     tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
     tx_header.BitRateSwitch       = FDCAN_BRS_OFF;
     tx_header.FDFormat            = FDCAN_CLASSIC_CAN;
@@ -52,7 +52,7 @@ bool DriverSTM32FDCAN::receive(CANFrame& out_frame) {
     }
 
     out_frame.id          = rx_header.Identifier;
-    out_frame.dlc         = dlc_to_len(rx_header.DataLength);
+    out_frame.dlc         = rx_header.DataLength;
     out_frame.is_extended = (rx_header.IdType == FDCAN_EXTENDED_ID);
     out_frame.is_rtr      = (rx_header.RxFrameType == FDCAN_REMOTE_FRAME);
     out_frame.is_error    = false;
@@ -64,52 +64,5 @@ bool DriverSTM32FDCAN::receive(CANFrame& out_frame) {
     return true;
 }
 
-uint32_t DriverSTM32FDCAN::len_to_dlc(uint8_t len) {
-    switch (len) {
-        case 0:
-            return FDCAN_DLC_BYTES_0;
-        case 1:
-            return FDCAN_DLC_BYTES_1;
-        case 2:
-            return FDCAN_DLC_BYTES_2;
-        case 3:
-            return FDCAN_DLC_BYTES_3;
-        case 4:
-            return FDCAN_DLC_BYTES_4;
-        case 5:
-            return FDCAN_DLC_BYTES_5;
-        case 6:
-            return FDCAN_DLC_BYTES_6;
-        case 7:
-            return FDCAN_DLC_BYTES_7;
-        case 8:
-        default:
-            return FDCAN_DLC_BYTES_8;
-    }
-}
-
-uint8_t DriverSTM32FDCAN::dlc_to_len(uint32_t dlc) {
-    switch (dlc) {
-        case FDCAN_DLC_BYTES_0:
-            return 0;
-        case FDCAN_DLC_BYTES_1:
-            return 1;
-        case FDCAN_DLC_BYTES_2:
-            return 2;
-        case FDCAN_DLC_BYTES_3:
-            return 3;
-        case FDCAN_DLC_BYTES_4:
-            return 4;
-        case FDCAN_DLC_BYTES_5:
-            return 5;
-        case FDCAN_DLC_BYTES_6:
-            return 6;
-        case FDCAN_DLC_BYTES_7:
-            return 7;
-        case FDCAN_DLC_BYTES_8:
-        default:
-            return 8;
-    }
-}
 }  // namespace drivers
 }  // namespace gn10_can

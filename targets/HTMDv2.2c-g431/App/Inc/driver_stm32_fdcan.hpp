@@ -26,9 +26,6 @@ class DriverSTM32FDCAN : public DriverInterface {
 
   private:
     FDCAN_HandleTypeDef* hfdcan_;
-
-    uint32_t len_to_dlc(uint8_t len);
-    uint8_t dlc_to_len(uint32_t dlc);
 };
 }  // namespace drivers
 }  // namespace gn10_can
