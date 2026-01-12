@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(MotorDriverFirmware)
+project(htmd_firmware)
 
 if(NOT DEFINED TARGET_BOARD)
     message(FATAL_ERROR "Error: TARGET_BOARD not defined. Use -DTARGET_BOARD=f303 or g431")
