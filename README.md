@@ -25,13 +25,13 @@ Install STM32CubeCLT.
 ## Build
 for STM32F303K8T6:
 ```bash
-cmake -B build_f303 -DTARGET_BOARD=f303 -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-f303/cmake/gcc-arm-none-eabi.cmake
-cmake --build build_f303
+cmake --preset f303-debug
+cmake --build --preset f303-debug
 ```
 for STM32G431K8T6:
 ```bash
-cmake -B build_g431 -DTARGET_BOARD=g431 -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-g431/cmake/gcc-arm-none-eabi.cmake
-cmake --build build_g431
+cmake --preset g431-debug
+cmake --build --preset g431-debug
 ```
 
 ## Class Diagram
