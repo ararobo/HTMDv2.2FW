@@ -1,6 +1,4 @@
-.vscode
-*/.vscode
-*/*/.vscode
-build_f303
-build_g431
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
 build
