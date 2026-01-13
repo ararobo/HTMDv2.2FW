@@ -8,12 +8,25 @@
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "stlink",
-            "device": "STM32F303K8",
-            "serverpath": "C:/ST/STM32CubeCLT_1.20.0/STLink-gdb-server/bin/ST-LINK_gdbserver.exe",
-            "stm32cubeprogrammer": "C:/ST/STM32CubeCLT_1.20.0/STM32CubeProgrammer/bin",
+            "device": "STM32G431K8",
             "interface": "swd",
             "runToEntryPoint": "main",
-            "svdFile": "${workspaceFolder}/targets/HTMDv2.2c-f303/svd/STM32F303.svd"
+            "svdFile": "${workspaceFolder}/targets/HTMDv2.2c-f303/svd/STM32F303.svd",
+
+            // --- 共通設定はここまで ---
+
+            // Windows用の設定 (STM32CubeCLTのパス)
+            "windows": {
+                "serverpath": "C:/ST/STM32CubeCLT_1.20.0/STLink-gdb-server/bin/ST-LINK_gdbserver.exe",
+                "stm32cubeprogrammer": "C:/ST/STM32CubeCLT_1.20.0/STM32CubeProgrammer/bin"
+            },
+
+            // Linux用の設定 (STM32CubeCLTのパス)
+            // ※ Linux版のCLTを /opt/st/stm32cubeclt_1.20.0 に入れている前提です
+            "linux": {
+                "serverpath": "/opt/st/stm32cubeclt_1.20.0/STLink-gdb-server/bin/ST-LINK_gdbserver",
+                "stm32cubeprogrammer": "/opt/st/stm32cubeclt_1.20.0/STM32CubeProgrammer/bin"
+            }
         }
     ]
 }
