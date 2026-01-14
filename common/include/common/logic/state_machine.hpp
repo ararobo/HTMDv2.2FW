@@ -3,51 +3,57 @@
 
 namespace common::logic {
 
-// シンプルなシステムの状態
 enum class SystemState : uint8_t {
     UNINITIALIZED,  // 起動直後
-    IDLE,           // 準備完了・PWM OFF・指令待ち
+    IDLE,           // 準備完了・PWM OFF
     RUNNING,        // 制御中・PWM ON
-    LIMIT_STOP,     // リミットスイッチ検知による停止中（復帰待ち）
-    ERROR,          // 異常発生・PWM遮断
+    LIMIT_STOP,     // リミットスイッチ検知による停止
+    ERROR,          // 異常発生
 };
 
-// 制御モード（Running中の詳細動作）
 enum class ControlMode : uint8_t {
-    DUTY_CYCLE,    // シンプルなDuty制御
-    SPEED_PID,     // 速度制御
-    POSITION_PID,  // 位置制御
+    DUTY_CYCLE,
+    SPEED_PID,
+    POSITION_PID,
 };
 
 class StateMachine {
-  public:
+ public:
     StateMachine()
-        : current_state_(SystemState::UNINITIALIZED), control_mode_(ControlMode::DUTY_CYCLE) {}
+        : current_state_(SystemState::UNINITIALIZED),
+          control_mode_(ControlMode::DUTY_CYCLE) {}
 
-    // 状態の取得・設定
     SystemState get_state() const { return current_state_; }
 
-    // イベントハンドラ
     void init_complete() {
         if (current_state_ == SystemState::UNINITIALIZED) {
             current_state_ = SystemState::IDLE;
         }
     }
 
-    void start_control() {
+    // 制御開始
+    bool start_control() {
         if (current_state_ == SystemState::IDLE) {
             current_state_ = SystemState::RUNNING;
+            return true;
         }
+        return false; // エラー中などは開始できない
     }
 
+    // 通常停止 & リミット停止からの復帰
     void stop_control() {
-        if (current_state_ == SystemState::RUNNING) {
+        // RUNNING中だけでなく、LIMIT_STOPからもIDLEに戻れるようにする
+        if (current_state_ == SystemState::RUNNING || 
+            current_state_ == SystemState::LIMIT_STOP) {
             current_state_ = SystemState::IDLE;
         }
     }
 
+    // リミットスイッチ検知
     void trigger_limit_switch() {
-        if (current_state_ == SystemState::RUNNING) {
+        // IDLE中でもリミット検知状態に遷移させるべき（安全のため）
+        if (current_state_ == SystemState::RUNNING || 
+            current_state_ == SystemState::IDLE) {
             current_state_ = SystemState::LIMIT_STOP;
         }
     }
@@ -60,11 +66,24 @@ class StateMachine {
         }
     }
 
-    // 制御モード設定
-    void set_control_mode(ControlMode mode) { control_mode_ = mode; }
+    bool set_control_mode(ControlMode mode) {
+        // 安全のため、IDLE（停止中）以外でのモード変更を禁止する
+        if (current_state_ != SystemState::IDLE && 
+            current_state_ != SystemState::UNINITIALIZED) {
+            return false; 
+        }
+        control_mode_ = mode;
+        return true;
+    }
+    
     ControlMode get_control_mode() const { return control_mode_; }
+    
+    // ヘルパー関数: PWMを出力して良い状態か？
+    bool is_active() const {
+        return current_state_ == SystemState::RUNNING;
+    }
 
-  private:
+ private:
     SystemState current_state_;
     ControlMode control_mode_;
 };
