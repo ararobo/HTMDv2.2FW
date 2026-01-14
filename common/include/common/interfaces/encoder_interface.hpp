@@ -4,9 +4,11 @@
 #include <cstdint>
 
 namespace common::interfaces {
-  
+
 class EncoderInterface {
   public:
+    virtual ~EncoderInterface() = default;
+    
     virtual bool init() = 0;
 
     virtual int32_t get_counts() = 0;

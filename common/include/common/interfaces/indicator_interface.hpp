@@ -13,6 +13,8 @@ enum class IndicatorId {
 
 class IndicatorInterface {
   public:
+    virtual ~IndicatorInterface() = default;
+    
     virtual bool init() = 0;
 
     virtual void set(IndicatorId id, bool enabled) = 0;

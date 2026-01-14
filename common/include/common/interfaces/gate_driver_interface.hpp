@@ -7,6 +7,8 @@ namespace common::interfaces {
 
 class GateDriverInterface {
   public:
+    virtual ~GateDriverInterface() = default;
+    
     virtual bool init() = 0;
 
     virtual bool output(float output) = 0;
