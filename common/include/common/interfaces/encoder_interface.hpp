@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace common::interfaces {
+  
 class EncoderInterface {
   public:
     virtual bool init() = 0;
