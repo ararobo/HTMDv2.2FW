@@ -48,15 +48,14 @@ class PID {
         return output;
     }
 
-    void reset() {
+    void reset(float current_measurement = 0.0f) {
         integral_ = 0.0f;
-        previous_measurement_ = 0.0f;
+        previous_measurement_ = current_measurement;
     }
 
-    // パラメータ動的変更用
     void set_config(const PIDConfig& config) {
         config_ = config;
-        reset(); // ゲイン変更時は安全のためリセット
+       integral_ = 0.0f;
     }
 
  private:
