@@ -1,0 +1,63 @@
+name: Build Firmware
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [f303, g431]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Arm Toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi ninja-build
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.target }}
+        variant: ccache
+
+    - name: Configure CMake
+      run: >
+        cmake -S . -B build
+        -G Ninja
+        -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-${{ matrix.target }}/cmake/gcc-arm-none-eabi.cmake
+        -DTARGET_BOARD=${{ matrix.target }}
+        -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware-${{ matrix.target }}
+        path: |
+          build/*.bin
+          build/**/*.elf
