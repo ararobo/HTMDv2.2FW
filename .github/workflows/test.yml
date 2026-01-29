@@ -2,7 +2,7 @@ name: Build Firmware
 
 on:
   push:
-    branches: [ "main", "dev/gn10-can" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
