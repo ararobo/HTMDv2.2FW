@@ -53,6 +53,9 @@ MotorManager::MotorManager(interfaces::EncoderInterface& encoder,
     can_slave_.set_on_config_received([this](const MotorDriverSlave::MotorConfig& config) {
         // Config適用
         // 例: state_machine_.set_control_mode(...)
+        
+        // 設定完了通知: CONFIG_WAIT -> IDLE へ遷移
+        state_machine_.complete_config();
     });
 }
 
@@ -105,6 +108,15 @@ void MotorManager::update() {
             }
             break;
 
+        case SystemState::CONFIG_WAIT:
+            gate_driver_.set_duty_cycle(0.0f);
+            gate_driver_.set_brake_mode(false); // 設定待ちはフリーラン
+            
+            indicator_.set(IndicatorId::ACTIVITY, false);
+            indicator_.set(IndicatorId::DIRECTION, false);
+            indicator_.set(IndicatorId::HEARTBEAT, true); // 点滅させたいが簡易的にON
+            break;
+
         case SystemState::IDLE:
             gate_driver_.set_duty_cycle(0.0f);
             gate_driver_.set_brake_mode(true); // ブレーキ
@@ -112,7 +124,17 @@ void MotorManager::update() {
             indicator_.set(IndicatorId::ACTIVITY, false);
             indicator_.set(IndicatorId::DIRECTION, false);
             // 本来はupdate毎にtoggleしたいが、ここでは簡易的にON
-            indicator_.set(IndicatorId::HEARTBEAT, true); 
+            indicator_.setLIMIT_STOP:
+            // リミット検知時は安全にブレーキ保持
+            gate_driver_.set_duty_cycle(0.0f);
+            gate_driver_.set_brake_mode(true);
+            
+            // 警告表示
+            indicator_.set(IndicatorId::ACTIVITY, true);
+            indicator_.set(IndicatorId::DIRECTION, true); // 点灯により警告
+            break;
+
+        case SystemState::(IndicatorId::HEARTBEAT, true); 
             
             // ターゲットが0以外かつRUNNINGでない場合（再開ロジック）はコールバックで処理済み
             // 逆にターゲットが0になったらIDLEに戻る処理が必要ならここ
