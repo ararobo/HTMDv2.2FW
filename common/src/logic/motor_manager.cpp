@@ -1,5 +1,4 @@
 #include "common/logic/motor_manager.hpp"
-#include "common/config_defs.hpp"
 
 namespace common::logic {
 
@@ -7,20 +6,16 @@ MotorManager::MotorManager(interfaces::EncoderInterface& encoder,
                            interfaces::GateDriverInterface& gate_driver,
                            interfaces::IndicatorInterface& indicator,
                            gn10_can::CANBus& can_bus,
+                           const MotorManagerConfig& config,
                            uint8_t device_id)
     : encoder_(encoder),
       gate_driver_(gate_driver),
       indicator_(indicator),
       can_slave_(can_bus, device_id),
       state_machine_(),
-      pid_controller_({
-          config::DefaultPID::Kp,
-          config::DefaultPID::Ki,
-          config::DefaultPID::Kd,
-          config::DefaultPID::IntegralLimit,
-          config::DefaultPID::OutputLimit
-      }),
-      accel_limiter_(config::DEFAULT_ACCEL_LIMIT) {
+      pid_controller_(config.pid_config),
+      accel_limiter_(config.default_accel_limit),
+      config_(config) {
 
     // --- コールバック設定 --- //
 
@@ -38,9 +33,19 @@ MotorManager::MotorManager(interfaces::EncoderInterface& encoder,
 
     // ゲイン設定受信
     can_slave_.set_on_gain_received([this](MotorDriverSlave::GainType type, float value) {
-        // PIDゲイン更新ロジック (PIDクラスにsetterが必要だが、configをいじれるか？)
-        // 今回のPIDクラスはconst config参照ではないので再構築かsetterが必要。
-        // 実装簡略化のため一旦スキップ、またはPIDクラスを修正すべき
+        // PIDゲイン更新ロジック
+        // config_はconst参照ではなくコピーを持つ設計にすれば変更可能だが、
+        // 現状はMotorManagerConfigで初期化している。
+        // PIDクラス自体は再構築が可能。
+        auto current = config_.pid_config;
+        if (type == MotorDriverSlave::GainType::Kp) current.kp = value;
+        if (type == MotorDriverSlave::GainType::Ki) current.ki = value;
+        if (type == MotorDriverSlave::GainType::Kd) current.kd = value;
+        // ...
+        
+        // PID再設定
+        config_.pid_config = current;
+        pid_controller_ = control::PID<float>(current);
     });
 
     // 設定受信
@@ -83,10 +88,10 @@ void MotorManager::update() {
                 if (mode == ControlMode::DUTY_CYCLE) {
                     // Duty制御モード
                     // 急加速防止のためAccelerationLimiterを通す
-                    output_duty = accel_limiter_.update(target_setpoint_, config::CONTROL_LOOP_DT);
+                    output_duty = accel_limiter_.update(target_setpoint_, config_.control_loop_dt);
                 } else {
                     // PID制御モード (速度制御)
-                   output_duty = pid_controller_.update(target_setpoint_, measured_value_, config::CONTROL_LOOP_DT);
+                   output_duty = pid_controller_.update(target_setpoint_, measured_value_, config_.control_loop_dt);
                 }
                 
                 // 出力

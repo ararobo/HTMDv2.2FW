@@ -29,8 +29,20 @@ void app_main() {
     if (HAL_GPIO_ReadPin(DIP3_GPIO_Port, DIP3_Pin) == GPIO_PIN_SET) device_id |= 1 << 2;
     if (HAL_GPIO_ReadPin(DIP4_GPIO_Port, DIP4_Pin) == GPIO_PIN_SET) device_id |= 1 << 3;
 
+    // Config構築
+    common::logic::MotorManagerConfig motor_config;
+    motor_config.control_loop_dt = common::config::CONTROL_LOOP_DT;
+    motor_config.pid_config = {
+        common::config::DefaultPID::Kp,
+        common::config::DefaultPID::Ki,
+        common::config::DefaultPID::Kd,
+        common::config::DefaultPID::IntegralLimit,
+        common::config::DefaultPID::OutputLimit
+    };
+    motor_config.default_accel_limit = common::config::DEFAULT_ACCEL_LIMIT;
+
     // 3. アプリケーションの構築
-    static common::core::App app(gate_driver, encoder, indicator, can_driver, device_id);
+    static common::core::App app(gate_driver, encoder, indicator, can_driver, motor_config, device_id);
 
     // 4. 初期化
     app.init();

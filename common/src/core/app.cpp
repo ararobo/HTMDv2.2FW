@@ -6,9 +6,10 @@ App::App(interfaces::GateDriverInterface& gate_driver,
          interfaces::EncoderInterface& encoder,
          interfaces::IndicatorInterface& indicator,
          gn10_can::drivers::DriverInterface& can_driver,
+         const logic::MotorManagerConfig& config,
          uint8_t device_id)
     : can_bus_(can_driver),
-      motor_manager_(encoder, gate_driver, indicator, can_bus_, device_id) {}
+      motor_manager_(encoder, gate_driver, indicator, can_bus_, config, device_id) {}
 
 void App::init() {
     // コンポーネントの初期化

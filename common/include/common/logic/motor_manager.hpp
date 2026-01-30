@@ -15,12 +15,19 @@ class CANBus;
 
 namespace common::logic {
 
+struct MotorManagerConfig {
+    float control_loop_dt;
+    control::PIDConfig<float> pid_config;
+    float default_accel_limit;
+};
+
 class MotorManager {
   public:
     MotorManager(interfaces::EncoderInterface& encoder,
                  interfaces::GateDriverInterface& gate_driver,
                  interfaces::IndicatorInterface& indicator,
                  gn10_can::CANBus& can_bus,
+                 const MotorManagerConfig& config,
                  uint8_t device_id);
 
     void init();
@@ -36,6 +43,8 @@ class MotorManager {
     StateMachine state_machine_;
     control::PID<float> pid_controller_;
     control::AccelerationLimiter<float> accel_limiter_;
+
+    MotorManagerConfig config_;
 
     float target_setpoint_ = 0.0f;
     float measured_value_ = 0.0f;

@@ -24,12 +24,14 @@ class App {
      * @param encoder エンコーダインターフェース
      * @param indicator インジケータ（LED）インターフェース
      * @param can_driver CAN物理層ドライバインターフェース
+     * @param config モーター制御設定
      * @param device_id このデバイスのCAN ID
      */
     App(interfaces::GateDriverInterface& gate_driver,
         interfaces::EncoderInterface& encoder,
         interfaces::IndicatorInterface& indicator,
         gn10_can::drivers::DriverInterface& can_driver,
+        const logic::MotorManagerConfig& config,
         uint8_t device_id);
 
     /**
