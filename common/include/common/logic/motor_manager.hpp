@@ -6,6 +6,12 @@
 #include "common/interfaces/gate_driver_interface.hpp"
 #include "common/interfaces/indicator_interface.hpp"
 #include "common/logic/state_machine.hpp"
+#include "common/logic/can_protocol.hpp"
+
+// Forward declaration
+namespace gn10_can {
+class CANBus;
+}
 
 namespace common::logic {
 
@@ -13,7 +19,9 @@ class MotorManager {
   public:
     MotorManager(interfaces::EncoderInterface& encoder,
                  interfaces::GateDriverInterface& gate_driver,
-                 interfaces::IndicatorInterface& indicator);
+                 interfaces::IndicatorInterface& indicator,
+                 gn10_can::CANBus& can_bus,
+                 uint8_t device_id);
 
     void init();
     void update();
@@ -22,9 +30,15 @@ class MotorManager {
     interfaces::EncoderInterface& encoder_;
     interfaces::GateDriverInterface& gate_driver_;
     interfaces::IndicatorInterface& indicator_;
+    
+    MotorDriverSlave can_slave_;
+    
     StateMachine state_machine_;
     control::PID<float> pid_controller_;
     control::AccelerationLimiter<float> accel_limiter_;
+
+    float target_value_ = 0.0f;
+    float current_value_ = 0.0f;
 };
 
 }  // namespace common::logic

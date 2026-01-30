@@ -46,6 +46,10 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/Src/driver_stm32_can.cpp
+    App/Src/app_main.cpp
+    App/Src/stm32_encoder.cpp
+    App/Src/stm32_gate_driver.cpp
+    App/Src/stm32_indicator.cpp
 )
 
 # Add include paths

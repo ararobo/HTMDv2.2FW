@@ -24,9 +24,10 @@ bool DriverSTM32CAN::init() {
         return false;
     }
 
-    if (HAL_CAN_ActivateNotification(hcan_, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
-        return false;
-    }
+    // Polling mode: Do not activate interrupts
+    // if (HAL_CAN_ActivateNotification(hcan_, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+    //    return false;
+    // }
 
     return true;
 }
@@ -50,22 +51,24 @@ bool DriverSTM32CAN::send(const CANFrame& frame) {
 }
 
 bool DriverSTM32CAN::receive(CANFrame& out_frame) {
-    CAN_RxHeaderTypeDef rx_header;
-    uint8_t rx_data[8];
-
-    if (HAL_CAN_GetRxMessage(hcan_, CAN_RX_FIFO0, &rx_header, rx_data) != HAL_OK) {
+    if (HAL_CAN_GetRxFifoFillLevel(hcan_, CAN_RX_FIFO0) == 0) {
         return false;
     }
 
+    CAN_RxHeaderTypeDef rx_header;
+    std::array<uint8_t, 8> data;
+
+    if (HAL_CAN_GetRxMessage(hcan_, CAN_RX_FIFO0, &rx_header, data.data()) != HAL_OK) {
+        return false;
+    }
+
+    // CANFrameへの変換
     out_frame.id          = (rx_header.IDE == CAN_ID_EXT) ? rx_header.ExtId : rx_header.StdId;
     out_frame.dlc         = rx_header.DLC;
     out_frame.is_extended = (rx_header.IDE == CAN_ID_EXT);
     out_frame.is_rtr      = (rx_header.RTR == CAN_RTR_REMOTE);
-    out_frame.is_error    = false;
-
-    for (uint8_t i = 0; i < out_frame.dlc; ++i) {
-        out_frame.data[i] = rx_data[i];
-    }
+    out_frame.is_error    = false; // HAL doesn't easily give error frames in this API
+    out_frame.data        = data;
 
     return true;
 }
