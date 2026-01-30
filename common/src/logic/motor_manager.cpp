@@ -124,7 +124,16 @@ void MotorManager::update() {
             indicator_.set(IndicatorId::ACTIVITY, false);
             indicator_.set(IndicatorId::DIRECTION, false);
             // 本来はupdate毎にtoggleしたいが、ここでは簡易的にON
-            indicator_.setLIMIT_STOP:
+            indicator_.set(IndicatorId::HEARTBEAT, true); 
+            
+            // ターゲットが0以外かつRUNNINGでない場合（再開ロジック）はコールバックで処理済み
+            // 逆にターゲットが0になったらIDLEに戻る処理が必要ならここ
+            if (target_setpoint_ == 0.0f && state_machine_.is_active()) {
+                state_machine_.stop_control();
+            }
+            break;
+
+        case SystemState::LIMIT_STOP:
             // リミット検知時は安全にブレーキ保持
             gate_driver_.set_duty_cycle(0.0f);
             gate_driver_.set_brake_mode(true);
@@ -132,15 +141,6 @@ void MotorManager::update() {
             // 警告表示
             indicator_.set(IndicatorId::ACTIVITY, true);
             indicator_.set(IndicatorId::DIRECTION, true); // 点灯により警告
-            break;
-
-        case SystemState::(IndicatorId::HEARTBEAT, true); 
-            
-            // ターゲットが0以外かつRUNNINGでない場合（再開ロジック）はコールバックで処理済み
-            // 逆にターゲットが0になったらIDLEに戻る処理が必要ならここ
-            if (target_setpoint_ == 0.0f && state_machine_.is_active()) {
-                state_machine_.stop_control();
-            }
             break;
 
         case SystemState::ERROR:
