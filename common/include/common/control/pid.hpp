@@ -64,6 +64,16 @@ class PID {
         integral_ = T{0};
     }
 
+    /**
+     * @brief 内部状態（積分項など）を維持したまま設定値を変更する
+     * 実行中のゲイン変更などに使用。必要に応じて積分項を新しいリミットでクランプする。
+     */
+    void update_config(const PIDConfig<T>& config) {
+        config_ = config;
+        // 新しいリミットに合わせて積分項をクランプし直す
+        integral_ = std::clamp(integral_, -config_.integral_limit, config_.integral_limit);
+    }
+
   private:
     PIDConfig<T> config_;
     T integral_             = T{0};

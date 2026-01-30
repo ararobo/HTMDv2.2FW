@@ -45,7 +45,8 @@ MotorManager::MotorManager(interfaces::EncoderInterface& encoder,
         
         // PID再設定
         config_.pid_config = current;
-        pid_controller_ = control::PID<float>(current);
+        // 積分項をリセットせずにゲインのみ更新する
+        pid_controller_.update_config(current);
     });
 
     // 設定受信
