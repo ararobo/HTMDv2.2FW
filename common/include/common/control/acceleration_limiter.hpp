@@ -11,7 +11,7 @@ class AccelerationLimiter {
     AccelerationLimiter(T max_acceleration, T initial_value = T(0))
         : max_acceleration_(max_acceleration), previous_value_(initial_value) {}
 
-    T limit(T target_value, T dt) {
+    T update(T target_value, T dt) {
         T max_delta = max_acceleration_ * dt;
         T desired_delta = target_value - previous_value_;
         T limited_delta = std::clamp(desired_delta, -max_delta, max_delta);

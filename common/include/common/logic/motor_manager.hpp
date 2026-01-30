@@ -37,8 +37,8 @@ class MotorManager {
     control::PID<float> pid_controller_;
     control::AccelerationLimiter<float> accel_limiter_;
 
-    float target_value_ = 0.0f;
-    float current_value_ = 0.0f;
+    float target_setpoint_ = 0.0f;
+    float measured_value_ = 0.0f;
 };
 
 }  // namespace common::logic

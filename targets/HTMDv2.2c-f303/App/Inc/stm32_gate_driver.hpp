@@ -11,7 +11,7 @@ class Stm32GateDriver : public common::interfaces::GateDriverInterface {
 
     bool init() override;
 
-    bool output(float output) override;
+    bool set_duty_cycle(float duty_cycle) override;
 
     void set_brake_mode(bool enabled) override;
 

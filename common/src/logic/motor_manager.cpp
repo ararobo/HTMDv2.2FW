@@ -26,7 +26,7 @@ MotorManager::MotorManager(interfaces::EncoderInterface& encoder,
 
     // 目標値受信
     can_slave_.set_on_target_received([this](float target) {
-        target_value_ = target;
+        target_setpoint_ = target;
         
         // IDLE状態かつターゲットが0以外なら制御開始
         if (state_machine_.get_state() == SystemState::IDLE) {
@@ -67,7 +67,7 @@ void MotorManager::update() {
     // エンコーダ値取得 (ControlModeによって位置か速度か変わる)
     float raw_vel = encoder_.get_velocity();
     // EncoderInterface::get_velocity は [rad/s] を返す想定
-    current_value_ = raw_vel;
+    measured_value_ = raw_vel;
 
     // 2. ステートマシン処理
     SystemState current_state = state_machine_.get_state();
@@ -83,14 +83,14 @@ void MotorManager::update() {
                 if (mode == ControlMode::DUTY_CYCLE) {
                     // Duty制御モード
                     // 急加速防止のためAccelerationLimiterを通す
-                    output_duty = accel_limiter_.limit(target_value_, config::CONTROL_LOOP_DT);
+                    output_duty = accel_limiter_.update(target_setpoint_, config::CONTROL_LOOP_DT);
                 } else {
                     // PID制御モード (速度制御)
-                   output_duty = pid_controller_.update(target_value_, current_value_, config::CONTROL_LOOP_DT);
+                   output_duty = pid_controller_.update(target_setpoint_, measured_value_, config::CONTROL_LOOP_DT);
                 }
                 
                 // 出力
-                gate_driver_.output(output_duty);
+                gate_driver_.set_duty_cycle(output_duty);
                 
                 // LED制御
                 indicator_.set(IndicatorId::ACTIVITY, true);
@@ -100,7 +100,7 @@ void MotorManager::update() {
             break;
 
         case SystemState::IDLE:
-            gate_driver_.output(0.0f);
+            gate_driver_.set_duty_cycle(0.0f);
             gate_driver_.set_brake_mode(true); // ブレーキ
             
             indicator_.set(IndicatorId::ACTIVITY, false);
@@ -110,13 +110,13 @@ void MotorManager::update() {
             
             // ターゲットが0以外かつRUNNINGでない場合（再開ロジック）はコールバックで処理済み
             // 逆にターゲットが0になったらIDLEに戻る処理が必要ならここ
-            if (target_value_ == 0.0f && state_machine_.is_active()) {
+            if (target_setpoint_ == 0.0f && state_machine_.is_active()) {
                 state_machine_.stop_control();
             }
             break;
 
         case SystemState::ERROR:
-            gate_driver_.output(0.0f);
+            gate_driver_.set_duty_cycle(0.0f);
             gate_driver_.set_brake_mode(false); // フリーラン
             
             // エラー時は全点灯など
@@ -126,13 +126,13 @@ void MotorManager::update() {
             break;
 
         default:
-            gate_driver_.output(0.0f);
+            gate_driver_.set_duty_cycle(0.0f);
             break;
     }
 
     // 3. フィードバック送信 (間引き処理なし、毎回送るとバス負荷高いので注意)
     // 実運用ではタイマーで間引く
-    can_slave_.send_feedback(current_value_, 0); 
+    can_slave_.send_feedback(measured_value_, 0); 
     // Load CurrentなどはGateDriverから取得できるならここで送る
 }
 
