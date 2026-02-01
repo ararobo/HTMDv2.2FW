@@ -9,10 +9,21 @@
 // Global handles defined in main.c
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim6;
 extern CAN_HandleTypeDef hcan;
+
+// Timer Interrupt Flag
+static volatile bool g_tick_flag = false;
 
 // C entry point wrapper
 extern "C" void app_main();
+
+// Timer Interrupt Callback
+extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM6) {
+        g_tick_flag = true;
+    }
+}
 
 void app_main() {
     // 1. ハードウェアドライバのインスタンス化
@@ -47,15 +58,23 @@ void app_main() {
     // 4. 初期化
     app.init();
 
+    // 制御周期設定の適用 (TIM6)
+    // CubeMX設定でTIM6は 64MHz / (63+1) = 1MHz (1us単位) でカウント動作するよう設定されているため、
+    // 1MHz を Configの周波数で割ることで、必要なカウント数(ARR)を算出する。
+    // 例: 1000Hz -> 1,000,000 / 1000 - 1 = 999
+    const uint32_t timer_base_clock = 1000000;
+    uint32_t arr_value = (timer_base_clock / static_cast<uint32_t>(common::config::CONTROL_LOOP_FREQ_HZ)) - 1;
+    __HAL_TIM_SET_AUTORELOAD(&htim6, arr_value);
+
+    // タイマー割り込み開始
+    HAL_TIM_Base_Start_IT(&htim6);
+
     // 5. メインループ
     while (true) {
-        app.update();
-        
-        // 簡易的なウェイト (1ms)
-        // 実用的にはタイマー割り込みでフラグを立てて、ここで処理するのが良いが、
-        // 今回はHAL_Delayを使用する。
-        // 制御周期ウェイト
-        // 1000ms / 1000Hz = 1ms
-        HAL_Delay(static_cast<uint32_t>(1000.0f / common::config::CONTROL_LOOP_FREQ_HZ));
+        // タイマー割り込み待ち (正確な周期実行のため)
+        if (g_tick_flag) {
+            g_tick_flag = false;
+            app.update();
+        }
     }
 }
