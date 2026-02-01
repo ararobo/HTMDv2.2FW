@@ -6,6 +6,11 @@ if(NOT DEFINED TARGET_BOARD)
     message(FATAL_ERROR "Error: TARGET_BOARD not defined. Use -DTARGET_BOARD=f303 or g431")
 endif()
 
+# C++17を必須にする
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+
 message(STATUS "Build Target: ${TARGET_BOARD}")
 
 set(BUILD_FOR_ROS2 OFF CACHE BOOL "Force disable ROS2 build for embedded" FORCE)
