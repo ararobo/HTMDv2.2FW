@@ -1,0 +1,44 @@
+@startuml
+    title 改善されたステートマシン: エラー処理と階層化
+
+    [*] --> Boot
+
+    state Boot {
+        [*] --> HardwareSelfTest
+        HardwareSelfTest --> Error : Fail
+        HardwareSelfTest --> Uninitialized : Pass
+    }
+
+    state Uninitialized {
+        [*] --> WaitingForConfig
+        WaitingForConfig --> ConfigLoaded : CAN Config Rx
+        ConfigLoaded --> Active : Enable Cmd
+    }
+
+    state Active {
+        state Standby {
+            [*] --> BrakeState
+            BrakeState --> CoastState : Brake Off
+            CoastState --> BrakeState : Brake On
+        }
+
+        state Running {
+            [*] --> PIDControl
+            PIDControl --> LimitHit : Limit SW Triggered
+            LimitHit --> PIDControl : Reverse Target
+        }
+
+        [*] --> Standby
+        Standby --> Running : Target != 0 & Valid
+        Running --> Standby : Target == 0
+    }
+
+    state Error {
+        [*] --> SafeStop : Cut PWM
+        SafeStop --> WaitingForReset
+        WaitingForReset --> [*] : Reset Cmd
+    }
+
+    Active --> Error : OverCurrent / Timeout
+    Active --> Uninitialized : Re-Config request
+@enduml

@@ -1,0 +1,97 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BUILD_TESTS": "OFF"
+            }
+        },
+        {
+            "name": "cross-base",
+            "hidden": true,
+            "inherits": "base",
+            "cacheVariables": {
+                "BUILD_FOR_ROS2": "OFF",
+                "BUILD_TESTS": "OFF"
+            }
+        },
+        {
+            "name": "f303-base",
+            "hidden": true,
+            "inherits": "cross-base",
+            "toolchainFile": "${sourceDir}/targets/HTMDv2.2c-f303/cmake/gcc-arm-none-eabi.cmake",
+            "cacheVariables": {
+                "TARGET_BOARD": "f303"
+            }
+        },
+        {
+            "name": "g431-base",
+            "hidden": true,
+            "inherits": "cross-base",
+            "toolchainFile": "${sourceDir}/targets/HTMDv2.2c-g431/cmake/gcc-arm-none-eabi.cmake",
+            "cacheVariables": {
+                "TARGET_BOARD": "g431"
+            }
+        },
+        {
+            "name": "f303-debug",
+            "inherits": "f303-base",
+            "displayName": "F303 Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "f303-release",
+            "inherits": "f303-base",
+            "displayName": "F303 Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "g431-debug",
+            "inherits": "g431-base",
+            "displayName": "G431 Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "g431-release",
+            "inherits": "g431-base",
+            "displayName": "G431 Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "f303-debug",
+            "configurePreset": "f303-debug"
+        },
+        {
+            "name": "f303-release",
+            "configurePreset": "f303-release"
+        },
+        {
+            "name": "g431-debug",
+            "configurePreset": "g431-debug"
+        },
+        {
+            "name": "g431-release",
+            "configurePreset": "g431-release"
+        }
+    ]
+}

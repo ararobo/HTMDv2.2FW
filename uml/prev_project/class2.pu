@@ -1,0 +1,67 @@
+@startuml
+    title 改善されたアーキテクチャ: HAL分離とCore共有
+
+    package "Shared Firmware Core" {
+
+        class MotorManager {
+            - IControlStrategy currentStrategy
+            - IGateDriver driver
+            - IEncoder encoder
+            + setMode(Mode mode)
+            + updateLoop()
+        }
+
+        interface IControlStrategy {
+            + calculate(target, current)
+            + reset()
+        }
+
+        class PIDStrategy implements IControlStrategy {
+            - float kp, ki, kd
+            + calculate()
+        }
+
+        class OpenLoopStrategy implements IControlStrategy {
+            + calculate()
+        }
+
+        interface IGateDriver {
+            + setDuty(float duty)
+            + setBrake(bool enable)
+        }
+
+        interface IEncoder {
+            + getCount()
+            + getVelocity()
+        }
+    }
+
+    package "STM32 Implementation" {
+        note bottom: 機種依存のドライバ実装
+
+        class F303GateDriver implements IGateDriver {
+            - TIM_HandleTypeDef htim
+            + setDuty(float duty)
+        }
+
+        class G431GateDriver implements IGateDriver {
+            - TIM_HandleTypeDef htim
+            + setDuty(float duty)
+        }
+
+        class EncoderDriver implements IEncoder {
+            + getCount()
+        }
+        
+        class AppMain {
+            + main()
+        }
+    }
+
+    MotorManager o-- IGateDriver : Dependency Injection
+    MotorManager o-- IEncoder : Dependency Injection
+    MotorManager *-- IControlStrategy
+    
+    AppMain --> MotorManager : インスタンス化 & 実行
+    AppMain --> F303GateDriver : 生成
+@enduml

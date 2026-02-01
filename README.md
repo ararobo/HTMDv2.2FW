@@ -1,34 +1,53 @@
 # HTMDv2.2FW
-GN10が開発しているHTMDv2.2系のファームウェアです。
+![Platform](https://img.shields.io/badge/Platform-STM32%20)
+Gento Aiba(GN10)が開発しているモータードライバーのファームウェアです。
 
-HTMDv2.2cはSTM32F303K8T6と、STM32G431K8T6の2つのMCUに対応している。
+HTMDとはHaruto Tanakaが作成したモータードライバーです。
+このリポジトリにはHTMDv2.2cという基板のファームウェアが入っています。
 
-## ファイル紹介
+HTMDv2.2cはSTM32F303K8T6と、STM32G431K8T6の2つのMCUに対応しているので、それぞれのMCU用に計２つのファームウェアがあります。
 
-[CAN通信v2.0について](docs/CANv2.0.md)
+## Development Environment Setup
 
-[HTMDv2.2cのSTM32F303用ファームウェア](HTMDv2.2c-f303)
+### Common
+Install **CMake Tools** extension for VSCode.
 
-## [ライブラリ](lib)
+### Ubuntu
+```bash
+sudo apt update
+sudo apt install build-essential cmake ninja-build
+```
 
-MDのCANv2.0のデータを管理するクラスです。
+### Windows(for STM32)
 
-説明：[MDDataManagerの説明](lib/Common/MDDataMaster.md)
+Install STM32CubeCLT.
 
-これはどのマイコンやPCでも使うことができます。
+## Build
+for STM32F303K8T6:
+```bash
+cmake --preset f303-debug
+cmake --build --preset f303-debug
+```
+for STM32G431K8T6:
+```bash
+cmake --preset g431-debug
+cmake --build --preset g431-debug
+```
 
-ESP32の場合は[ESP32でCAN通信をするときに使用する](lib\ESP32CAN)このフォルダをPlatform ioの`lib`フォルダに直接入れてください。
+## Class Diagram
 
-ESP32の場合はCANのRXとTXピンを設定しなくてはならないため、initメソッドの前にset_pinsメソッドを呼び出して設定してください。
+![Class Diagram](uml/class.png)
 
-STM32の場合はCommonとSTM32G4シリーズならCANFDなので、STM32FDCANを組み合わせて使用する。それ以外のF3等では普通のCANなのでSTM32CANを組み合わせてください。
+## Development Rules
 
-その際はCommon内部のMDDataMaster/Slaveの継承元やインクルードパスを変更して対応してください。
+### 1. Naming Conventions
+Variable and function names must be self-explanatory. We follow the **Google C++ Style Guide** basics:
+- **Class/Struct names**: `PascalCase` (e.g., `SpeedMsg`, `BatteryStatus`)
+- **Function/Variable names**: `snake_case` (e.g., `get_id()`, `target_velocity`)
+- **Constants/Enum values**: `kPascalCase` or `ALL_CAPS` (e.g., `kMaxSpeed`, `BATTERY_LOW`)
+- **Private Member variables**: Must have a trailing underscore (e.g., speed_, voltage_) to distinguish them from local variables.
 
-[CAN通信のデータを管理するクラス](lib\Common)
-
-自分の使いたい環境に対応するクラスを用いてCAN通信しましょう。
-
-[CAN付きのSTM32でCAN通信するときに継承するクラス](lib\STM32CAN)
-
-[FDCAN付きのSTM32でCAN通信するときに継承するクラス](lib\STM32FDCAN)
+### 2. Code Formatting
+- Do not rely on IDE defaults.
+- All code must be formatted using **Clang-Format**.
+- A `.clang-format` file is provided in the root directory. Please configure your editor to use it on save.

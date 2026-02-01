@@ -1,0 +1,61 @@
+@startuml
+    class App {
+        -uint8_t md_id
+        -md_config_t md_config
+        -float pid_gain[3]
+        -CANDriver can
+        +setup()
+        +loop()
+        -control_motor()
+        -update_md_config()
+    }
+
+    class MotorController {
+        -md_config_t md_config
+        -bool limit_stop
+        +init()
+        +reset()
+        +run(output, now_value, limit_sw)
+        +set_config(config)
+        +set_pid_gain(p, i, d)
+    }
+
+    class PIDCalculator {
+        -float Kp
+        -float Ki
+        -float Kd
+        +PIDCalculator(dt)
+        +calculate_pid(target, now_value)
+        +reset()
+    }
+
+    class TrapezoidalController {
+        +trapezoidal_control(target, accel)
+        +reset()
+    }
+
+    class GateDriver {
+        -float max_duty
+        +hardware_init()
+        +output(duty)
+        +set_brake(bool)
+    }
+
+    class IncrementalEncoder {
+        +hardware_init()
+        +reset()
+        +get_value()
+    }
+
+    class CANManager <<External Lib>> {
+        +register_device()
+        +process()
+    }
+
+    App --> MotorController : "manages"
+    App --> CANManager : "uses"
+    MotorController --> PIDCalculator : "uses"
+    MotorController --> TrapezoidalController : "uses"
+    MotorController --> GateDriver : "controls"
+    MotorController --> IncrementalEncoder : "reads"
+@enduml
