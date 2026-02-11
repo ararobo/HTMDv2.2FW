@@ -1,58 +1,121 @@
-@startuml class
+@startuml motor_driver_architecture
 
-package gn10_motor {
-    class App {
-        +init()
-        +update()
+namespace gn10_motor {
+
+    class Config {
+        - pid_kp : float
+        - pid_ki : float
+        - pid_kd : float
+        - max_velocity : float
+        - max_acceleration : float
+        - control_loop_dt_ms : int
+        + get_pid_kp() : float
+        + get_pid_ki() : float
+        + get_pid_kd() : float
+        + get_max_velocity() : float
+        + get_max_acceleration() : float
+        + get_control_loop_dt_ms() : int
+        + set_pid_kp(kp: float) : void
+        + set_pid_ki(ki: float) : void
+        + set_pid_kd(kd: float) : void
+        + set_max_velocity(max_vel: float) : void
+        + set_max_acceleration(max_acc: float) : void
     }
 
-    class Parameters {
-    }
-
-    class MotorControler {
+    class MotorController {
+        - motor_ : interfaces.MotorInterface&
+        - encoder_ : interfaces.EncoderInterface&
+        - params_ : Config&
+        + init()
+        + update()
     }
 
     class AccelerationLimiter {
+        + limit(current_val: float, target_val: float, dt: float) : float
     }
 
     class PID {
+        + calculate(target: float, feedback: float, dt: float) : float
     }
 
-    package interfaces {
-        class MotorInterface {
+    namespace interfaces {
+        interface MotorInterface {
+            + {abstract} set_duty_cycle(duty: float) : void
+            + {abstract} set_short_brake(enabled: bool) : void
+            + {abstract} ~MotorInterface()
         }
-        class EncoderInterface {
+
+        interface EncoderInterface {
+            + {abstract} update() : void
+            + {abstract} get_velocity_rad_s() : float
+            
+            ' 積算角度（相対角）：起動時0スタート
+            + {abstract} get_relative_angle_rad() : float
+            
+            ' 絶対角度：非対応ならfalseを返す
+            + {abstract} try_get_absolute_angle_rad(out angle: float&) : bool
+            + {abstract} has_absolute_position() : bool
+            
+            + {abstract} ~EncoderInterface()
         }
-        class IndicatorInterface {
+
+        interface IndicatorInterface {
+            + {abstract} set_state(state: State) : void
+            + {abstract} heartbeat() : void
+            + {abstract} ~IndicatorInterface()
+        }
+
+        enum State {
+            INITIALIZED
+            RUNNING
+            ERROR
         }
     }
 
-    App --> MotorControler
-    App --> IndicatorInterface
-    App --> Parameters
-    MotorControler --> AccelerationLimiter
-    MotorControler --> PID
-    MotorControler --> MotorInterface
-    MotorControler --> EncoderInterface
+    MotorController *-- AccelerationLimiter
+    MotorController *-- PID
+    MotorController o-- interfaces.MotorInterface
+    MotorController o-- interfaces.EncoderInterface
+    MotorController o-- Config
+    IndicatorInterface o-- State
 }
 
-package targets {
-    package common {
-        class STM32Motor {
+namespace targets {
+    namespace common {
+        ' インターフェースを具体的に継承(実体化)
+        class STM32Motor implements gn10_motor.interfaces.MotorInterface {
+            - timer_ : TIM_HandleTypeDef*
+            - channel : uint32_t
         }
 
-        class STM32Encoder {
+        class STM32Encoder implements gn10_motor.interfaces.EncoderInterface {
+            - timer_ : TIM_HandleTypeDef*
         }
 
-        class STM32Indicator {
+        class STM32Indicator implements gn10_motor.interfaces.IndicatorInterface {
+            - port : GPIO_TypeDef*
+            - pin : uint16_t
         }
     }
-    package stm32f303 {
+
+    ' main.cppに相当するパッケージ
+    package stm32xxx_main {
+        
+        class MainLoop << (S,#FF7700) static >> {
+            - motor : STM32Motor
+            - encoder : STM32Encoder
+            - controller : MotorController
+            - params : Config
+            + main()
+        }
+        
+        MainLoop ..> gn10_motor.MotorController : "instantiates & updates"
+        MainLoop ..> targets.common.STM32Motor : "instantiates"
     }
-    package stm32g431 {
+}
+
+package external {
+    package gn10_can {
     }
-    gn10_motor.interfaces.MotorInterface ..> common.STM32Motor
-    gn10_motor.interfaces.EncoderInterface ..> common.STM32Encoder
-    gn10_motor.interfaces.IndicatorInterface ..> common.STM32Indicator
 }
 @enduml
