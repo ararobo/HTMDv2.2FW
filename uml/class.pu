@@ -1,3 +1,58 @@
 @startuml class
 
+package gn10_motor {
+    class App {
+        +init()
+        +update()
+    }
+
+    class Parameters {
+    }
+
+    class MotorControler {
+    }
+
+    class AccelerationLimiter {
+    }
+
+    class PID {
+    }
+
+    package interfaces {
+        class MotorInterface {
+        }
+        class EncoderInterface {
+        }
+        class IndicatorInterface {
+        }
+    }
+
+    App --> MotorControler
+    App --> IndicatorInterface
+    App --> Parameters
+    MotorControler --> AccelerationLimiter
+    MotorControler --> PID
+    MotorControler --> MotorInterface
+    MotorControler --> EncoderInterface
+}
+
+package targets {
+    package common {
+        class STM32Motor {
+        }
+
+        class STM32Encoder {
+        }
+
+        class STM32Indicator {
+        }
+    }
+    package stm32f303 {
+    }
+    package stm32g431 {
+    }
+    gn10_motor.interfaces.MotorInterface ..> common.STM32Motor
+    gn10_motor.interfaces.EncoderInterface ..> common.STM32Encoder
+    gn10_motor.interfaces.IndicatorInterface ..> common.STM32Indicator
+}
 @enduml
