@@ -7,8 +7,8 @@ file(GLOB_RECURSE COMMON_SOURCES
     "src/*.cpp"
 )
 
-add_library(common_app STATIC ${COMMON_SOURCES})
+add_library(gn10_motor STATIC ${COMMON_SOURCES})
 
-target_include_directories(common_app PUBLIC include)
+target_include_directories(gn10_motor PUBLIC include)
 
-target_link_libraries(common_app PUBLIC gn10_can)
+target_link_libraries(gn10_motor PUBLIC gn10_can)
