@@ -106,16 +106,77 @@ namespace targets {
             - encoder : STM32Encoder
             - controller : MotorController
             - params : Config
+            - indicator : STM32Indicator
+            - can_bus : external.gn10_can.core.CANBus
+            - can_device : external.gn10_can.devices.MotorDriver
             + main()
+        }
+
+        class DriverSTM32CAN {
+            + init()
         }
         
         MainLoop ..> gn10_motor.MotorController : "instantiates & updates"
         MainLoop ..> targets.common.STM32Motor : "instantiates"
+        MainLoop ..> targets.common.STM32Indicator : "instantiates"
+        MainLoop ..> targets.common.STM32Encoder : "instantiates"
+        MainLoop ..> DriverSTM32CAN : "instantiates"
     }
 }
 
+targets.stm32xxx_main.MainLoop ..> external.gn10_can.devices.MotorDriver : "instantiates"
+targets.stm32xxx_main.MainLoop ..> external.gn10_can.core.CANBus : "instantiates"
+
 package external {
-    package gn10_can {
+    namespace gn10_can {
+
+        namespace core {
+            struct CANFrame {
+                + id
+                + data
+                + dlc
+                + flags
+            }
+
+            class CANBus {
+                - attach(device)
+                - detach(device)
+                + update()
+                + send_frame(frame)
+            }
+
+            abstract class CANDevice {
+                + {abstract} on_receive(frame)
+                # send(command, data)
+            }
+        }
+
+        namespace drivers {
+            interface DriverInterface {
+                + {abstract} send(frame)
+                + {abstract} receive(out_frame)
+            }
+        }
+
+        namespace devices {
+            class MotorDriver {
+                + send_init(config)
+                + send_target(target)
+                + send_gain(type, value)
+                + on_receive(frame)
+            }
+
+            class MotorConfig {
+                + set_params(...)
+                + to_bytes()
+            }
+        }
+
+        core.CANBus o-- drivers.DriverInterface
+        core.CANBus "1" o-- "*" core.CANDevice : manages (RAII) >
+        core.CANDevice <|-- devices.MotorDriver
+        core.CANDevice ..> core.CANBus : attaches to >
+        devices.MotorDriver ..> devices.MotorConfig : uses >
     }
 }
 @enduml
