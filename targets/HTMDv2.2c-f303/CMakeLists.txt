@@ -34,6 +34,9 @@ enable_language(C CXX ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
+# Add User Application
+add_subdirectory(app)
+
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
@@ -65,6 +68,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
     gn10_can
     gn10_motor
+    app
     # Add user defined libraries
 )
 
