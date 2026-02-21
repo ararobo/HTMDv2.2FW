@@ -50,8 +50,6 @@ Variable and function names must be self-explanatory. We follow the **Google C++
 - **Private Member variables**: Must have a trailing underscore (e.g., speed_, voltage_) to distinguish them from local variables.
 
 ### 2. Code Formatting
-- Do not rely on IDE defaults.
-- All code must be formatted using **Clang-Format**.
 - A `.clang-format` file is provided in the root directory. Please configure your editor to use it on save.
 
 ### 3. Memory Management (No Dynamic Allocation)
