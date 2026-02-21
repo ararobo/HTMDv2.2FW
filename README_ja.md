@@ -57,8 +57,3 @@ cmake --build --preset g431-debug
 
 ## ライセンス
 このプロジェクトは Apache-2.0 ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
-
-## メンテナ
-- Gento Aiba
-- Koichiro Watanabe
-- Akeru Kamagata
