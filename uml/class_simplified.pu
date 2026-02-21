@@ -1,0 +1,76 @@
+@startuml motor_driver_architecture_simplified
+
+namespace gn10_motor {
+
+    class Config {
+        - pid_kp : float
+        - pid_ki : float
+        - pid_kd : float
+        - max_velocity : float
+        - max_acceleration : float
+        - control_loop_dt_ms : int
+        + get/set_methods()
+    }
+
+    namespace logic {
+        class AccelerationLimiter {
+            + update(target_val: float, dt: float) : float
+            + reset(val: float)
+        }
+
+        class PID {
+            + update(setpoint: float, measurement: float, dt: float) : float
+            + reset()
+        }
+    }
+}
+
+namespace targets {
+    
+    ' MainLoopがすべての結節点となる
+    class MainLoop << (S,#FF7700) static >> {
+        - motor_driver : STM32MotorDriver
+        - encoder : STM32Encoder
+        - indicator : STM32Indicator
+        - pid : gn10_motor.logic.PID
+        - limiter : gn10_motor.logic.AccelerationLimiter
+        - can_manager : CANManager
+        
+        + main()
+        - control_loop() : void
+    }
+
+    ' ハードウェア操作クラス群 (インターフェース継承なし)
+    class STM32MotorDriver {
+        - timer_ : TIM_HandleTypeDef*
+        + init()
+        + set_duty_cycle(duty: float)
+        + brake()
+    }
+
+    class STM32Encoder {
+        - timer_ : TIM_HandleTypeDef*
+        + get_velocity() : float
+    }
+
+    class STM32Indicator {
+        + set_led(state)
+    }
+
+    MainLoop *-- STM32MotorDriver
+    MainLoop *-- STM32Encoder
+    MainLoop *-- STM32Indicator
+    MainLoop *-- gn10_motor.logic.PID
+    MainLoop *-- gn10_motor.logic.AccelerationLimiter
+    MainLoop o-- gn10_motor.Config
+}
+
+note right of targets.MainLoop
+  <b>Control Flow:</b>
+  1. velocity = encoder.get_velocity()
+  2. target = limiter.update(target_velocity, dt)
+  3. duty = pid.update(target, velocity, dt)
+  4. motor_driver.set_duty_cycle(duty)
+end note
+
+@enduml
