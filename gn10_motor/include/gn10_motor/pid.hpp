@@ -5,14 +5,16 @@
  * @version 0.1
  * @date 2026-02-20
  * 
- * @copyright Copyright (c) 2026
+ * @copyright Copyright (c) 2026 Gento Aiba
+ * SPDX-License-Identifier: Apache-2.0
  * 
  */
 #pragma once
 
 #include <algorithm>
+#include <type_traits>
 
-namespace common::control {
+namespace gn10_motor {
 
 template <typename T>
 struct PIDConfig {
@@ -47,23 +49,28 @@ class PID {
         T i_term = config_.ki * integral_;
 
         // 微分先行 (Derivative on Measurement)
+        // Setpoint Kickを防ぐため、誤差(error)ではなく測定値(measurement)の微分を使用
         T derivative = T{0};
         if (dt > T{0}) {
             derivative = (measurement - previous_measurement_) / dt;
         }
-
+        
+        // 変化量(derivative)が正のとき、抑制方向へ力を加えるため -Kd を掛ける
         T d_term = -config_.kd * derivative;
 
         T output = p_term + i_term + d_term;
-
-        // 出力制限
-        output = std::clamp(output, -config_.output_limit, config_.output_limit);
-
+        
+        // 前回の測定値を更新
         previous_measurement_ = measurement;
 
-        return output;
+        // 出力制限
+        return std::clamp(output, -config_.output_limit, config_.output_limit);
     }
 
+    /**
+     * @brief PID内部状態のリセット
+     * @param current_measurement 現在の測定値（微分項のKick防止のため初期化に必要）
+     */
     void reset(T current_measurement = T{0}) {
         integral_             = T{0};
         previous_measurement_ = current_measurement;
@@ -90,4 +97,4 @@ class PID {
     T previous_measurement_ = T{0};
 };
 
-}  // namespace common::control
+}  // namespace gn10_motor
