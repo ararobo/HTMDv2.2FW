@@ -1,9 +1,12 @@
 # HTMDv2.2FW
-Gento Aiba(GN10)が開発しているモータードライバーのファームウェアです。
 
-このリポジトリには[HTMDv2.2c](https://github.com/ararobo/HTMDv2.2c)という基板のファームウェアが入っています。
+[English](README.md) | [日本語](README_ja.md)
 
-HTMDv2.2cはSTM32F303K8T6と、STM32G431K8T6の2つのMCUに対応しているので、それぞれのMCU用に計２つのファームウェアがあります。
+Firmware for the customized motor driver developed by Gento Aiba (GN10).
+
+This repository contains firmware for the [HTMDv2.2c](https://github.com/ararobo/HTMDv2.2c) board.
+
+The HTMDv2.2c board supports two MCUs: STM32F303K8T6 and STM32G431K8T6. Therefore, this repository includes firmware targets for both MCUs.
 
 ## Development Environment Setup
 
@@ -13,7 +16,7 @@ Install **CMake Tools** extension for VSCode.
 ### Ubuntu
 ```bash
 sudo apt update
-sudo apt install build-essential cmake ninja-build
+sudo apt install -y build-essential cmake ninja-build gcc-arm-none-eabi gdb-multiarch
 ```
 
 ### Windows(for STM32)
@@ -36,6 +39,7 @@ cmake --build --preset g431-debug
 
 ![Class Diagram](uml/class.png)
 
+
 ## Development Rules
 
 ### 1. Naming Conventions
@@ -49,3 +53,15 @@ Variable and function names must be self-explanatory. We follow the **Google C++
 - Do not rely on IDE defaults.
 - All code must be formatted using **Clang-Format**.
 - A `.clang-format` file is provided in the root directory. Please configure your editor to use it on save.
+
+### 3. Memory Management (No Dynamic Allocation)
+- Avoid using dynamic memory allocation (`new`, `malloc`, `std::vector`, `std::string`) inside the models.
+- Use fixed-size arrays and primitive types.
+
+## License
+This project is licensed under the Apache-2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Maintainer
+- Gento Aiba
+- Koichiro Watanabe
+- Akeru Kamagata
