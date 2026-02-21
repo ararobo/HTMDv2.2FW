@@ -37,7 +37,7 @@ cmake --build --preset g431-debug
 
 ## クラス図
 
-![Class Diagram](uml/class.png)
+![class simplified](uml/motor_driver_architecture_simplified.png)
 
 ## 開発ルール
 
