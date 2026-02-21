@@ -50,10 +50,7 @@ class PID {
 
         // 微分先行 (Derivative on Measurement)
         // Setpoint Kickを防ぐため、誤差(error)ではなく測定値(measurement)の微分を使用
-        T derivative = T{0};
-        if (dt > T{0}) {
-            derivative = (measurement - previous_measurement_) / dt;
-        }
+        T derivative = (measurement - previous_measurement_) / dt;
         
         // 変化量(derivative)が正のとき、抑制方向へ力を加えるため -Kd を掛ける
         T d_term = -config_.kd * derivative;
