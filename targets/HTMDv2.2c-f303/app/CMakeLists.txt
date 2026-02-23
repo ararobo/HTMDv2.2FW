@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(app STATIC
     src/app.cpp
+    src/a3921_gate_driver.cpp
+    src/incremental_encoder.cpp
 )
 
 target_include_directories(app PUBLIC
