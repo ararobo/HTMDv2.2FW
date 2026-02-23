@@ -1,6 +1,6 @@
 /**
  * @file incremental_encoder.hpp
- * @author aiba-gento, Watanabe-Koichiro
+ * @author Gento Aiba (aiba-gento), Watanabe-Koichiro
  * @brief インクリメンタルエンコーダの具象クラス
  * @version 3.0
  * @date 2026-02-23

@@ -1,6 +1,6 @@
 /**
  * @file a3921_gate_driver.cpp
- * @author  (8gn24gn25@gmail.com)
+ * @author Gento Aiba (aiba-gento)
  * @brief A3921ゲートドライバの具象クラス
  * @version 0.2
  * @date 2026-02-23
