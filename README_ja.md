@@ -45,7 +45,7 @@ cmake --build --preset g431-debug
 変数名や関数名は、それだけで意味が分かるように命名してください。**Google C++ Style Guide** に準拠します：
 - **クラス/構造体名**: `PascalCase` (例: `SpeedMsg`, `BatteryStatus`)
 - **関数/変数名**: `snake_case` (例: `get_id()`, `target_velocity`)
-- **定数/列挙値**: `kPascalCase` または `ALL_CAPS` (例: `kMaxSpeed`, `BATTERY_LOW`)
+- **定数/列挙値**: `ALL_CAPS` (例: `BATTERY_LOW`)
 - **プライベートメンバ変数**: ローカル変数と区別するため、末尾にアンダースコアを付けます (例: `speed_`, `voltage_`)。
 
 ### 2. コードフォーマット
