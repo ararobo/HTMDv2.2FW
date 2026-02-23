@@ -46,7 +46,7 @@ cmake --build --preset g431-debug
 Variable and function names must be self-explanatory. We follow the **Google C++ Style Guide** basics:
 - **Class/Struct names**: `PascalCase` (e.g., `SpeedMsg`, `BatteryStatus`)
 - **Function/Variable names**: `snake_case` (e.g., `get_id()`, `target_velocity`)
-- **Constants/Enum values**: `kPascalCase` or `ALL_CAPS` (e.g., `kMaxSpeed`, `BATTERY_LOW`)
+- **Constants/Enum values**: `ALL_CAPS` (e.g., `BATTERY_LOW`)
 - **Private Member variables**: Must have a trailing underscore (e.g., speed_, voltage_) to distinguish them from local variables.
 
 ### 2. Code Formatting
