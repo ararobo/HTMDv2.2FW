@@ -74,6 +74,18 @@ class MotorController {
      */
     void reset();
 
+    /**
+     * @brief CAN init パケット受信済みか否かを返す
+     * @return true 初期化済み (制御動作中)
+     */
+    bool is_initialized() const { return initialized_; }
+
+    /**
+     * @brief 現在の目標値を返す (LED 制御などの UI 用途向け)
+     * @return float 最後に受け取った目標値
+     */
+    float get_target() const { return target_; }
+
   private:
     // --- DI で注入されるハードウェア依存オブジェクト ---
     IGateDriver& driver_;
