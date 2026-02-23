@@ -49,9 +49,6 @@ constexpr uint32_t LED1_BLINK_CYCLES = 100U;
  *
  * 生成順の依存関係:
  *   can_driver_ → can_bus_ → (setup時) can_server_ → motor_
- *
- * setup() 呼び出し前にHAL関数を一切呼ばないため、
- * グローバルインスタンスとして安全に宣言できる。
  */
 class App {
   public:
@@ -174,8 +171,7 @@ class App {
     uint32_t led1_count_;  ///< LED1 点滅カウンタ
 };
 
-/// ファイルスコープのシングルトン (動的メモリ不使用)
-App g_app;
+App gn10_app;
 
 }  // namespace
 
@@ -184,19 +180,19 @@ App g_app;
 // ---------------------------------------------------------------------------
 
 void setup() {
-    g_app.setup();
+    gn10_app.setup();
 }
 
 void loop() {
-    g_app.loop();
+    gn10_app.loop();
 }
 
 extern "C" {
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
-    g_app.on_can_rx(hcan);
+    gn10_app.on_can_rx(hcan);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-    g_app.on_timer(htim);
+    gn10_app.on_timer(htim);
 }
 }  // extern "C"
