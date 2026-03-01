@@ -1,7 +1,7 @@
 # Googleをベースにカスタムする
 BasedOnStyle: Google
-# 画面分割を想定し、短めに設定
-ColumnLimit: 80
+# 過度な改行はしない
+ColumnLimit: 100
 # インデントはROS2標準に合わせ横幅節約
 IndentWidth: 4
 # クラスのアクセスは明確に
@@ -34,6 +34,8 @@ AlignConsecutiveMacros:
     Enabled: true
 # ビットフィールドは縦のつながりがあるので揃える
 AlignConsecutiveBitFields: Consecutive
+# 設定値やパラメータの代入は、視認性向上のため縦に揃える
+AlignConsecutiveAssignments: true
 
 # 配列は右揃えにして値をわかりやすくする
 AlignArrayOfStructures: Right
