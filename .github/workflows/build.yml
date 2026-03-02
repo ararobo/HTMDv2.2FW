@@ -28,7 +28,7 @@ jobs:
         target: [f303, g431]
 
     steps:
-    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -38,7 +38,7 @@ jobs:
         sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi ninja-build
 
     - name: Setup ccache
-      uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+      uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: ${{ matrix.target }}
         variant: ccache
@@ -55,7 +55,7 @@ jobs:
       run: cmake --build build --config Release
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      uses: actions/upload-artifact@v4
       with:
         name: firmware-${{ matrix.target }}
         path: |
