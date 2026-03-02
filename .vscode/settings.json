@@ -7,11 +7,13 @@
         "*": false,
         "plaintext": false,
         "markdown": false,
-        "scminput": false
+        "scminput": false,
+        "cpp": false,
+        "c": false
     },
     "plantuml.exportFormat": "png",
-    "plantuml.exportOutDir": "uml/",
-    "plantuml.diagramsRoot": "uml/",
+    "plantuml.exportOutDir": "docs/uml/",
+    "plantuml.diagramsRoot": "docs/uml/",
     "plantuml.exportSubFolder": false,
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
@@ -19,6 +21,5 @@
     "[c]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
     },
-    "C_Cpp.clang_format_style": "file",
-    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "file"
 }
