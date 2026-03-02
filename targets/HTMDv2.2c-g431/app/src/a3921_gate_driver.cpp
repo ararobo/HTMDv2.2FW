@@ -20,8 +20,8 @@ A3921GateDriver::A3921GateDriver(uint16_t max_duty) : max_duty_(max_duty) {}
 
 void A3921GateDriver::hardware_init() {
     // PWM および GPIO の初期化
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
 
     HAL_GPIO_WritePin(PHASE_GPIO_Port, PHASE_Pin, GPIO_PIN_SET);  // モーター回転方向: 正
     set_brake(true);  // 自クラスの set_brake() 経由で統一する
@@ -40,8 +40,8 @@ void A3921GateDriver::output(float output) {
     }
 
     // CH1: 可変デューティ, CH2: 常に max_duty_（A3921 の SR 制御用）
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, static_cast<uint32_t>(output));
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, max_duty_);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, static_cast<uint32_t>(output));
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, max_duty_);
 }
 
 void A3921GateDriver::set_brake(bool brake) {
