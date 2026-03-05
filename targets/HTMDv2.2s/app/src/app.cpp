@@ -68,10 +68,6 @@ public:
      */
     void setup()
     {
-        HAL_GPIO_WritePin(LED_CAN_GPIO_Port, LED_CAN_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED_LGC_PWR_GPIO_Port, LED_LGC_PWR_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED_OCD_GPIO_Port, LED_OCD_Pin, GPIO_PIN_SET);
         const uint8_t board_id = read_board_id();
 
         // CAN ドライバ初期化 (フィルタ設定 + 受信割り込み有効)
