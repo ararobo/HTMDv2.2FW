@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [f303, g431, 2.2s]
+        target: [HTMDv2.2c-f303, HTMDv2.2c-g431, HTMDv2.2s]
 
     steps:
     - uses: actions/checkout@v4

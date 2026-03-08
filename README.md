@@ -2,9 +2,9 @@
 
 [English](README.md) | [日本語](README_ja.md)
 
-This repository contains firmware for the [HTMDv2.2c](https://github.com/ararobo/HTMDv2.2c) board.
+This repository contains firmware for the [HTMDv2.2c](https://github.com/ararobo/HTMDv2.2c) and [HTMDv2.2s](https://github.com/ararobo/HTMDv2.2s) boards.
 
-The HTMDv2.2c board supports two MCUs: STM32F303K8T6 and STM32G431K8T6. Therefore, this repository includes firmware targets for both MCUs.
+HTMDv2.2c supports two MCUs: STM32F303K8T6 and STM32G431K8T6. HTMDv2.2s supports STM32G431CEU6.
 
 ## Documentation
 
@@ -30,15 +30,20 @@ Install STM32CubeCLT.
 
 ## Build
 
-for STM32F303K8T6:
+for STM32F303K8T6 (HTMDv2.2c-f303):
 ```bash
-cmake --preset f303-debug
-cmake --build --preset f303-debug
+cmake --preset HTMDv2.2c-f303-debug
+cmake --build --preset HTMDv2.2c-f303-debug
 ```
-for STM32G431K8T6:
+for STM32G431K8T6 (HTMDv2.2c-g431):
 ```bash
-cmake --preset g431-debug
-cmake --build --preset g431-debug
+cmake --preset HTMDv2.2c-g431-debug
+cmake --build --preset HTMDv2.2c-g431-debug
+```
+for HTMDv2.2s:
+```bash
+cmake --preset HTMDv2.2s-debug
+cmake --build --preset HTMDv2.2s-debug
 ```
 
 ## Class Diagram

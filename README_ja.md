@@ -2,9 +2,9 @@
 
 [English](README.md) | [日本語](README_ja.md)
 
-このリポジトリには [HTMDv2.2c](https://github.com/ararobo/HTMDv2.2c) という基板のファームウェアが含まれています。
+このリポジトリには [HTMDv2.2c](https://github.com/ararobo/HTMDv2.2c)・[HTMDv2.2s](https://github.com/ararobo/HTMDv2.2s) という基板のファームウェアが含まれています。
 
-HTMDv2.2c は STM32F303K8T6 と STM32G431K8T6 の2つの MCU に対応しているため、それぞれの MCU 用に計2つのファームウェアターゲットが存在します。
+HTMDv2.2c は STM32F303K8T6 と STM32G431K8T6 の2つの MCU に対応しており、HTMDv2.2s は STM32G431CEU6 に対応しています。
 
 ## ドキュメント
 
@@ -29,16 +29,22 @@ STM32CubeCLT をインストールしてください。
 
 ## ビルド方法
 
-STM32F303K8T6 用:
+STM32F303K8T6 用 (HTMDv2.2c-f303):
 ```bash
-cmake --preset f303-debug
-cmake --build --preset f303-debug
+cmake --preset HTMDv2.2c-f303-debug
+cmake --build --preset HTMDv2.2c-f303-debug
 ```
 
-STM32G431K8T6 用:
+STM32G431K8T6 用 (HTMDv2.2c-g431):
 ```bash
-cmake --preset g431-debug
-cmake --build --preset g431-debug
+cmake --preset HTMDv2.2c-g431-debug
+cmake --build --preset HTMDv2.2c-g431-debug
+```
+
+HTMDv2.2s 用:
+```bash
+cmake --preset HTMDv2.2s-debug
+cmake --build --preset HTMDv2.2s-debug
 ```
 
 ## クラス図

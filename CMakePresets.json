@@ -26,7 +26,7 @@
             }
         },
         {
-            "name": "f303-base",
+            "name": "HTMDv2.2c-f303-base",
             "hidden": true,
             "inherits": "cross-base",
             "toolchainFile": "${sourceDir}/targets/HTMDv2.2c-f303/cmake/gcc-arm-none-eabi.cmake",
@@ -35,7 +35,7 @@
             }
         },
         {
-            "name": "g431-base",
+            "name": "HTMDv2.2c-g431-base",
             "hidden": true,
             "inherits": "cross-base",
             "toolchainFile": "${sourceDir}/targets/HTMDv2.2c-g431/cmake/gcc-arm-none-eabi.cmake",
@@ -44,7 +44,7 @@
             }
         },
         {
-            "name": "2.2s-base",
+            "name": "HTMDv2.2s-base",
             "hidden": true,
             "inherits": "cross-base",
             "toolchainFile": "${sourceDir}/targets/HTMDv2.2s/cmake/gcc-arm-none-eabi.cmake",
@@ -53,49 +53,49 @@
             }
         },
         {
-            "name": "f303-debug",
-            "inherits": "f303-base",
-            "displayName": "F303 Debug",
+            "name": "HTMDv2.2c-f303-debug",
+            "inherits": "HTMDv2.2c-f303-base",
+            "displayName": "HTMDv2.2c-f303 Debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "f303-release",
-            "inherits": "f303-base",
-            "displayName": "F303 Release",
+            "name": "HTMDv2.2c-f303-release",
+            "inherits": "HTMDv2.2c-f303-base",
+            "displayName": "HTMDv2.2c-f303 Release",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "g431-debug",
-            "inherits": "g431-base",
-            "displayName": "G431 Debug",
+            "name": "HTMDv2.2c-g431-debug",
+            "inherits": "HTMDv2.2c-g431-base",
+            "displayName": "HTMDv2.2c-g431 Debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "g431-release",
-            "inherits": "g431-base",
-            "displayName": "G431 Release",
+            "name": "HTMDv2.2c-g431-release",
+            "inherits": "HTMDv2.2c-g431-base",
+            "displayName": "HTMDv2.2c-g431 Release",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "2.2s-debug",
-            "inherits": "2.2s-base",
-            "displayName": "2.2s Debug",
+            "name": "HTMDv2.2s-debug",
+            "inherits": "HTMDv2.2s-base",
+            "displayName": "HTMDv2.2s Debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "2.2s-release",
-            "inherits": "2.2s-base",
-            "displayName": "2.2s Release",
+            "name": "HTMDv2.2s-release",
+            "inherits": "HTMDv2.2s-base",
+            "displayName": "HTMDv2.2s Release",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
@@ -103,28 +103,28 @@
     ],
     "buildPresets": [
         {
-            "name": "f303-debug",
-            "configurePreset": "f303-debug"
+            "name": "HTMDv2.2c-f303-debug",
+            "configurePreset": "HTMDv2.2c-f303-debug"
         },
         {
-            "name": "f303-release",
-            "configurePreset": "f303-release"
+            "name": "HTMDv2.2c-f303-release",
+            "configurePreset": "HTMDv2.2c-f303-release"
         },
         {
-            "name": "g431-debug",
-            "configurePreset": "g431-debug"
+            "name": "HTMDv2.2c-g431-debug",
+            "configurePreset": "HTMDv2.2c-g431-debug"
         },
         {
-            "name": "g431-release",
-            "configurePreset": "g431-release"
+            "name": "HTMDv2.2c-g431-release",
+            "configurePreset": "HTMDv2.2c-g431-release"
         },
         {
-            "name": "2.2s-debug",
-            "configurePreset": "2.2s-debug"
+            "name": "HTMDv2.2s-debug",
+            "configurePreset": "HTMDv2.2s-debug"
         },
         {
-            "name": "2.2s-release",
-            "configurePreset": "2.2s-release"
+            "name": "HTMDv2.2s-release",
+            "configurePreset": "HTMDv2.2s-release"
         }
     ]
 }
