@@ -2,10 +2,11 @@
  * @file tmp275.cpp
  * @author Gento Aiba (aiba-gento)
  * @brief TMP275 温度センサードライバ
- * @version 0.1
+ * @version 0.2.0
  * @date 2026-03-08
  *
- * @copyright Copyright (c) 2026 Gento Aiba
+ * @copyright Copyright (c) 2026 ararobo
+ * SPDX-License-Identifier: Apache-2.0
  *
  */
 #include "app/tmp275.hpp"

@@ -2,10 +2,10 @@
  * @file motor_controller.hpp
  * @author Gento Aiba (aiba-gento)
  * @brief DCモーター制御クラス
- * @version 0.1
+ * @version 0.2.0
  * @date 2026-02-23
  *
- * @copyright Copyright (c) 2026 Gento Aiba
+ * @copyright Copyright (c) 2026 ararobo
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
@@ -106,7 +106,7 @@ private:
     // --- 状態 ---
     float target_;          ///< CAN から受け取った目標値
     float feedback_value_;  ///< エンコーダから計算したフィードバック値 [rad/s or rad]
-    bool initialized_;  ///< init パケット受信後に true になる
+    bool initialized_;      ///< init パケット受信後に true になる
 
     // --- 設定 ---
     gn10_can::devices::MotorConfig config_;

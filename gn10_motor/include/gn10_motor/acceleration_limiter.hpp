@@ -2,10 +2,10 @@
  * @file acceleration_limiter.hpp
  * @author Gento Aiba (aiba-gento)
  * @brief 加速度制限クラス
- * @version 0.1
+ * @version 0.2.0
  * @date 2026-02-21
  *
- * @copyright Copyright (c) 2026 Gento Aiba
+ * @copyright Copyright (c) 2026 ararobo
  * SPDX-License-Identifier: Apache-2.0
  *
  */
