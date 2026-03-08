@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [f303, g431]
+        target: [f303, g431, 2.2s]
 
     steps:
     - uses: actions/checkout@v4
@@ -40,15 +40,10 @@ jobs:
         variant: ccache
 
     - name: Configure CMake
-      run: >
-        cmake -S . -B build
-        -G Ninja
-        -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-${{ matrix.target }}/cmake/gcc-arm-none-eabi.cmake
-        -DTARGET_BOARD=${{ matrix.target }}
-        -DCMAKE_BUILD_TYPE=Release
+      run: cmake --preset ${{ matrix.target }}-release
 
     - name: Build
-      run: cmake --build build --config Release
+      run: cmake --build --preset ${{ matrix.target }}-release
 
     # 次のreleaseジョブに渡すため、一時的にアーティファクトとして保存する
     - name: Upload Build Artifacts
@@ -56,7 +51,7 @@ jobs:
       with:
         name: firmware-${{ matrix.target }}
         path: |
-          build/*.bin
+          build/**/*.bin
           build/**/*.elf
 
   release:

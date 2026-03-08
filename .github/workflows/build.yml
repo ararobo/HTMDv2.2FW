@@ -33,7 +33,7 @@ jobs:
     # CubeMX生成ファイル(Core/)とサブモジュール(external/)は除外する
     - name: Check formatting
       run: >
-        find gn10_motor targets/HTMDv2.2c-f303/app targets/HTMDv2.2c-g431/app
+        find gn10_motor targets/HTMDv2.2c-f303/app targets/HTMDv2.2c-g431/app targets/HTMDv2.2s/app
         \( -name "*.cpp" -o -name "*.hpp" -o -name "*.c" -o -name "*.h" \)
         | xargs clang-format --dry-run --Werror
 
@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [f303, g431]
+        target: [f303, g431, 2.2s]
 
     steps:
     - uses: actions/checkout@v4
@@ -62,20 +62,15 @@ jobs:
         variant: ccache
 
     - name: Configure CMake
-      run: >
-        cmake -S . -B build
-        -G Ninja
-        -DCMAKE_TOOLCHAIN_FILE=targets/HTMDv2.2c-${{ matrix.target }}/cmake/gcc-arm-none-eabi.cmake
-        -DTARGET_BOARD=${{ matrix.target }}
-        -DCMAKE_BUILD_TYPE=Release
+      run: cmake --preset ${{ matrix.target }}-release
 
     - name: Build
-      run: cmake --build build --config Release
+      run: cmake --build --preset ${{ matrix.target }}-release
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: firmware-${{ matrix.target }}
         path: |
-          build/*.bin
+          build/**/*.bin
           build/**/*.elf
